@@ -1,0 +1,12 @@
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\bin\Debug\net6.0\NNTraining.Domain.deps.json
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\bin\Debug\net6.0\NNTraining.Domain.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\bin\Debug\net6.0\NNTraining.Domain.pdb
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.csproj.AssemblyReference.cache
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.AssemblyInfoInputs.cache
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.AssemblyInfo.cs
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.csproj.CoreCompileInputs.cache
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\refint\NNTraining.Domain.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\NNTraining.Domain.pdb
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Domain\obj\Debug\net6.0\ref\NNTraining.Domain.dll

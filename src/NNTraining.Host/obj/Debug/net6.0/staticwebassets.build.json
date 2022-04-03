@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "Et4kuxDOxYkw/lRBo8924AWrOn8AjhHk+dhTbgUWqPM=",
+  "Source": "NNTraining.Host",
+  "BasePath": "_content/NNTraining.Host",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
