@@ -17,6 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NNTraining.App\NNTraining.App.csproj" />
+      <ProjectReference Include="..\NNTraining.Contracts\NNTraining.Contracts.csproj" />
       <ProjectReference Include="..\NNTraining.DataAccess\NNTraining.DataAccess.csproj" />
     </ItemGroup>
 

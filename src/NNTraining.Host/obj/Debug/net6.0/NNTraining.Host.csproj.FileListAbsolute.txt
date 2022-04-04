@@ -40,3 +40,7 @@ C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\Innofactor.EfCoreJsonValueConverter.dll
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\Innofactor.EfCoreJsonValueConverter.Attributes.dll
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\NNTraining.App.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\NNTraining.Contracts.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\NNTraining.App.pdb
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\bin\Debug\net6.0\NNTraining.Contracts.pdb

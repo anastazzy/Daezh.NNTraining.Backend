@@ -10,7 +10,7 @@ public class NNTrainingDbContext : DbContext
     {
     }
 
-    private DbSet<Model> Models { get; set; }
+    public DbSet<Model> Models { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

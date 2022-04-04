@@ -4,8 +4,8 @@ namespace NNTraining.Contracts;
 
 public interface ICrudForModelService
 {
-    public Task<long> CreateModel();
-    public Task<List<Model>> GetListOfModels();
-    public Task<bool> UpdateModel(long id);
-    public Task<bool> DeleteModel(long id);
+    public Task<long> CreateModelAsync(DataPredictionInputDto modelDto);
+    public Task<ModelOutputDto[]> GetListOfModelsAsync();
+    public Task<bool> UpdateModelAsync(long id, DataPredictionInputDto modelDto);
+    public Task<bool> DeleteModelAsync(long id);
 }

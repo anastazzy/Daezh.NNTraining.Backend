@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "NNTraining.Api": {
+    "NNTraining.Host": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

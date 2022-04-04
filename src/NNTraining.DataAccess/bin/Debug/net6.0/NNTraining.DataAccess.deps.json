@@ -245,6 +245,9 @@
       },
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "NNTraining.Domain/1.0.0": {
+        "dependencies": {
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
+        },
         "runtime": {
           "NNTraining.Domain.dll": {}
         }

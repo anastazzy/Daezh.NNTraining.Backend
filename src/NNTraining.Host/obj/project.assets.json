@@ -372,6 +372,33 @@
           "buildTransitive/netcoreapp3.1/_._": {}
         }
       },
+      "NNTraining.App/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "NNTraining.Contracts": "1.0.0",
+          "NNTraining.DataAccess": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/NNTraining.App.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/NNTraining.App.dll": {}
+        }
+      },
+      "NNTraining.Contracts/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "NNTraining.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/NNTraining.Contracts.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/NNTraining.Contracts.dll": {}
+        }
+      },
       "NNTraining.DataAccess/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
@@ -391,6 +418,9 @@
       "NNTraining.Domain/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
+        },
         "compile": {
           "bin/placeholder/NNTraining.Domain.dll": {}
         },
@@ -1002,6 +1032,16 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "NNTraining.App/1.0.0": {
+      "type": "project",
+      "path": "../NNTraining.App/NNTraining.App.csproj",
+      "msbuildProject": "../NNTraining.App/NNTraining.App.csproj"
+    },
+    "NNTraining.Contracts/1.0.0": {
+      "type": "project",
+      "path": "../NNTraining.Contracts/NNTraining.Contracts.csproj",
+      "msbuildProject": "../NNTraining.Contracts/NNTraining.Contracts.csproj"
+    },
     "NNTraining.DataAccess/1.0.0": {
       "type": "project",
       "path": "../NNTraining.DataAccess/NNTraining.DataAccess.csproj",
@@ -1017,6 +1057,8 @@
     "net6.0": [
       "Microsoft.EntityFrameworkCore >= 6.0.3",
       "Microsoft.EntityFrameworkCore.Design >= 6.0.3",
+      "NNTraining.App >= 1.0.0",
+      "NNTraining.Contracts >= 1.0.0",
       "NNTraining.DataAccess >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.2.3"
     ]
@@ -1046,6 +1088,12 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
+            "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj": {
+              "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj"
+            },
+            "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj": {
+              "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj"
+            },
             "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj": {
               "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj"
             }
@@ -1095,7 +1143,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }

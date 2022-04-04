@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "449lAKks4zT5Xr2pry3wl8YZ/76dtgrSMrtHCE82F0jj6lvoOy0n7QfM47MpOGfFY6ZpGMXlc7a5ymfS4mAW/g==",
+  "dgSpecHash": "ibYkP/SxcGvDVo6asySEMD2mvY+1v5a3YTC+DRrq/SWubOThK5/69/eQTHKouHJNSS3Rr5LJK7/PyTrD/cfgMg==",
   "success": true,
   "projectFilePath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Anastasiia\\.nuget\\packages\\innofactor.efcorejsonvalueconverter.attributes\\2.0.1\\innofactor.efcorejsonvalueconverter.attributes.2.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

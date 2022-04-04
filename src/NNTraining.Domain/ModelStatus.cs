@@ -4,5 +4,6 @@ public enum ModelStatus
 {
     Created,
     StillTraining,
-    Trained
+    Trained,
+    Deleted
 }

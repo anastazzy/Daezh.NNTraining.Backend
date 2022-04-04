@@ -4,6 +4,121 @@
     "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Host\\NNTraining.Host.csproj": {}
   },
   "projects": {
+    "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj",
+        "projectName": "NNTraining.App",
+        "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj",
+        "packagesPath": "C:\\Users\\Anastasiia\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Anastasiia\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj": {
+                "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj"
+              },
+              "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj": {
+                "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj",
+        "projectName": "NNTraining.Contracts",
+        "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj",
+        "packagesPath": "C:\\Users\\Anastasiia\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Anastasiia\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Domain\\NNTraining.Domain.csproj": {
+                "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Domain\\NNTraining.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
     "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -76,7 +191,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -113,6 +228,12 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "Innofactor.EfCoreJsonValueConverter.Attributes": {
+              "target": "Package",
+              "version": "[2.0.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -128,7 +249,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -154,6 +275,12 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
+              "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj": {
+                "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.App\\NNTraining.App.csproj"
+              },
+              "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj": {
+                "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.Contracts\\NNTraining.Contracts.csproj"
+              },
               "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj": {
                 "projectPath": "C:\\Repos\\Pet-projects\\Daezh.NNTraining\\NNTraining\\src\\NNTraining.DataAccess\\NNTraining.DataAccess.csproj"
               }
@@ -203,7 +330,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     }

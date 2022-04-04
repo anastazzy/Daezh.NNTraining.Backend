@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using NNTraining.Api.Controllers;
+using NNTraining.Contracts;
 using NNTraining.DataAccess;
+using NNTraining.Host;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
+builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
 
 // Add services to the container.
 
@@ -28,5 +32,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+var scope = app.Services.CreateScope();
+await using var db = scope.ServiceProvider.GetRequiredService<NNTrainingDbContext>();
+await db.Database.MigrateAsync();
 
 app.Run();

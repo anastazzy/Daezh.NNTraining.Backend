@@ -7,4 +7,9 @@
         <RootNamespace>NNTraining.Host</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\NNTraining.Contracts\NNTraining.Contracts.csproj" />
+      <ProjectReference Include="..\NNTraining.DataAccess\NNTraining.DataAccess.csproj" />
+    </ItemGroup>
+
 </Project>

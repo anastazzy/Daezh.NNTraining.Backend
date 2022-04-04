@@ -1,0 +1,54 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "NNTraining.Contracts/1.0.0": {
+        "dependencies": {
+          "NNTraining.Domain": "1.0.0"
+        },
+        "runtime": {
+          "NNTraining.Contracts.dll": {}
+        }
+      },
+      "Innofactor.EfCoreJsonValueConverter.Attributes/2.0.1": {
+        "runtime": {
+          "lib/netstandard2.1/Innofactor.EfCoreJsonValueConverter.Attributes.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "NNTraining.Domain/1.0.0": {
+        "dependencies": {
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
+        },
+        "runtime": {
+          "NNTraining.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NNTraining.Contracts/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Innofactor.EfCoreJsonValueConverter.Attributes/2.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HJgBGFqYUe1yaHbCiNWmFz1ZTVEwYo/RxK3KSPuqCsgbaJl+U2J8TEIjz2bi4TM2sK+y3LecYUEztMeLHTnOMA==",
+      "path": "innofactor.efcorejsonvalueconverter.attributes/2.0.1",
+      "hashPath": "innofactor.efcorejsonvalueconverter.attributes.2.0.1.nupkg.sha512"
+    },
+    "NNTraining.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

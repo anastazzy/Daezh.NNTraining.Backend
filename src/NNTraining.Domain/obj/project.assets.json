@@ -1,11 +1,37 @@
 {
   "version": 3,
   "targets": {
-    "net6.0": {}
+    "net6.0": {
+      "Innofactor.EfCoreJsonValueConverter.Attributes/2.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Innofactor.EfCoreJsonValueConverter.Attributes.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Innofactor.EfCoreJsonValueConverter.Attributes.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Innofactor.EfCoreJsonValueConverter.Attributes/2.0.1": {
+      "sha512": "HJgBGFqYUe1yaHbCiNWmFz1ZTVEwYo/RxK3KSPuqCsgbaJl+U2J8TEIjz2bi4TM2sK+y3LecYUEztMeLHTnOMA==",
+      "type": "package",
+      "path": "innofactor.efcorejsonvalueconverter.attributes/2.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "innofactor.efcorejsonvalueconverter.attributes.2.0.1.nupkg.sha512",
+        "innofactor.efcorejsonvalueconverter.attributes.nuspec",
+        "lib/netstandard2.1/Innofactor.EfCoreJsonValueConverter.Attributes.dll",
+        "lib/netstandard2.1/Innofactor.EfCoreJsonValueConverter.Attributes.xml"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net6.0": []
+    "net6.0": [
+      "Innofactor.EfCoreJsonValueConverter.Attributes >= 2.0.1"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\Anastasiia\\.nuget\\packages\\": {}
@@ -43,6 +69,12 @@
     "frameworks": {
       "net6.0": {
         "targetAlias": "net6.0",
+        "dependencies": {
+          "Innofactor.EfCoreJsonValueConverter.Attributes": {
+            "target": "Package",
+            "version": "[2.0.1, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",
@@ -58,7 +90,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\Anastasiia\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }
