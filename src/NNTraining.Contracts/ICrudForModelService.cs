@@ -8,4 +8,5 @@ public interface ICrudForModelService
     public Task<ModelOutputDto[]> GetListOfModelsAsync();
     public Task<bool> UpdateModelAsync(long id, DataPredictionInputDto modelDto);
     public Task<bool> DeleteModelAsync(long id);
+    public string[] GetModelTypes();
 }

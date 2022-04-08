@@ -59,4 +59,9 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return true;
     }
+
+    public string[] GetModelTypes()
+    {
+        return Enum.GetNames(typeof(ModelType));
+    }
 }
