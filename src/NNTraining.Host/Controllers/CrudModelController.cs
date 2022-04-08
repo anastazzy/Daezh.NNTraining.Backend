@@ -39,4 +39,10 @@ public class CrudModelController
     {
         return _modelService.DeleteModelAsync(id);
     }
+    
+    [HttpGet("types")]
+    public string[] GetModelTypes()
+    {
+        return _modelService.GetModelTypes();
+    }
 }
