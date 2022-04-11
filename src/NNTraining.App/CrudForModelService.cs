@@ -60,8 +60,13 @@ public class CrudForModelService : ICrudForModelService
         return true;
     }
 
-    public string[] GetModelTypes()
+    public IEnumerable<TypeOutputDto> GetModelTypes()
     {
-        return Enum.GetNames(typeof(ModelType));
+        return Enum.GetValues<ModelType>()
+            .Select(x => new TypeOutputDto
+            {
+                Id = (int) x,
+                Name = x.ToString(),
+            });
     }
 }

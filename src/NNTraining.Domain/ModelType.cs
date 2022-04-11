@@ -2,5 +2,8 @@
 
 public enum ModelType
 {
-    DataPrediction
+    DataPrediction,
+    ClassifyMNIST,
+    ClassifyPictures,
+    Paints
 }

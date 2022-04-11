@@ -6,7 +6,7 @@ namespace NNTraining.Api.Controllers;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class CrudModelController
 {
     private readonly ICrudForModelService _modelService;
@@ -41,7 +41,7 @@ public class CrudModelController
     }
     
     [HttpGet("types")]
-    public string[] GetModelTypes()
+    public IEnumerable<TypeOutputDto> GetModelTypes()
     {
         return _modelService.GetModelTypes();
     }
