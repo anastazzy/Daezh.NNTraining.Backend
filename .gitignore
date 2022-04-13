@@ -2,6 +2,7 @@
 *.dll
 *.pdb
 *.cache
+*.bak
 packages
 bin
 obj
