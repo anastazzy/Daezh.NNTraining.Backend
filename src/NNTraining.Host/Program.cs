@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using NNTraining.Api.Controllers;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Host;

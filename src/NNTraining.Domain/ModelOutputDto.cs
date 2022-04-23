@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Nodes;
-
-namespace NNTraining.Domain;
+﻿namespace NNTraining.Domain;
 
 public class ModelOutputDto
 {
