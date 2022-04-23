@@ -35,8 +35,8 @@ public class CrudForModelService : ICrudForModelService
         {
             Id = model.Id,
             Name = model.Name,
-            ModelStatus = model.ModelStatus,
-            Parameters = model.Parameters,
+            /*ModelStatus = model.ModelStatus,
+            Parameters = model.Parameters,*/
         }).ToArray();
     }
 
