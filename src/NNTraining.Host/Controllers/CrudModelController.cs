@@ -21,6 +21,12 @@ public class CrudModelController
     {
         return _modelService.CreateModelAsync(modelDto);
     }
+    
+    [HttpPost("dataPrediction")]
+    public float CreateDataPredictModel()
+    {
+        return _modelService.CreateTheDataPrediction();
+    }
 
     [HttpGet]
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()

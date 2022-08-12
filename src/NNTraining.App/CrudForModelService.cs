@@ -28,6 +28,12 @@ public class CrudForModelService : ICrudForModelService
         return model.Id;
     }
 
+    public float CreateTheDataPrediction()
+    {
+        var factory = new CreateANeuralModel();
+        return factory.Create();
+    }
+
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {
         var models = await _dbContext.Models.ToArrayAsync();

@@ -22,4 +22,10 @@
       <ProjectReference Include="..\NNTraining.DataAccess\NNTraining.DataAccess.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="train-set.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
