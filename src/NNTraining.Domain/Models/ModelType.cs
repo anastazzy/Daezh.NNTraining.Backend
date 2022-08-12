@@ -3,7 +3,7 @@
 public enum ModelType
 {
     DataPrediction,
-    ClassifyMNIST,
+    ClassifyMnist,
     ClassifyPictures,
     Paints
 }
