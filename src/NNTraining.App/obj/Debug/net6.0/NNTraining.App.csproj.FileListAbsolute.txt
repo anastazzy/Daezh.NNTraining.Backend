@@ -17,3 +17,7 @@ C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\obj\Debug\n
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\obj\Debug\net6.0\refint\NNTraining.App.dll
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\obj\Debug\net6.0\NNTraining.App.pdb
 C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\obj\Debug\net6.0\ref\NNTraining.App.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Features.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\bin\Debug\net6.0\System.IO.Pipelines.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\bin\Debug\net6.0\Microsoft.Extensions.Features.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.App\bin\Debug\net6.0\Microsoft.Net.Http.Headers.dll

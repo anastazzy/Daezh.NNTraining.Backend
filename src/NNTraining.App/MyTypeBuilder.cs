@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace NNTraining.Host;
 
-public class MyTypeBuilder
+public static class MyTypeBuilder
 {
     public static Type CompileResultType(IEnumerable<(string, Type)> fields)
     {

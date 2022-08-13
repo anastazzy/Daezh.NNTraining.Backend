@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
 builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 // Add services to the container.
 
