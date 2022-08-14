@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Minio;
 using NNTraining.Contracts;
+using NNTraining.Contracts.Options;
 using NNTraining.DataAccess;
 using NNTraining.Host;
 
@@ -18,7 +21,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddOptions<MinioOptions>();
+builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
+
+builder.Services.AddSingleton(x =>
+{
+    var options = x.GetRequiredService<IOptions<MinioOptions>>().Value;
+    var minio = new MinioClient()
+        .WithEndpoint(options.Endpoint)
+        .WithCredentials(options.AccessKey, options.SecretKey)
+        //.WithSSL()
+        .Build();
+    return minio;
+});
+
+
 var app = builder.Build();
+var minio = app.Services.GetRequiredService<MinioClient>();
+await minio.BucketExistsAsync("gyu");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
