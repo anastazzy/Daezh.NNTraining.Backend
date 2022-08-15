@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Minio.DataModel;
 using NNTraining.Contracts;
 using NNTraining.Domain;
 
@@ -17,8 +18,14 @@ public class FileStorageController
     }
     
     [HttpPost]
-    public async Task UploadDocuments(IFormFile formFile)
+    public async Task UploadFile(IFormFile formFile)
     {
         await _storage.UploadAsync(formFile.FileName, formFile.ContentType, formFile.OpenReadStream(), formFile.Length);
+    }
+    
+    [HttpGet]
+    public async Task GetFile(string fileName)
+    {
+        await _storage.GetAsync(fileName);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Minio;
+using Minio.DataModel;
 using Minio.Exceptions;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Options;
@@ -29,11 +30,33 @@ public class FileStorage: IFileStorage
         await CreateBucketAsync();      
         await _minio.PutObjectAsync(new PutObjectArgs()
             .WithBucket(BucketName)
-            //.WithFileName(fileName)
             .WithStreamData(fileStream)
             .WithObjectSize(size)
             .WithObject(fileName)
             .WithContentType(contentType));
+    }
+
+    public async Task<ObjectStat> GetAsync(string fileName)
+    {
+        var tempFileName = "temp.csv";
+        
+        var file = new FileInfo(tempFileName);
+        if (!file.Exists)
+        {
+            file.Create();
+        }
+        
+        var result = await _minio.GetObjectAsync(new GetObjectArgs().
+            WithBucket(BucketName)
+            .WithObject(fileName)
+            .WithFile(tempFileName));
+        
+        if (result is null)
+        {
+            throw new Exception("null blin");
+        }
+
+        return result;
     }
 
     private async Task CreateBucketAsync()

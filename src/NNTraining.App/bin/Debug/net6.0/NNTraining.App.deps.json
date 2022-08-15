@@ -789,6 +789,7 @@
       "System.ValueTuple/4.4.0": {},
       "NNTraining.Contracts/1.0.0": {
         "dependencies": {
+          "Minio": "4.0.5",
           "NNTraining.Domain": "1.0.0"
         },
         "runtime": {
