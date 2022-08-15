@@ -11,7 +11,6 @@ public class NNTrainingDbContext : DbContext
     }
 
     public DbSet<Model> Models { get; set; }
-    public DbSet<AppFile> Files { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
