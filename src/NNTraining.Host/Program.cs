@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
 builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
-builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 // Add services to the container.
 
@@ -24,24 +23,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOptions<MinioOptions>();
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
 
-builder.Services.AddSingleton(x =>
-{
-    var options = x.GetRequiredService<IOptions<MinioOptions>>().Value;
-    var minio = new MinioClient()
-        .WithEndpoint(options.Endpoint)
-        .WithCredentials(options.AccessKey, options.SecretKey);
-        if (options.Secure)
-        {
-            minio.WithSSL();
-        }
-        minio.Build();
-        return minio;
-});
+builder.Services.AddSingleton<IFileStorage, FileStorage>();
 
 
 var app = builder.Build();
-var minio = app.Services.GetRequiredService<MinioClient>();
-await minio.BucketExistsAsync("gyu");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
