@@ -29,10 +29,13 @@ builder.Services.AddSingleton(x =>
     var options = x.GetRequiredService<IOptions<MinioOptions>>().Value;
     var minio = new MinioClient()
         .WithEndpoint(options.Endpoint)
-        .WithCredentials(options.AccessKey, options.SecretKey)
-        //.WithSSL()
-        .Build();
-    return minio;
+        .WithCredentials(options.AccessKey, options.SecretKey);
+        if (options.Secure)
+        {
+            minio.WithSSL();
+        }
+        minio.Build();
+        return minio;
 });
 
 
