@@ -28,10 +28,11 @@ public class CrudForModelService : ICrudForModelService
         return model.Id;
     }
 
-    public float CreateTheDataPrediction()
+    public Task<float> CreateTheDataPrediction()
     {
-        var factory = new CreateANeuralModel();
-        return factory.Create();
+        var path = "train-set.csv";
+        var creator = new CreatorOfModel(path);
+        return creator.Create();
     }
 
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()

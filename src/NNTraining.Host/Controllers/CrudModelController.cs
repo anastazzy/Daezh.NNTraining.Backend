@@ -23,7 +23,7 @@ public class CrudModelController
     }
     
     [HttpPost("dataPrediction")]
-    public float CreateDataPredictModel()
+    public Task<float> CreateDataPredictModel()
     {
         return _modelService.CreateTheDataPrediction();
     }
