@@ -22,10 +22,22 @@ public class CrudModelController
         return _modelService.CreateModelAsync(modelDto);
     }
     
-    [HttpPost("dataPrediction")]
-    public Task<float> CreateDataPredictModel()
+    [HttpPost("createDataPrediction")]
+    public Task CreateDataPredictModel()
     {
         return _modelService.CreateTheDataPrediction();
+    }
+    
+    [HttpGet("dataPredictionSchema")]
+    public Dictionary<string, string> GetSchemaOfModel()
+    {
+        return _modelService.GetSchemaOfModel();
+    }
+    
+    [HttpPost("dataPredictionModel")]
+    public float UsingModel([FromBody] object inputModelForUsing)
+    {
+        return _modelService.UsingModel(inputModelForUsing.ToString());
     }
 
     [HttpGet]

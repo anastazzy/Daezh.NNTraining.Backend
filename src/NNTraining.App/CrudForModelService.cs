@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
@@ -8,10 +10,12 @@ namespace NNTraining.Host;
 public class CrudForModelService : ICrudForModelService
 {
     private readonly NNTrainingDbContext _dbContext;
+    private CreatorOfModel _creator;
 
-    public CrudForModelService(NNTrainingDbContext dbContext)
+    public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider)
     {
         _dbContext = dbContext;
+        _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
     }
 
     public async Task<long> CreateModelAsync(DataPredictionInputDto modelDto)
@@ -28,12 +32,19 @@ public class CrudForModelService : ICrudForModelService
         return model.Id;
     }
 
-    public Task<float> CreateTheDataPrediction()
+    public Task CreateTheDataPrediction()
     {
-        var path = "train-set.csv";
-        var creator = new CreatorOfModel(path);
-        return creator.Create();
+        return _creator.Create();
     }
+    public Dictionary<string,string> GetSchemaOfModel()
+    {
+        return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
+    }
+    public float UsingModel(string inputModelForUsing)
+    {
+        return _creator.UsingModel(inputModelForUsing);
+    }
+    
 
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {

@@ -1,8 +1,12 @@
 ﻿using System.Data;
+using System.Dynamic;
 using System.Reflection;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
 using Microsoft.ML;
 using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
 
 namespace NNTraining.Host;
 
@@ -10,56 +14,78 @@ public class CreatorOfModel
 {
     private readonly MLContext _mlContext = new (0);
     private readonly string _nameOfTrainSet;
-    private readonly Dictionary<string, Type> _dictionary = new ();
+    private readonly Dictionary<string, Type> _dictionary;
+    private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
+    private Type? type;
 
-    public CreatorOfModel(string nameOfTrainSet)//train-set.csv
+    public CreatorOfModel(string nameOfTrainSet)//nameOfTrainSet = "train-set.csv"
     {
         _nameOfTrainSet = nameOfTrainSet;
+        _dictionary = new Dictionary<string, Type>();
     }
     
-    public async Task<float> Create()
+    public async Task Create()
     {
-        var type = await GetTypeOfModelAndColumnsWithType(_nameOfTrainSet);
+        type = await GetTypeOfModelWithCompletionTheDictionaryAsync(_nameOfTrainSet);
+        var columns = CreateTheTextLoaderColumn().ToArray();
 
-        //Do something with the choice of the desired method
-        // const int countOfParametersOfNecessaryMethod = 3;
-        // var infoLoader = typeof(TextLoaderSaverCatalog)
-        //     .GetMethods()
-        //     .FirstOrDefault(x => x.Name == nameof(TextLoaderSaverCatalog.LoadFromTextFile)
-        //                          && x.IsGenericMethod
-        //                          && x.GetParameters().Length == countOfParametersOfNecessaryMethod);
-        //
-        // // var infoLoader = typeof(TextLoaderSaverCatalog).GetMethod(
-        // //     nameof(TextLoaderSaverCatalog.LoadFromTextFile), 
-        // //     BindingFlags.Static | BindingFlags.Public, 
-        // //     new []
-        // //     {
-        // //         typeof(DataOperationsCatalog),
-        // //         typeof(string),
-        // //         typeof(TextLoader.Options)
-        // //     });
-        //
-        // if (infoLoader is null)
-        // {
-        //     throw new ArgumentException("The method was not created");
-        // }
-        // var methodInfo = infoLoader!.MakeGenericMethod(type);
-        // var methodResult = methodInfo.Invoke(_mlContext.Model, new object[]
-        // {
-        //     Activator.CreateInstance(typeof(DataOperationsCatalog)), 
-        //     _nameOfTrainSet, 
-        //     true, 
-        //     ';'
-        // });
-        // if (methodResult is null)
-        // {
-        //     throw new ArgumentException("Method not be created");
-        // }
-        //
-        // var trainView = (IDataView) methodResult;
-        //
-        //
+        var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
+        {
+            HasHeader = true,
+            Separators = new[]
+            {
+                ';',
+            },
+            Columns = columns
+
+        });
         
+
+        // creation the training pipelines
+        var dataProcessPipeline = CreateTrainingPipeline("price", columns);
+       
+        if (dataProcessPipeline is null)
+        {
+            throw new ArgumentException("Pipeline was not created");
+        }
+        
+        // create the trainer with specific algorithm  
+        var trainer = _mlContext.Regression.Trainers.Sdca("label", "features");
+        
+        // train the model
+        var trainingPipeline = dataProcessPipeline.Append(trainer);
+        _trainedModel = trainingPipeline.Fit(trainingView);
+
+        //using the model
+        // dynamic example = Activator.CreateInstance(type);
+        // example.square = 20;
+        // example.floor = 5;
+        // example.max_floor = 16;
+        // example.year = 2018;
+        // example.is_combined_bathroom = 1;
+        // example.is_secondary_housing = 1;
+        // example.rooms_number = 1;
+        // example.renovation_type = "renovation";    
+        
+        // var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
+        //     new []
+        // {
+        //     typeof(ITransformer),
+        //     typeof(bool),
+        //     typeof(SchemaDefinition),
+        //     typeof(SchemaDefinition),
+        // });
+        // var generic = method!.MakeGenericMethod(type, typeof(PredictionResult));
+        // dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ v, true, null, null });
+        // PredictionResult result = predictor.Predict(example);
+        //
+        // Console.WriteLine(result.Score);
+        // return result.Score;
+    }
+
+
+    private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn()
+    {
         List<TextLoader.Column> columns = new();
         var keys = _dictionary.Keys.ToArray();
         
@@ -76,113 +102,50 @@ public class CreatorOfModel
                 ? new TextLoader.Column(keys[index], DataKind.Single, index)
                 : new TextLoader.Column(keys[index], DataKind.String, index));
         }
+        return columns;
+    }
 
-        var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
+    public IEnumerable<(string,Type)> GetSchemaOfModel()
+    {
+        if (_dictionary.Count == 0)
         {
-            HasHeader = true,
-            Separators = new[]
-            {
-                ';',
-            },
-            Columns = columns.ToArray()
-
-        });
-        // ////////////// was
-        // var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
-        // {
-        //     HasHeader = true,
-        //     Separators = new[]
-        //     {
-        //         ';'
-        //     },
-        //     Columns = new[]
-        //     {
-        //         new TextLoader.Column("square", DataKind.Single, 0),
-        //         new TextLoader.Column("floor", DataKind.Single, 1),
-        //         new TextLoader.Column("max_floor", DataKind.Single, 2),
-        //         new TextLoader.Column("year", DataKind.Single, 3),
-        //         new TextLoader.Column("is_combined_bathroom", DataKind.Single, 4),
-        //         new TextLoader.Column("is_secondary_housing", DataKind.Single, 5),
-        //         new TextLoader.Column("rooms_number", DataKind.Single, 6),
-        //         new TextLoader.Column("renovation_type", DataKind.String, 7),
-        //         new TextLoader.Column("price", DataKind.Single, 8),
-        //     }
-        // });
-        // //
-
-        var dataProcessPipeline = CreateTrainingPipeline("price", columns);
-        // was
-        // var dataProcessPipeline = _mlContext.Transforms.CopyColumns("label", "price")
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("square"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("floor"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("max_floor"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("year"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("rooms_number"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("is_combined_bathroom"))
-        //     .Append(_mlContext.Transforms.NormalizeMeanVariance("is_secondary_housing"))
-        //     .Append(_mlContext.Transforms.Categorical.OneHotEncoding("renovation_type_output", "renovation_type"))
-        //     .Append(_mlContext.Transforms.Concatenate(
-        //         "features",
-        //         "square",
-        //         "floor",
-        //         "max_floor",
-        //         "year",
-        //         "rooms_number",
-        //         "is_combined_bathroom",
-        //         "is_secondary_housing",
-        //         "renovation_type_output"));
-        if (dataProcessPipeline is null)
-        {
-            throw new ArgumentException("Pipeline was not created");
+            throw new ArgumentException("The Dictionary with columns does not have a information about columns");
         }
-            
-        var trainer = _mlContext.Regression.Trainers.Sdca("label", "features");
-        var trainingPipeline = dataProcessPipeline.Append(trainer);
-        
-        var trainedModel = trainingPipeline.Fit(trainingView);
-
-        // Define temp type
-        
-        // var fields = trainingView.Schema
-        //     .Select(x => (x.Name, x.Type == NumberDataViewType.Single ? typeof(float) : typeof(string)));
-        // var type = MyTypeBuilder.CompileResultType(fields);
-
-        dynamic example = Activator.CreateInstance(type);
-        example.square = 20;
-        example.floor = 5;
-        example.max_floor = 16;
-        example.year = 2018;
-        example.is_combined_bathroom = 1;
-        example.is_secondary_housing = 1;
-        example.rooms_number = 1;
-        example.renovation_type = "renovation";    
-
+        foreach (var (key, value) in _dictionary)
+        {
+            yield return (key, value);
+        }
+    }
+    
+    public float UsingModel(string inputModelForUsing)
+    {
+        var a = JsonSerializer.Deserialize(inputModelForUsing, type!);//need custom deserializer single-> float
         var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
             new []
+            {
+                typeof(ITransformer),
+                typeof(bool),
+                typeof(SchemaDefinition),
+                typeof(SchemaDefinition),
+            });
+        var generic = method!.MakeGenericMethod(type!, typeof(PredictionResult));
+        if (_trainedModel is null)
         {
-            typeof(ITransformer),
-            typeof(bool),
-            typeof(SchemaDefinition),
-            typeof(SchemaDefinition),
-        });
-        var generic = method!.MakeGenericMethod(type, typeof(PredictionResult));
-        dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ trainedModel, true, null, null });
-        PredictionResult result = predictor.Predict(example);
+            throw new ArgumentException("The Model does not exist in the current moment");
+        }
+        dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null, null });
+        if (predictor is null)
+        {
+            throw new ArgumentException("Error with invoke the generis function");
+        }
+        PredictionResult result = predictor.Predict(inputModelForUsing);
 
         Console.WriteLine(result.Score);
         return result.Score;
     }
     
-    
-    private void UsingModel()
-    {
-        
-    }
-    
-    
-    
 
-    private async Task<Type> GetTypeOfModelAndColumnsWithType(string fileName)
+    private async Task<Type> GetTypeOfModelWithCompletionTheDictionaryAsync(string fileName)
     {
         using var streamReader = new StreamReader(fileName);
         
@@ -211,7 +174,6 @@ public class CreatorOfModel
             var fieldsType = float.TryParse(field, out _)
                  ? typeof(float)
                  : typeof(string);
-            
             try
             {
                 _dictionary.TryAdd(header,fieldsType);
@@ -267,14 +229,3 @@ public class CreatorOfModel
         return result;
     }
 }
-//
-// public class TypeValuePair
-// {
-//     public Type Type { get;}
-//     public object Value { get;}
-//     public TypeValuePair(Type type, object value)
-//     {
-//         Type = type;
-//         Value = value;
-//     }
-// }
