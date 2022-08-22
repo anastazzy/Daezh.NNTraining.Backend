@@ -1,12 +1,15 @@
 ﻿using System.Data;
 using System.Dynamic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
 namespace NNTraining.Host;
 
@@ -39,7 +42,6 @@ public class CreatorOfModel
             Columns = columns
 
         });
-        
 
         // creation the training pipelines
         var dataProcessPipeline = CreateTrainingPipeline("price", columns);
@@ -55,32 +57,6 @@ public class CreatorOfModel
         // train the model
         var trainingPipeline = dataProcessPipeline.Append(trainer);
         _trainedModel = trainingPipeline.Fit(trainingView);
-
-        //using the model
-        // dynamic example = Activator.CreateInstance(type);
-        // example.square = 20;
-        // example.floor = 5;
-        // example.max_floor = 16;
-        // example.year = 2018;
-        // example.is_combined_bathroom = 1;
-        // example.is_secondary_housing = 1;
-        // example.rooms_number = 1;
-        // example.renovation_type = "renovation";    
-        
-        // var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
-        //     new []
-        // {
-        //     typeof(ITransformer),
-        //     typeof(bool),
-        //     typeof(SchemaDefinition),
-        //     typeof(SchemaDefinition),
-        // });
-        // var generic = method!.MakeGenericMethod(type, typeof(PredictionResult));
-        // dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ v, true, null, null });
-        // PredictionResult result = predictor.Predict(example);
-        //
-        // Console.WriteLine(result.Score);
-        // return result.Score;
     }
 
 
@@ -116,10 +92,45 @@ public class CreatorOfModel
             yield return (key, value);
         }
     }
-    
-    public float UsingModel(string inputModelForUsing)
+
+    public float UsingModel(Dictionary<string,string> inputModelForUsing)
     {
-        var a = JsonSerializer.Deserialize(inputModelForUsing, type!);//need custom deserializer single-> float
+        if (type is null)
+        {
+            throw new ArgumentNullException(nameof(type));
+        }
+        
+        var instance = Activator.CreateInstance(type);
+        
+        if (instance is null)
+        {
+            throw new ArgumentNullException(nameof(instance));
+        }
+        var prop = instance.GetType().GetProperties().Where(x => x.Name != "price");
+        foreach (var currentPropertyInfo in prop)
+        {
+            var inputFieldValue = inputModelForUsing
+                .Where(x => x.Key == currentPropertyInfo.Name)
+                .Select(x => x.Value)
+                .FirstOrDefault();
+            if (currentPropertyInfo.PropertyType == typeof(string))
+            {
+                currentPropertyInfo.SetValue(instance, inputFieldValue);
+            }
+            else
+            {
+                if(float.TryParse(inputFieldValue, out var value))
+                {
+                    currentPropertyInfo.SetValue(instance, value);
+                }
+                else
+                {
+                    throw new ArgumentException("Error with parse of input value to Single");
+                };
+            }
+
+        }
+
         var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
             new []
             {
@@ -131,16 +142,24 @@ public class CreatorOfModel
         var generic = method!.MakeGenericMethod(type!, typeof(PredictionResult));
         if (_trainedModel is null)
         {
-            throw new ArgumentException("The Model does not exist in the current moment");
+            throw new ArgumentException("The Model does not exist at the current moment");
         }
         dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null, null });
         if (predictor is null)
         {
             throw new ArgumentException("Error with invoke the generis function");
         }
-        PredictionResult result = predictor.Predict(inputModelForUsing);
-
-        Console.WriteLine(result.Score);
+        var a = (object) predictor;
+        var engine = a.GetType().GetMethods()
+            .Where(x => x.GetParameters().Length < 2)
+            .FirstOrDefault(x => x.Name == "Predict");
+        var res = engine.Invoke((object) predictor, new []{instance});
+        if (res is null)
+        {
+            throw new ArgumentException("Error with invoke the generis function");
+        }
+        var result = (PredictionResult) res;
+       
         return result.Score;
     }
     

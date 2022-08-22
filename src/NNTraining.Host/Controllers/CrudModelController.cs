@@ -35,9 +35,9 @@ public class CrudModelController
     }
     
     [HttpPost("dataPredictionModel")]
-    public float UsingModel([FromBody] object inputModelForUsing)
+    public float UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
     {
-        return _modelService.UsingModel(inputModelForUsing.ToString());
+        return _modelService.UsingModel(inputModelForUsing);
     }
 
     [HttpGet]

@@ -47,4 +47,4 @@ var scope = app.Services.CreateScope();
 await using var db = scope.ServiceProvider.GetRequiredService<NNTrainingDbContext>();
 await db.Database.MigrateAsync();
 
-app.Run();
+await app.RunAsync();

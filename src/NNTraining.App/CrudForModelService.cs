@@ -40,7 +40,7 @@ public class CrudForModelService : ICrudForModelService
     {
         return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
     }
-    public float UsingModel(string inputModelForUsing)
+    public float UsingModel(Dictionary<string,string> inputModelForUsing)
     {
         return _creator.UsingModel(inputModelForUsing);
     }
