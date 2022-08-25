@@ -1,6 +1,6 @@
 ﻿using Innofactor.EfCoreJsonValueConverter;
 
-namespace NNTraining.Domain;
+namespace NNTraining.Domain.Models;
 
 public class Model
 {

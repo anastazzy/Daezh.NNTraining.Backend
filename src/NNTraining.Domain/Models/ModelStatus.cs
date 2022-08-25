@@ -1,4 +1,4 @@
-﻿namespace NNTraining.Domain;
+﻿namespace NNTraining.Domain.Models;
 
 public enum ModelStatus
 {

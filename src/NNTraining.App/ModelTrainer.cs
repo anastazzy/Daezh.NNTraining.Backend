@@ -1,24 +1,29 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using NNTraining.Contracts;
 
 namespace NNTraining.Host;
 
-public class CreatorOfModel
+public class ModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
     private readonly string _nameOfTrainSet;
     private readonly Dictionary<string, Type> _dictionary;
     private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
     private Type? _type;
+    private readonly string _nameOfTargetColumn;
 
-    public CreatorOfModel(string nameOfTrainSet)//nameOfTrainSet = "train-set.csv"
+    public ModelTrainer(string nameOfTrainSet, string nameOfTargetColumn)//"train-set.csv", "price"
     {
+        _nameOfTargetColumn = nameOfTargetColumn;
         _nameOfTrainSet = nameOfTrainSet;
         _dictionary = new Dictionary<string, Type>();
     }
     
-    public async Task Create()
+    
+    
+    public async Task CreateAndTrain()
     {
         _type = await GetTypeOfModelWithCompletionTheDictionaryAsync(_nameOfTrainSet);
         var columns = CreateTheTextLoaderColumn().ToArray();
@@ -35,7 +40,7 @@ public class CreatorOfModel
         });
 
         // creation the training pipelines
-        var dataProcessPipeline = CreateTrainingPipeline("price", columns);
+        var dataProcessPipeline = CreateTrainingPipeline(columns);
        
         if (dataProcessPipeline is null)
         {
@@ -49,8 +54,6 @@ public class CreatorOfModel
         var trainingPipeline = dataProcessPipeline.Append(trainer);
         _trainedModel = trainingPipeline.Fit(trainingView);
     }
-
-
     private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn()
     {
         List<TextLoader.Column> columns = new();
@@ -84,76 +87,6 @@ public class CreatorOfModel
         }
     }
 
-    public float UsingModel(Dictionary<string,string> inputModelForUsing)
-    {
-        if (_type is null)
-        {
-            throw new ArgumentException("The type of model is null");
-        }
-        
-        var instance = Activator.CreateInstance(_type);
-        
-        if (instance is null)
-        {
-            throw new ArgumentException("The instance of custom type was nat created");
-        }
-        var prop = instance.GetType().GetProperties().Where(x => x.Name != "price");
-        foreach (var currentPropertyInfo in prop)
-        {
-            var inputFieldValue = inputModelForUsing
-                .Where(x => x.Key == currentPropertyInfo.Name)
-                .Select(x => x.Value)
-                .FirstOrDefault();
-            if (currentPropertyInfo.PropertyType == typeof(string))
-            {
-                currentPropertyInfo.SetValue(instance, inputFieldValue);
-            }
-            else
-            {
-                if(float.TryParse(inputFieldValue, out var value))
-                {
-                    currentPropertyInfo.SetValue(instance, value);
-                }
-                else
-                {
-                    throw new ArgumentException("Error with parse of input value to Single");
-                };
-            }
-
-        }
-
-        var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
-            new []
-            {
-                typeof(ITransformer),
-                typeof(bool),
-                typeof(SchemaDefinition),
-                typeof(SchemaDefinition),
-            });
-        var generic = method!.MakeGenericMethod(_type!, typeof(PredictionResult));
-        if (_trainedModel is null)
-        {
-            throw new ArgumentException("The Model does not exist at the current moment");
-        }
-        dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null, null });
-        if (predictor is null)
-        {
-            throw new ArgumentException("Error with invoke the generis function");
-        }
-        var a = (object) predictor;
-        var engine = a.GetType().GetMethods()
-            .Where(x => x.GetParameters().Length < 2)
-            .FirstOrDefault(x => x.Name == "Predict");
-        var res = engine.Invoke((object) predictor, new []{instance});
-        if (res is null)
-        {
-            throw new ArgumentException("Error with invoke the generis function");
-        }
-        var result = (PredictionResult) res;
-       
-        return result.Score;
-    }
-    
 
     private async Task<Type> GetTypeOfModelWithCompletionTheDictionaryAsync(string fileName)
     {
@@ -200,17 +133,16 @@ public class CreatorOfModel
         return MyTypeBuilder.CompileResultType(nameTypePair);
     }
 
-    private EstimatorChain<ColumnConcatenatingTransformer>? CreateTrainingPipeline(string nameOfTargetColumn,
-        IEnumerable<TextLoader.Column> columns)
+    private EstimatorChain<ColumnConcatenatingTransformer>? CreateTrainingPipeline(IEnumerable<TextLoader.Column> columns)
     {
         const string outputConcat = "features";
         var nameOfColumns = new List<string>();
         var newColumns = columns.Select(x=> x)
-            .Where(x => x.Name != nameOfTargetColumn)
+            .Where(x => x.Name != _nameOfTargetColumn)
             .ToList();
         
         var temp = _mlContext.Transforms
-            .CopyColumns("label", nameOfTargetColumn);
+            .CopyColumns("label", _nameOfTargetColumn);
 
         EstimatorChain<ITransformer>? estimatorChain = null;
         

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NNTraining.Contracts;
 using NNTraining.Domain;
+using NNTraining.Domain.Dto;
 
 namespace NNTraining.Api.Controllers;
 
@@ -19,7 +20,7 @@ public class CrudModelController
     [HttpPost]
     public Task<long> CreateModelAsync(DataPredictionInputDto modelDto)
     {
-        return _modelService.CreateModelAsync(modelDto);
+        return _modelService.SaveAsync(modelDto);
     }
     
     [HttpPost("createDataPrediction")]
@@ -35,7 +36,7 @@ public class CrudModelController
     }
     
     [HttpPost("dataPredictionModel")]
-    public float UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
+    public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
     {
         return _modelService.UsingModel(inputModelForUsing);
     }
