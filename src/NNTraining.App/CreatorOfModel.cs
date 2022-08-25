@@ -1,15 +1,6 @@
-﻿using System.Data;
-using System.Dynamic;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Microsoft.CSharp.RuntimeBinder;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
-using Microsoft.ML;
+﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
-using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
 namespace NNTraining.Host;
 
@@ -19,7 +10,7 @@ public class CreatorOfModel
     private readonly string _nameOfTrainSet;
     private readonly Dictionary<string, Type> _dictionary;
     private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
-    private Type? type;
+    private Type? _type;
 
     public CreatorOfModel(string nameOfTrainSet)//nameOfTrainSet = "train-set.csv"
     {
@@ -29,7 +20,7 @@ public class CreatorOfModel
     
     public async Task Create()
     {
-        type = await GetTypeOfModelWithCompletionTheDictionaryAsync(_nameOfTrainSet);
+        _type = await GetTypeOfModelWithCompletionTheDictionaryAsync(_nameOfTrainSet);
         var columns = CreateTheTextLoaderColumn().ToArray();
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
@@ -95,16 +86,16 @@ public class CreatorOfModel
 
     public float UsingModel(Dictionary<string,string> inputModelForUsing)
     {
-        if (type is null)
+        if (_type is null)
         {
-            throw new ArgumentNullException(nameof(type));
+            throw new ArgumentException("The type of model is null");
         }
         
-        var instance = Activator.CreateInstance(type);
+        var instance = Activator.CreateInstance(_type);
         
         if (instance is null)
         {
-            throw new ArgumentNullException(nameof(instance));
+            throw new ArgumentException("The instance of custom type was nat created");
         }
         var prop = instance.GetType().GetProperties().Where(x => x.Name != "price");
         foreach (var currentPropertyInfo in prop)
@@ -139,7 +130,7 @@ public class CreatorOfModel
                 typeof(SchemaDefinition),
                 typeof(SchemaDefinition),
             });
-        var generic = method!.MakeGenericMethod(type!, typeof(PredictionResult));
+        var generic = method!.MakeGenericMethod(_type!, typeof(PredictionResult));
         if (_trainedModel is null)
         {
             throw new ArgumentException("The Model does not exist at the current moment");
@@ -243,6 +234,10 @@ public class CreatorOfModel
                 : estimatorChain.Append(estimator);
         }
 
+        if (estimatorChain is null)
+        {
+            throw new ArgumentException("EstimatorChain was not created");
+        }
         var result = estimatorChain!
             .Append(_mlContext.Transforms.Concatenate(outputConcat, nameOfColumns.ToArray()));
         return result;
