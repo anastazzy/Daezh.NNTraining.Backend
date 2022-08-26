@@ -1,6 +1,6 @@
-﻿namespace NNTraining.Domain;
+﻿namespace NNTraining.Domain.Dto;
 
-public class DataPredictionNNParameters : NNParameters
+public class DataPredInputParameters: BaseInputParameters
 {
     public string NameOfTargetColumn { get; set; }
     public bool HasHeader { get; set; }

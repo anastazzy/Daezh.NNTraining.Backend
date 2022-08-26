@@ -25,8 +25,10 @@ public class FileStorage: IFileStorage
         _minio.Build();
     }
     
+    //Todo unique fileName
     public async Task UploadAsync(string fileName, string contentType, Stream fileStream, long size)
     {
+        var newFileName = fileName + "_" + DateTimeOffset.UtcNow;//?????????
         await CreateBucketAsync();      
         await _minio.PutObjectAsync(new PutObjectArgs()
             .WithBucket(BucketName)

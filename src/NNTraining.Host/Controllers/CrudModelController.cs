@@ -18,28 +18,28 @@ public class CrudModelController
     }
 
     [HttpPost]
-    public Task<long> CreateModelAsync(DataPredictionInputDto modelDto)
+    public Task<long> SaveModelAsync(DataPredictionInputDto modelDto)
     {
-        return _modelService.SaveAsync(modelDto);
+        return _modelService.SaveDataPredictionModelAsync(modelDto);
     }
     
-    [HttpPost("createDataPrediction")]
-    public Task CreateDataPredictModel()
-    {
-        return _modelService.CreateTheDataPrediction();
-    }
+    // [HttpPost("createDataPrediction")]
+    // public Task CreateDataPredictModel()
+    // {
+    //     return _modelService.CreateTheDataPrediction();
+    // }
     
-    [HttpGet("dataPredictionSchema")]
-    public Dictionary<string, string> GetSchemaOfModel()
-    {
-        return _modelService.GetSchemaOfModel();
-    }
+    // [HttpGet("dataPredictionSchema")]
+    // public Dictionary<string, string> GetSchemaOfModel()
+    // {
+    //     return _modelService.GetSchemaOfModel();
+    // }
     
-    [HttpPost("dataPredictionModel")]
-    public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
-    {
-        return _modelService.UsingModel(inputModelForUsing);
-    }
+    // [HttpPost("dataPredictionModel")]
+    // public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
+    // {
+    //     return _modelService.UsingModel(inputModelForUsing);
+    // }
 
     [HttpGet]
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()

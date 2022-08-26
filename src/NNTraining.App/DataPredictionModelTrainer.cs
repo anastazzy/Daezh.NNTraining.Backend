@@ -5,7 +5,7 @@ using NNTraining.Contracts;
 
 namespace NNTraining.Host;
 
-public class ModelTrainer
+public class DataPredictionModelTrainer : IModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
     private readonly string _nameOfTrainSet;
@@ -13,15 +13,18 @@ public class ModelTrainer
     private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
     private Type? _type;
     private readonly string _nameOfTargetColumn;
+    private readonly bool _hasHeader;
+    private readonly char[] _separators;
 
-    public ModelTrainer(string nameOfTrainSet, string nameOfTargetColumn)//"train-set.csv", "price"
+    public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn, 
+        bool hasHeader, char[] separators) //"train-set.csv", "price", true, ';'
     {
         _nameOfTargetColumn = nameOfTargetColumn;
         _nameOfTrainSet = nameOfTrainSet;
         _dictionary = new Dictionary<string, Type>();
+        _hasHeader = hasHeader;
+        _separators = separators;
     }
-    
-    
     
     public async Task CreateAndTrain()
     {
@@ -30,11 +33,8 @@ public class ModelTrainer
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
         {
-            HasHeader = true,
-            Separators = new[]
-            {
-                ';',
-            },
+            HasHeader = _hasHeader,
+            Separators = _separators,
             Columns = columns
 
         });
@@ -98,7 +98,7 @@ public class ModelTrainer
         {
             throw new ArgumentException("Headers is null");
         }
-        var headers = lineWithHeaders.Split(';');
+        var headers = lineWithHeaders.Split(_separators);
 
         //get fields of first line
         var firstRow = await streamReader.ReadLineAsync();
@@ -106,7 +106,7 @@ public class ModelTrainer
         {
             throw new ArgumentException("First row is null");
         }
-        var fields = firstRow.Split(';');
+        var fields = firstRow.Split(_separators);
         
         //added values in dictionary with headers, values and type of this values
         for (var index = 0; index < fields.Length; index++)
@@ -173,5 +173,10 @@ public class ModelTrainer
         var result = estimatorChain!
             .Append(_mlContext.Transforms.Concatenate(outputConcat, nameOfColumns.ToArray()));
         return result;
+    }
+
+    public ITrainedModel Train()
+    {
+        throw new NotImplementedException();
     }
 }

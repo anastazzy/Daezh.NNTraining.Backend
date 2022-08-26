@@ -12,27 +12,43 @@ namespace NNTraining.Host;
 public class CrudForModelService : ICrudForModelService
 {
     private readonly NNTrainingDbContext _dbContext;
-    private CreatorOfModel _creator;
+    // private CreatorOfModel _creator;
 
     public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider)
     {
         _dbContext = dbContext;
-        _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
+        // _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
     }
 
-    public async Task<long> SaveAsync(DataPredictionInputDto modelDto)
+    public async Task<long> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
     {
+        var modelParameters = new DataPredictionNNParameters
+        {
+            NameOfTrainSet = null,
+            NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
+            HasHeader = modelDto.Parameters.HasHeader,
+            Separators = modelDto.Parameters.Separators
+        }
         var model = new Model
         {
             Name = modelDto.Name,
             ModelStatus = ModelStatus.Created,
-            ModelType = modelDto.ModelType,
-            Parameters = modelDto.Parameters
+            ModelType = ModelType.DataPrediction,
+            Parameters = modelParameters
         };
         _dbContext.Models.Add(model);
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
+
+    // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
+    // {
+    //     return T switch
+    //     {
+    //         ModelType.DataPrediction => new DataPredictionNNParameters(),
+    //     };
+    // }
+    
     //
     // public Task CreateTheDataPrediction()
     // {
@@ -41,28 +57,22 @@ public class CrudForModelService : ICrudForModelService
     //
 
 
-    public async Task<IModelCreator> Create()
-    {
-        
-        var factory = new ModelFactory(_dbContext);
-        var creator = await factory.CreateModel(modelDto);
-    }
-    
-    public async Task CreateModel(ModelInputDto modelDto) 
-    {
-        var a = Create()
-    }
-    
-    
-    public Dictionary<string,string> GetSchemaOfModel()
-    {
-        return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
-    }
-    
-    public object UsingModel(Dictionary<string,string> inputModelForUsing)
-    {
-        return _creator.UsingModel(inputModelForUsing);
-    }
+    // public async Task<IModelCreator> Create()
+    // {
+    //     
+    //     var factory = new ModelFactory(_dbContext);
+    //     var creator = await factory.CreateModel(modelDto);
+    // }
+
+    // public Dictionary<string,string> GetSchemaOfModel()
+    // {
+    //     return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
+    // }
+    //
+    // public object UsingModel(Dictionary<string,string> inputModelForUsing)
+    // {
+    //     return _creator.UsingModel(inputModelForUsing);
+    // }
     
 
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
@@ -82,8 +92,8 @@ public class CrudForModelService : ICrudForModelService
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
         if (model is null) throw new Exception("Model update ERROR");
         model.Name = modelDto.Name;
-        model.Parameters = modelDto.Parameters;
-        model.ModelType = modelDto.ModelType;
+        //model.Parameters = modelDto.Parameters;
+        model.ModelType = ModelType.DataPrediction;
         await _dbContext.SaveChangesAsync();
         return true;
     }
