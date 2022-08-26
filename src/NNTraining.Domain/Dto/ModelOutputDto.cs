@@ -1,4 +1,4 @@
-﻿namespace NNTraining.Domain;
+﻿namespace NNTraining.Domain.Dto;
 
 public class ModelOutputDto
 {

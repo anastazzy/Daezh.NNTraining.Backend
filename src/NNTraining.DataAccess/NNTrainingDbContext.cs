@@ -1,6 +1,7 @@
 ﻿using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using NNTraining.Domain;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.DataAccess;
 

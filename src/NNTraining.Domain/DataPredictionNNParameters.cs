@@ -2,5 +2,5 @@
 
 public class DataPredictionNNParameters : NNParameters
 {
-    public DateTime StartDate { get; set; }
+    public string NameOfTargetColumn { get; set; }
 }

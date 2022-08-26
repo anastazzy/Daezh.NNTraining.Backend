@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
+using NNTraining.Domain.Dto;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.Host;
 
@@ -18,7 +20,7 @@ public class CrudForModelService : ICrudForModelService
         _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
     }
 
-    public async Task<long> CreateModelAsync(DataPredictionInputDto modelDto)
+    public async Task<long> SaveAsync(DataPredictionInputDto modelDto)
     {
         var model = new Model
         {
@@ -31,16 +33,33 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
+    //
+    // public Task CreateTheDataPrediction()
+    // {
+    //     return _creator.Create();
+    // }
+    //
 
-    public Task CreateTheDataPrediction()
+
+    public async Task<IModelCreator> Create()
     {
-        return _creator.Create();
+        
+        var factory = new ModelFactory(_dbContext);
+        var creator = await factory.CreateModel(modelDto);
     }
+    
+    public async Task CreateModel(ModelInputDto modelDto) 
+    {
+        var a = Create()
+    }
+    
+    
     public Dictionary<string,string> GetSchemaOfModel()
     {
         return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
     }
-    public float UsingModel(Dictionary<string,string> inputModelForUsing)
+    
+    public object UsingModel(Dictionary<string,string> inputModelForUsing)
     {
         return _creator.UsingModel(inputModelForUsing);
     }
