@@ -4,16 +4,20 @@ using Minio.DataModel;
 using Minio.Exceptions;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Options;
+using NNTraining.DataAccess;
+using NNTraining.Domain.Models;
+using File = NNTraining.Domain.Models.File;
 
 namespace NNTraining.Host;
 
 public class FileStorage: IFileStorage
 {
     private readonly MinioClient _minio;
-    private const string BucketName = "dataprediction";
-    private const string Location = "datasets";
+    private readonly NNTrainingDbContext _dbContext;
 
-    public FileStorage(IOptions<MinioOptions> options)
+    private const string Location = "datasets";
+//"dataprediction"
+    public FileStorage(IOptions<MinioOptions> options, NNTrainingDbContext dbContext)
     {
         _minio = new MinioClient()
             .WithEndpoint(options.Value.Endpoint)
@@ -23,22 +27,33 @@ public class FileStorage: IFileStorage
             _minio.WithSSL();
         }
         _minio.Build();
+
+        _dbContext = dbContext;
     }
     
     //Todo unique fileName
-    public async Task UploadAsync(string fileName, string contentType, Stream fileStream, long size)
+    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, long idModel)
     {
-        var newFileName = fileName + "_" + DateTimeOffset.UtcNow;//?????????
-        await CreateBucketAsync();      
+        var newFileName = Guid.NewGuid();
+        var file = new File
+        {
+            OriginalName = fileName,
+            Extension = fileName, //get extencion from string
+            Size = 0
+        };
+
+
+        await CreateBucketAsync(bucketName);      
         await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(BucketName)
+            .WithBucket(bucketName)
             .WithStreamData(fileStream)
             .WithObjectSize(size)
-            .WithObject(fileName)
+            .WithObject(newFileName.ToString())
             .WithContentType(contentType));
+        return newFileName;
     }
 
-    public async Task<ObjectStat> GetAsync(string fileName)
+    public async Task<ObjectStat> GetAsync(string fileName, string bucketName)
     {
         var tempFileName = "temp.csv";
         
@@ -49,7 +64,7 @@ public class FileStorage: IFileStorage
         }
         
         var result = await _minio.GetObjectAsync(new GetObjectArgs().
-            WithBucket(BucketName)
+            WithBucket(bucketName)
             .WithObject(fileName)
             .WithFile(tempFileName));
         
@@ -61,15 +76,15 @@ public class FileStorage: IFileStorage
         return result;
     }
 
-    private async Task CreateBucketAsync()
+    private async Task CreateBucketAsync(string bucketName)
     {
         try
         {
-            var found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(BucketName));
+            var found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
             if (!found)
             {
                 await _minio.MakeBucketAsync(new MakeBucketArgs()
-                    .WithBucket(BucketName)
+                    .WithBucket(bucketName)
                     .WithLocation(Location));
             }
         }

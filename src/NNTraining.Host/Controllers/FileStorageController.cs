@@ -18,14 +18,14 @@ public class FileStorageController
     }
     
     [HttpPost]
-    public async Task UploadFile(IFormFile formFile)
+    public async Task<Guid> UploadFile(IFormFile formFile, string bucketName, long idModel)
     {
-        await _storage.UploadAsync(formFile.FileName, formFile.ContentType, formFile.OpenReadStream(), formFile.Length);
+        return await _storage.UploadAsync(formFile.FileName, formFile.ContentType, formFile.OpenReadStream(), formFile.Length, bucketName, idModel);
     }
     
     [HttpGet]
-    public async Task GetFile(string fileName)
+    public async Task GetFile(string fileName,  string bucketName)
     {
-        await _storage.GetAsync(fileName);
+        await _storage.GetAsync(fileName, bucketName);
     }
 }

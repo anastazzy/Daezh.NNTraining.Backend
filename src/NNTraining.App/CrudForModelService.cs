@@ -12,23 +12,28 @@ namespace NNTraining.Host;
 public class CrudForModelService : ICrudForModelService
 {
     private readonly NNTrainingDbContext _dbContext;
+
+    private readonly IFileStorage _storage;
+
+    private const string BucketDataPrediction = "dataprediction";
     // private CreatorOfModel _creator;
 
-    public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider)
+    public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
     {
         _dbContext = dbContext;
         // _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
+        _storage = storage;
     }
 
     public async Task<long> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
     {
-        var modelParameters = new DataPredictionNNParameters
+        var modelParameters = new DataPredictionNnParameters
         {
             NameOfTrainSet = null,
             NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
             HasHeader = modelDto.Parameters.HasHeader,
             Separators = modelDto.Parameters.Separators
-        }
+        };
         var model = new Model
         {
             Name = modelDto.Name,

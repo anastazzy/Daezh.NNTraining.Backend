@@ -9,7 +9,7 @@ public class ModelTrainerFactory : IModelTrainerFactory
     {
         switch (parameters)
         {
-            case DataPredictionNNParameters dataPredictionNnParameters:
+            case DataPredictionNnParameters dataPredictionNnParameters:
                 // return new DataPredictionModelTrainer(dataPredictionNnParameters.NameOfTrainSet,
                 //     dataPredictionNnParameters.NameOfTargetColumn);
             

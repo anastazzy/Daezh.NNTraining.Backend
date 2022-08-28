@@ -4,6 +4,6 @@ namespace NNTraining.Contracts;
 
 public interface IFileStorage
 {
-    Task UploadAsync(string fileName, string contentType, Stream fileStream, long size);
-    Task<ObjectStat> GetAsync(string fileName);
+    Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, long idModel);
+    Task<ObjectStat> GetAsync(string fileName, string bucketName);
 }
