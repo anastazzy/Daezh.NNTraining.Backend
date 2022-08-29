@@ -31,18 +31,24 @@ public class FileStorage: IFileStorage
         _dbContext = dbContext;
     }
     
-    //Todo unique fileName
     public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, long idModel)
     {
         var newFileName = Guid.NewGuid();
         var file = new File
         {
             OriginalName = fileName,
-            Extension = fileName, //get extencion from string
+            Extension = fileName[fileName.IndexOf('.')..], //get extension from string
             Size = 0
         };
-
-
+        _dbContext.Files.Add(file);
+        var idFile = file.Id;
+        _dbContext.ModelFiles.Add(new ModelFile()
+        {
+            FileId = idFile,
+            ModelId = idModel
+        });
+        // Here?
+        
         await CreateBucketAsync(bucketName);      
         await _minio.PutObjectAsync(new PutObjectArgs()
             .WithBucket(bucketName)
@@ -50,6 +56,7 @@ public class FileStorage: IFileStorage
             .WithObjectSize(size)
             .WithObject(newFileName.ToString())
             .WithContentType(contentType));
+        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
         return newFileName;
     }
 
@@ -76,6 +83,7 @@ public class FileStorage: IFileStorage
         return result;
     }
 
+    
     private async Task CreateBucketAsync(string bucketName)
     {
         try

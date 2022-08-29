@@ -45,6 +45,15 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
+    public async Task<bool> UpdateFileForModelAsync(long idModel, Guid idFile)
+    {
+        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
+        if (model is null) throw new Exception("Model update ERROR");
+        model.Parameters.NameOfTrainSet = idFile.ToString();
+        model.ModelStatus = ModelStatus.ReadyToTraining;
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
 
     // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
     // {
@@ -87,8 +96,8 @@ public class CrudForModelService : ICrudForModelService
         {
             Id = model.Id,
             Name = model.Name,
-            /*ModelStatus = model.ModelStatus,
-            Parameters = model.Parameters,*/
+            ModelStatus = model.ModelStatus,
+            //Parameters = model.Parameters,
         }).ToArray();
     }
 
@@ -102,6 +111,8 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return true;
     }
+    
+    
 
     public async Task<bool> DeleteModelAsync(long id)
     {

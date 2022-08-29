@@ -1,11 +1,13 @@
-﻿namespace NNTraining.Domain.Dto;
+﻿using NNTraining.Domain.Models;
+
+namespace NNTraining.Domain.Dto;
 
 public class ModelOutputDto
 {
     public long Id { get; set; }
     public string? Name { get; set; }
-    /*public ModelType ModelType { get; set; }
+    //public ModelType ModelType { get; set; }
     public ModelStatus ModelStatus { get; set; }
     
-    public object? Parameters { get; set; }*/
+    //public object? Parameters { get; set; }
 }
