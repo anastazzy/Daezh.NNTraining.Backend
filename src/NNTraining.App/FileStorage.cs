@@ -31,22 +31,19 @@ public class FileStorage: IFileStorage
         _dbContext = dbContext;
     }
     
-    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel)
+    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel, FileType fileType)
     {
-        var newFileName = Guid.NewGuid();
-        var file = new File
+        switch (fileType)
         {
-            OriginalName = fileName,
-            Extension = fileName[fileName.IndexOf('.')..], //get extension from string
-            Size = 0
+            case FileType.TrainSet :
+                SaveTrainSet(idModel, fileName, size);
+                break;
+            case FileType.SaveModelInStorage :
+                SaveModel(idModel, fileName, size);
+                break;
         };
-        _dbContext.Files.Add(file);
-        var idFile = file.Id;
-        _dbContext.ModelFiles.Add(new ModelFile()
-        {
-            FileId = idFile,
-            ModelId = idModel
-        });
+        var newFileName = Guid.NewGuid();
+        
         // Here?
         
         await CreateBucketAsync(bucketName);      
@@ -58,6 +55,39 @@ public class FileStorage: IFileStorage
             .WithContentType(contentType));
         await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
         return newFileName;
+    }
+
+    private void SaveTrainSet(Guid idModel, string fileName, long size)
+    {
+        var file = new File
+        {
+            OriginalName = fileName,
+            Extension = fileName[fileName.IndexOf('.')..], //get extension from string
+            Size = size
+        };
+        _dbContext.Files.Add(file);
+        var idFile = file.Id;
+        _dbContext.ModelFiles.Add(new ModelFile()
+        {
+            FileId = idFile,
+            ModelId = idModel
+        });
+    }
+    private void SaveModel(Guid idModel, string fileName, long size)
+    {
+        var file = new File
+        {
+            OriginalName = fileName,
+            Extension = ".zip", //get extension from string
+            Size = 0
+        };
+        _dbContext.Files.Add(file);
+        var idFile = file.Id;
+        _dbContext.ModelFiles.Add(new ModelFile()
+        {
+            FileId = idFile,
+            ModelId = idModel
+        });
     }
 
     public async Task<ObjectStat> GetAsync(string fileName, string bucketName)

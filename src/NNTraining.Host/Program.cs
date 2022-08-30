@@ -25,7 +25,6 @@ builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio
 
 builder.Services.AddSingleton<IFileStorage, FileStorage>();
 
-//builder.Services.AddSingleton<ModelFactory>(); 
 
 
 var app = builder.Build();

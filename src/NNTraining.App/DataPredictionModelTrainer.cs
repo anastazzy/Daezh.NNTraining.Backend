@@ -1,19 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.ML;
+﻿using Microsoft.ML;
 using Microsoft.ML.Data;
-using Microsoft.ML.Trainers;
 using NNTraining.Contracts;
-using NNTraining.DataAccess;
 
 namespace NNTraining.Host;
 
 public class DataPredictionModelTrainer : IModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
-    private readonly string? _nameOfTrainSet;
+    private readonly string _nameOfTrainSet;
     private readonly Dictionary<string, Type> _dictionary;
-    private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
-    private Type? _type;
     private readonly string _nameOfTargetColumn;
     private readonly bool _hasHeader;
     private readonly char[] _separators;
@@ -26,35 +21,6 @@ public class DataPredictionModelTrainer : IModelTrainer
         _dictionary = new Dictionary<string, Type>();
         _hasHeader = hasHeader;
         _separators = separators;
-    }
-    
-    public async Task CreateAndTrain()
-    {
-        _type = await GetTypeOfModelWithCompletionTheDictionaryAsync(_nameOfTrainSet);
-        var columns = CreateTheTextLoaderColumn().ToArray();
-
-        var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
-        {
-            HasHeader = _hasHeader,
-            Separators = _separators,
-            Columns = columns
-
-        });
-
-        // creation the training pipelines
-        var dataProcessPipeline = CreateTrainingPipeline(columns);
-       
-        if (dataProcessPipeline is null)
-        {
-            throw new ArgumentException("Pipeline was not created");
-        }
-        
-        // create the trainer with specific algorithm  
-        var trainer = _mlContext.Regression.Trainers.Sdca("label", "features");
-        
-        // train the model
-        var trainingPipeline = dataProcessPipeline.Append(trainer);
-        _trainedModel = trainingPipeline.Fit(trainingView);
     }
     private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn()
     {
@@ -90,7 +56,7 @@ public class DataPredictionModelTrainer : IModelTrainer
     }
 
 
-    private async Task<Type> GetTypeOfModelWithCompletionTheDictionaryAsync(string fileName)
+    private async Task CompletionTheDictionaryAsync(string fileName)
     {
         using var streamReader = new StreamReader(fileName);
         
@@ -128,7 +94,10 @@ public class DataPredictionModelTrainer : IModelTrainer
                 throw new ArgumentException("Key is null");
             }
         }
-        
+    }
+
+    private Type GetTypeOfCurrentModel()
+    {
         var nameTypePair = _dictionary
             .Select(x => (x.Key, x.Value));
         
@@ -172,13 +141,43 @@ public class DataPredictionModelTrainer : IModelTrainer
         {
             throw new ArgumentException("EstimatorChain was not created");
         }
-        var result = estimatorChain!
+        var result = estimatorChain
             .Append(_mlContext.Transforms.Concatenate(outputConcat, nameOfColumns.ToArray()));
         return result;
     }
 
-    public ITrainedModel Train()
+    public async Task<ITrainedModel> Train()
     {
-        throw new NotImplementedException();
+        await CompletionTheDictionaryAsync(_nameOfTrainSet);
+        
+        var columns = CreateTheTextLoaderColumn().ToArray();
+
+        var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
+        {
+            HasHeader = _hasHeader,
+            Separators = _separators,
+            Columns = columns
+
+        });
+
+        // creation the training pipelines
+        var dataProcessPipeline = CreateTrainingPipeline(columns);
+       
+        if (dataProcessPipeline is null)
+        {
+            throw new ArgumentException("Pipeline was not created");
+        }
+        
+        // create the trainer with specific algorithm  
+        var trainer = _mlContext.Regression.Trainers.Sdca("label", "features");
+        
+        // train the model
+        var trainingPipeline = dataProcessPipeline.Append(trainer);
+        
+        return new DataPredictionTrainedModel(
+            trainingPipeline.Fit(trainingView), 
+            _mlContext, 
+            GetTypeOfCurrentModel(), 
+            _nameOfTargetColumn);
     }
 }

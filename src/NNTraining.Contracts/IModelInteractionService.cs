@@ -4,6 +4,6 @@ namespace NNTraining.Contracts;
 
 public interface IModelInteractionService
 {
-    public void Train(long id, NNParameters parameters);
+    public void Train(Guid id);
     public object Predict(object modelForPrediction);
 }

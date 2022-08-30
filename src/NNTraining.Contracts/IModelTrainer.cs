@@ -2,5 +2,5 @@
 
 public interface IModelTrainer
 {
-    public ITrainedModel Train();
+    public Task<ITrainedModel>  Train();
 }

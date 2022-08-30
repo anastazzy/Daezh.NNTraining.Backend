@@ -13,7 +13,7 @@ namespace NNTraining.DataAccess.Migrations
                 name: "Models",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
                     ModelType = table.Column<int>(type: "integer", nullable: false),

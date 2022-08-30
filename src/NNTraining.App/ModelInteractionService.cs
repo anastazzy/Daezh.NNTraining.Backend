@@ -1,18 +1,51 @@
 ﻿using NNTraining.Contracts;
+using NNTraining.DataAccess;
 using NNTraining.Domain;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.Host;
 
 public class ModelInteractionService: IModelInteractionService
 {
-    public void Train(long id, NNParameters parameters)
+    private readonly NNTrainingDbContext _dbContext;
+    private ITrainedModel? _trainedModel = null;
+    public ModelInteractionService(NNTrainingDbContext dbContext)
     {
-        throw new NotImplementedException();
+        _dbContext = dbContext;
+    }
+    public async void Train(Guid id)
+    {
+        var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
+        if (model is null)
+        {
+            throw new ArgumentException("The model with current id not found");
+        }
+        var factory = new ModelTrainerFactory();
+        var trainer = factory.CreateTrainer(model.Parameters);
+        _trainedModel = await trainer.Train();
+        //save in Db or minio with modelStorage
+        //fileNae = model.name
     }
 
     public object Predict(object modelForPrediction)
     {
         throw new NotImplementedException();
+    }
+
+    public object Predict(Guid id, object modelForPrediction)
+    {
+        var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
+        if (model is null)
+        {
+            throw new ArgumentException("The model with current id not found");
+        }
+
+        return null;
+        //     model.ModelType switch
+        // {
+        //     ModelType.DataPrediction => new DataPredictionTrainedModel(modelForPrediction)
+        // };
+        
     }
     // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
     // {

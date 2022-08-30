@@ -6,4 +6,6 @@ public class File
     public string? OriginalName { get; set; }
     public string? Extension { get; set; }
     public long Size { get; set; }
+    
+    public FileType FileType { get; set; }//add migrations
 }
