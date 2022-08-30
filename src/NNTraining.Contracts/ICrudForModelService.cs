@@ -7,12 +7,12 @@ namespace NNTraining.Contracts;
 
 public interface ICrudForModelService
 {
-    public Task<long> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto);
+    public Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto);
     //public Task CreateTheDataPrediction();
     //public Dictionary<string,string> GetSchemaOfModel();
     //public object UsingModel(Dictionary<string,string> inputModelForUsing);
     public Task<ModelOutputDto[]> GetListOfModelsAsync();
-    public Task<bool> UpdateModelAsync(long id, DataPredictionInputDto modelDto);
-    public Task<bool> DeleteModelAsync(long id);
+    public Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto);
+    public Task<bool> DeleteModelAsync(Guid id);
     public IEnumerable<TypeOutputDto> GetModelTypes();
 }

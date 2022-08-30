@@ -1,14 +1,16 @@
-﻿using Microsoft.ML;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using NNTraining.Contracts;
+using NNTraining.DataAccess;
 
 namespace NNTraining.Host;
 
 public class DataPredictionModelTrainer : IModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
-    private readonly string _nameOfTrainSet;
+    private readonly string? _nameOfTrainSet;
     private readonly Dictionary<string, Type> _dictionary;
     private TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>? _trainedModel;
     private Type? _type;
@@ -16,7 +18,7 @@ public class DataPredictionModelTrainer : IModelTrainer
     private readonly bool _hasHeader;
     private readonly char[] _separators;
 
-    public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn, 
+    public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn,
         bool hasHeader, char[] separators) //"train-set.csv", "price", true, ';'
     {
         _nameOfTargetColumn = nameOfTargetColumn;

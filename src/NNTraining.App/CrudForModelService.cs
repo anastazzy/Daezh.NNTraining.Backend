@@ -25,7 +25,7 @@ public class CrudForModelService : ICrudForModelService
         _storage = storage;
     }
 
-    public async Task<long> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
+    public async Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
     {
         var modelParameters = new DataPredictionNnParameters
         {
@@ -45,7 +45,7 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
-    public async Task<bool> UpdateFileForModelAsync(long idModel, Guid idFile)
+    public async Task<bool> UpdateFileForModelAsync(Guid idModel, Guid idFile)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
         if (model is null) throw new Exception("Model update ERROR");
@@ -54,40 +54,6 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return true;
     }
-
-    // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
-    // {
-    //     return T switch
-    //     {
-    //         ModelType.DataPrediction => new DataPredictionNNParameters(),
-    //     };
-    // }
-    
-    //
-    // public Task CreateTheDataPrediction()
-    // {
-    //     return _creator.Create();
-    // }
-    //
-
-
-    // public async Task<IModelCreator> Create()
-    // {
-    //     
-    //     var factory = new ModelFactory(_dbContext);
-    //     var creator = await factory.CreateModel(modelDto);
-    // }
-
-    // public Dictionary<string,string> GetSchemaOfModel()
-    // {
-    //     return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
-    // }
-    //
-    // public object UsingModel(Dictionary<string,string> inputModelForUsing)
-    // {
-    //     return _creator.UsingModel(inputModelForUsing);
-    // }
-    
 
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {
@@ -101,7 +67,7 @@ public class CrudForModelService : ICrudForModelService
         }).ToArray();
     }
 
-    public async Task<bool> UpdateModelAsync(long id, DataPredictionInputDto modelDto)
+    public async Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
         if (model is null) throw new Exception("Model update ERROR");
@@ -114,7 +80,7 @@ public class CrudForModelService : ICrudForModelService
     
     
 
-    public async Task<bool> DeleteModelAsync(long id)
+    public async Task<bool> DeleteModelAsync(Guid id)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
         if (model is null) throw new Exception("Delete model ERROR");

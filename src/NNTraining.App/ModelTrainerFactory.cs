@@ -10,8 +10,11 @@ public class ModelTrainerFactory : IModelTrainerFactory
         switch (parameters)
         {
             case DataPredictionNnParameters dataPredictionNnParameters:
-                // return new DataPredictionModelTrainer(dataPredictionNnParameters.NameOfTrainSet,
-                //     dataPredictionNnParameters.NameOfTargetColumn);
+                return new DataPredictionModelTrainer(
+                    dataPredictionNnParameters.NameOfTrainSet!, 
+                    dataPredictionNnParameters.NameOfTargetColumn!,
+                    dataPredictionNnParameters.HasHeader,
+                    dataPredictionNnParameters.Separators!);
             
             default: throw new Exception();
         }

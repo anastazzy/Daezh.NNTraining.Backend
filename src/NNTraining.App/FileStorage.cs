@@ -31,7 +31,7 @@ public class FileStorage: IFileStorage
         _dbContext = dbContext;
     }
     
-    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, long idModel)
+    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel)
     {
         var newFileName = Guid.NewGuid();
         var file = new File

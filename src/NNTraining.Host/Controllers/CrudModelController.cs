@@ -18,7 +18,7 @@ public class CrudModelController
     }
 
     [HttpPost]
-    public Task<long> SaveModelAsync(DataPredictionInputDto modelDto)
+    public Task<Guid> SaveModelAsync(DataPredictionInputDto modelDto)
     {
         return _modelService.SaveDataPredictionModelAsync(modelDto);
     }
@@ -48,13 +48,13 @@ public class CrudModelController
     }
 
     [HttpPut("id")]
-    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, long id)
+    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, Guid id)
     {
         return _modelService.UpdateModelAsync(id, modelDto);
     }
 
     [HttpDelete("id")]
-    public Task<bool> DeleteModelAsync(long id)
+    public Task<bool> DeleteModelAsync(Guid id)
     {
         return _modelService.DeleteModelAsync(id);
     }
