@@ -33,32 +33,7 @@ public class FileStorage: IFileStorage
     
     public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel, FileType fileType)
     {
-        switch (fileType)
-        {
-            case FileType.TrainSet :
-                SaveTrainSet(idModel, fileName, size);
-                break;
-            case FileType.SaveModelInStorage :
-                SaveModel(idModel, fileName, size);
-                break;
-        };
         var newFileName = Guid.NewGuid();
-        
-        // Here?
-        
-        await CreateBucketAsync(bucketName);      
-        await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(bucketName)
-            .WithStreamData(fileStream)
-            .WithObjectSize(size)
-            .WithObject(newFileName.ToString())
-            .WithContentType(contentType));
-        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
-        return newFileName;
-    }
-
-    private void SaveTrainSet(Guid idModel, string fileName, long size)
-    {
         var file = new File
         {
             OriginalName = fileName,
@@ -72,23 +47,52 @@ public class FileStorage: IFileStorage
             FileId = idFile,
             ModelId = idModel
         });
+        // Here?
+        
+        await CreateBucketAsync(bucketName);      
+        await _minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(bucketName)
+            .WithStreamData(fileStream)
+            .WithObjectSize(size)
+            .WithObject(newFileName.ToString())
+            .WithContentType(contentType));
+        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
+        return newFileName;
     }
-    private void SaveModel(Guid idModel, string fileName, long size)
+
+    public async Task<Guid> UploadAsync()
     {
-        var file = new File
-        {
-            OriginalName = fileName,
-            Extension = ".zip", //get extension from string
-            Size = 0
-        };
-        _dbContext.Files.Add(file);
-        var idFile = file.Id;
-        _dbContext.ModelFiles.Add(new ModelFile()
-        {
-            FileId = idFile,
-            ModelId = idModel
-        });
+        await CreateBucketAsync(bucketName);      
+        await _minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(bucketName)
+            .WithStreamData(fileStream)
+            .WithObjectSize(size)
+            .WithObject(newFileName.ToString())
+            .WithContentType(contentType));
+        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
+        return newFileName;
     }
+
+    // private void SaveTrainSet(Guid idModel, string fileName, long size)
+    // {
+    //     
+    // }
+    // private void SaveModel(Guid idModel, string fileName, long size)
+    // {
+    //     var file = new File
+    //     {
+    //         OriginalName = fileName,
+    //         Extension = ".zip", //get extension from string
+    //         Size = 0
+    //     };
+    //     _dbContext.Files.Add(file);
+    //     var idFile = file.Id;
+    //     _dbContext.ModelFiles.Add(new ModelFile()
+    //     {
+    //         FileId = idFile,
+    //         ModelId = idModel
+    //     });
+    // }
 
     public async Task<ObjectStat> GetAsync(string fileName, string bucketName)
     {

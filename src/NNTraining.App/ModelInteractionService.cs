@@ -26,12 +26,6 @@ public class ModelInteractionService: IModelInteractionService
         //save in Db or minio with modelStorage
         //fileNae = model.name
     }
-
-    public object Predict(object modelForPrediction)
-    {
-        throw new NotImplementedException();
-    }
-
     public object Predict(Guid id, object modelForPrediction)
     {
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
