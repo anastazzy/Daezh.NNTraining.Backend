@@ -9,9 +9,12 @@ public class ModelInteractionService: IModelInteractionService
 {
     private readonly NNTrainingDbContext _dbContext;
     private ITrainedModel? _trainedModel = null;
-    public ModelInteractionService(NNTrainingDbContext dbContext)
+    private readonly IModelStorage _storage;
+
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage)
     {
         _dbContext = dbContext;
+        _storage = storage;
     }
     public async void Train(Guid id)
     {
@@ -23,8 +26,7 @@ public class ModelInteractionService: IModelInteractionService
         var factory = new ModelTrainerFactory();
         var trainer = factory.CreateTrainer(model.Parameters);
         _trainedModel = await trainer.Train();
-        //save in Db or minio with modelStorage
-        //fileNae = model.name
+        await _storage.SaveAsync(_trainedModel, model);
     }
     public object Predict(Guid id, object modelForPrediction)
     {
@@ -55,14 +57,6 @@ public class ModelInteractionService: IModelInteractionService
     //     return _creator.Create();
     // }
     //
-
-
-    // public async Task<IModelCreator> Create()
-    // {
-    //     
-    //     var factory = new ModelFactory(_dbContext);
-    //     var creator = await factory.CreateModel(modelDto);
-    // }
 
     // public Dictionary<string,string> GetSchemaOfModel()
     // {

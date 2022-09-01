@@ -7,5 +7,5 @@ public class File
     public string? Extension { get; set; }
     public long Size { get; set; }
     
-    //public FileType FileType { get; set; }//add migrations
+    public FileType FileType { get; set; }//add migrations
 }

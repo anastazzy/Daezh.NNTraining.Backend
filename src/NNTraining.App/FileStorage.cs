@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel;
 using Minio.Exceptions;
@@ -15,9 +16,11 @@ public class FileStorage: IFileStorage
     private readonly MinioClient _minio;
     private readonly NNTrainingDbContext _dbContext;
 
-    private const string Location = "datasets";
+    //private const string Location = "datasets";
+    //
+    
 //"dataprediction"
-    public FileStorage(IOptions<MinioOptions> options, NNTrainingDbContext dbContext)
+    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider)
     {
         _minio = new MinioClient()
             .WithEndpoint(options.Value.Endpoint)
@@ -27,18 +30,21 @@ public class FileStorage: IFileStorage
             _minio.WithSSL();
         }
         _minio.Build();
-
-        _dbContext = dbContext;
+        using var scope = serviceProvider.CreateScope();
+        _dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
     }
     
-    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel, FileType fileType)
+    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream,
+        ModelType modelType, Guid idModel, FileType fileType)
     {
+        var size = fileStream.Length;
         var newFileName = Guid.NewGuid();
         var file = new File
         {
             OriginalName = fileName,
             Extension = fileName[fileName.IndexOf('.')..], //get extension from string
-            Size = size
+            Size = size,
+            FileType = fileType
         };
         _dbContext.Files.Add(file);
         var idFile = file.Id;
@@ -47,31 +53,19 @@ public class FileStorage: IFileStorage
             FileId = idFile,
             ModelId = idModel
         });
-        // Here?
+        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
         
-        await CreateBucketAsync(bucketName);      
+        await CreateBucketAsync(modelType, fileType);      
         await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(bucketName)
+            .WithBucket(modelType.ToString())
             .WithStreamData(fileStream)
             .WithObjectSize(size)
             .WithObject(newFileName.ToString())
             .WithContentType(contentType));
-        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
         return newFileName;
     }
 
-    public async Task<Guid> UploadAsync()
-    {
-        await CreateBucketAsync(bucketName);      
-        await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(bucketName)
-            .WithStreamData(fileStream)
-            .WithObjectSize(size)
-            .WithObject(newFileName.ToString())
-            .WithContentType(contentType));
-        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
-        return newFileName;
-    }
+    /// <summary>
 
     // private void SaveTrainSet(Guid idModel, string fileName, long size)
     // {
@@ -94,7 +88,7 @@ public class FileStorage: IFileStorage
     //     });
     // }
 
-    public async Task<ObjectStat> GetAsync(string fileName, string bucketName)
+    public async Task<ObjectStat> GetAsync(string fileName, ModelType bucketName)
     {
         var tempFileName = "temp.csv";
         
@@ -105,7 +99,7 @@ public class FileStorage: IFileStorage
         }
         
         var result = await _minio.GetObjectAsync(new GetObjectArgs().
-            WithBucket(bucketName)
+            WithBucket(bucketName.ToString())
             .WithObject(fileName)
             .WithFile(tempFileName));
         
@@ -118,16 +112,17 @@ public class FileStorage: IFileStorage
     }
 
     
-    private async Task CreateBucketAsync(string bucketName)
+    private async Task CreateBucketAsync(ModelType bucketName, FileType location)
     {
         try
         {
-            var found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            var found = await _minio.BucketExistsAsync(
+                new BucketExistsArgs().WithBucket(bucketName.ToString()));
             if (!found)
             {
                 await _minio.MakeBucketAsync(new MakeBucketArgs()
-                    .WithBucket(bucketName)
-                    .WithLocation(Location));
+                    .WithBucket(bucketName.ToString())
+                    .WithLocation(location.ToString()));
             }
         }
         catch (MinioException e)

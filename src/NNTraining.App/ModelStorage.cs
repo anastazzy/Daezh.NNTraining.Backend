@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.IO.Compression;
+using Microsoft.AspNetCore.Http;
 using Microsoft.ML;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.Host;
 
@@ -26,13 +28,16 @@ public class ModelStorage: IModelStorage// save model in minio?
         _dbContext = dbContext;
         _storage = storage;
     }
-    public Task<Guid> SaveAsync(ITrainedModel model)
+    public async Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model)
     {
-        var idFile  = Guid.NewGuid();
-        var fileName = idFile + ".zip";
+        var fileName = model.Name + ".zip";
         _mlContext.Model.Save(_trainedModel, _dataView, fileName);
-        // _storage.UploadAsync() - make uploadStorage universal file storage or overload
-        throw new NotImplementedException();
+        var idFile = await _storage.UploadAsync(model.Name!, ".zip", 
+            new FileStream(fileName,FileMode.Open), 
+            model.ModelType, 
+            model.Id,
+            FileType.SavedModelInStorage);
+        return idFile;
     }
 
     public Task<ITrainedModel> GetAsync(Guid id)

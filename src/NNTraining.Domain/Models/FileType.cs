@@ -2,7 +2,8 @@
 
 public enum FileType
 {
-    TrainSet,
-    PredictSet,
-    SaveModelInStorage
+    TrainDataset,
+    PredictDataset,
+    SavedModelInStorage,
+    Picture
 }
