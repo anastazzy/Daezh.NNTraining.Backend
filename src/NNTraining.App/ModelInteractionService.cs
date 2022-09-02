@@ -1,9 +1,8 @@
 ﻿using NNTraining.Contracts;
 using NNTraining.DataAccess;
-using NNTraining.Domain;
 using NNTraining.Domain.Models;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class ModelInteractionService: IModelInteractionService
 {
@@ -23,10 +22,20 @@ public class ModelInteractionService: IModelInteractionService
         {
             throw new ArgumentException("The model with current id not found");
         }
+        var dictionaryCreator = new DictionaryCreator();
         var factory = new ModelTrainerFactory();
-        var trainer = factory.CreateTrainer(model.Parameters);
+        var trainer = factory.CreateTrainer(model.Parameters, dictionaryCreator);
         _trainedModel = await trainer.Train();
+
+        var dictionary = dictionaryCreator.GetDictionary();
+        await _dbContext.ModelFieldNameTypes.AddAsync(new ModelFieldNameType()
+        {
+            IdModel = id,
+            PairFieldType = dictionary
+        });
+
         await _storage.SaveAsync(_trainedModel, model);
+        
     }
     public object Predict(Guid id, object modelForPrediction)
     {
@@ -43,6 +52,11 @@ public class ModelInteractionService: IModelInteractionService
         // };
         
     }
+    
+    
+    
+    
+    
     // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
     // {
     //     return T switch

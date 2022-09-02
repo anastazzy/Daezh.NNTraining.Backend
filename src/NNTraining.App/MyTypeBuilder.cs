@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public static class MyTypeBuilder
 {

@@ -1,13 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
 using NNTraining.Domain.Models;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class CrudForModelService : ICrudForModelService
 {

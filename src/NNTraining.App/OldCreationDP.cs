@@ -1,8 +1,7 @@
-﻿using System.Reflection;
-
-namespace NNTraining.Host;
-using Microsoft.ML;
+﻿using Microsoft.ML;
 using Microsoft.ML.Data;
+
+namespace NNTraining.App;
 
 public class CreateANeuralModel
 {

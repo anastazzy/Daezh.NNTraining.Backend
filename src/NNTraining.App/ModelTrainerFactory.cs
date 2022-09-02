@@ -1,11 +1,11 @@
 ﻿using NNTraining.Contracts;
 using NNTraining.Domain;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class ModelTrainerFactory : IModelTrainerFactory
 {
-    public IModelTrainer CreateTrainer(NNParameters parameters)
+    public IModelTrainer CreateTrainer(NNParameters parameters, IDictionaryCreator dictionaryCreator)
     {
         switch (parameters)
         {
@@ -14,7 +14,7 @@ public class ModelTrainerFactory : IModelTrainerFactory
                     dataPredictionNnParameters.NameOfTrainSet!, 
                     dataPredictionNnParameters.NameOfTargetColumn!,
                     dataPredictionNnParameters.HasHeader,
-                    dataPredictionNnParameters.Separators!);
+                    dataPredictionNnParameters.Separators!, dictionaryCreator);
             
             default: throw new Exception();
         }

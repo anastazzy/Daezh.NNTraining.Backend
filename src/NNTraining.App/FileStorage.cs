@@ -9,7 +9,7 @@ using NNTraining.DataAccess;
 using NNTraining.Domain.Models;
 using File = NNTraining.Domain.Models.File;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class FileStorage: IFileStorage
 {
@@ -65,6 +65,27 @@ public class FileStorage: IFileStorage
         return newFileName;
     }
 
+    public async Task<ObjectStat> GetAsync(Guid fileName, ModelType bucketName, string outputFileName = "temp.csv")
+    {
+        var file = new FileInfo(outputFileName);
+        if (!file.Exists)
+        {
+            file.Create();
+        }
+        
+        var result = await _minio.GetObjectAsync(new GetObjectArgs()
+            .WithBucket(bucketName.ToString())
+            .WithObject(fileName.ToString())
+            .WithFile(outputFileName));
+        
+        if (result is null)
+        {
+            throw new Exception("null blin");
+        }
+
+        return result;
+    }
+
     /// <summary>
 
     // private void SaveTrainSet(Guid idModel, string fileName, long size)
@@ -88,28 +109,6 @@ public class FileStorage: IFileStorage
     //     });
     // }
 
-    public async Task<ObjectStat> GetAsync(string fileName, ModelType bucketName)
-    {
-        var tempFileName = "temp.csv";
-        
-        var file = new FileInfo(tempFileName);
-        if (!file.Exists)
-        {
-            file.Create();
-        }
-        
-        var result = await _minio.GetObjectAsync(new GetObjectArgs().
-            WithBucket(bucketName.ToString())
-            .WithObject(fileName)
-            .WithFile(tempFileName));
-        
-        if (result is null)
-        {
-            throw new Exception("null blin");
-        }
-
-        return result;
-    }
 
     
     private async Task CreateBucketAsync(ModelType bucketName, FileType location)

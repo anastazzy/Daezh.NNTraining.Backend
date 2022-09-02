@@ -26,7 +26,7 @@ public class FileStorageController
     }
     
     [HttpGet]
-    public async Task GetFile(string fileName,  ModelType bucketName)
+    public async Task GetFile(Guid fileName,  ModelType bucketName)
     {
         await _storage.GetAsync(fileName, bucketName);
     }

@@ -2,35 +2,37 @@
 using Microsoft.ML.Data;
 using NNTraining.Contracts;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class DataPredictionModelTrainer : IModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
     private readonly string _nameOfTrainSet;
-    private readonly Dictionary<string, Type> _dictionary;
+    //private readonly Dictionary<string, Type> _dictionary;
     private readonly string _nameOfTargetColumn;
     private readonly bool _hasHeader;
     private readonly char[] _separators;
+    private readonly IDictionaryCreator _dictionaryCreator;
 
     public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn,
-        bool hasHeader, char[] separators) //"train-set.csv", "price", true, ';'
+        bool hasHeader, char[] separators, IDictionaryCreator dictionaryCreator) //"train-set.csv", "price", true, ';'
     {
         _nameOfTargetColumn = nameOfTargetColumn;
         _nameOfTrainSet = nameOfTrainSet;
-        _dictionary = new Dictionary<string, Type>();
+       // _dictionary = new Dictionary<string, Type>();
         _hasHeader = hasHeader;
         _separators = separators;
+        _dictionaryCreator = dictionaryCreator;
     }
-    private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn()
+    private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn(Dictionary<string, Type> dictionary)
     {
         List<TextLoader.Column> columns = new();
-        var keys = _dictionary.Keys.ToArray();
+        var keys = dictionary.Keys.ToArray();
         
         for (var index = 0; index < keys.Length; index++)
         {
             
-            _dictionary.TryGetValue(keys[index], out var typeOfColumn);
+            dictionary.TryGetValue(keys[index], out var typeOfColumn);
             if (typeOfColumn is null)
             {
                 throw new ArgumentException("Null value in dictionary.");
@@ -43,66 +45,66 @@ public class DataPredictionModelTrainer : IModelTrainer
         return columns;
     }
 
-    public IEnumerable<(string,Type)> GetSchemaOfModel()
-    {
-        if (_dictionary.Count == 0)
-        {
-            throw new ArgumentException("The Dictionary with columns does not have a information about columns");
-        }
-        foreach (var (key, value) in _dictionary)
-        {
-            yield return (key, value);
-        }
-    }
+    // public IEnumerable<(string,Type)> GetSchemaOfModel()
+    // {
+    //     if (_dictionary.Count == 0)
+    //     {
+    //         throw new ArgumentException("The Dictionary with columns does not have a information about columns");
+    //     }
+    //     foreach (var (key, value) in _dictionary)
+    //     {
+    //         yield return (key, value);
+    //     }
+    // }
 
 
-    private async Task CompletionTheDictionaryAsync(string fileName)
-    {
-        using var streamReader = new StreamReader(fileName);
-        
-        //get headers
-        var lineWithHeaders = await streamReader.ReadLineAsync();
-        if (lineWithHeaders is null)
-        {
-            throw new ArgumentException("Headers is null");
-        }
-        var headers = lineWithHeaders.Split(_separators);
+    // private async Task CompletionTheDictionaryAsync(string fileName)
+    // {
+    //     using var streamReader = new StreamReader(fileName);
+    //     
+    //     //get headers
+    //     var lineWithHeaders = await streamReader.ReadLineAsync();
+    //     if (lineWithHeaders is null)
+    //     {
+    //         throw new ArgumentException("Headers is null");
+    //     }
+    //     var headers = lineWithHeaders.Split(_separators);
+    //
+    //     //get fields of first line
+    //     var firstRow = await streamReader.ReadLineAsync();
+    //     if (firstRow is null)
+    //     {
+    //         throw new ArgumentException("First row is null");
+    //     }
+    //     var fields = firstRow.Split(_separators);
+    //     
+    //     //added values in dictionary with headers, values and type of this values
+    //     for (var index = 0; index < fields.Length; index++)
+    //     {
+    //         var header = headers[index];
+    //         var field = fields[index];
+    //         
+    //         var fieldsType = float.TryParse(field, out _)
+    //              ? typeof(float)
+    //              : typeof(string);
+    //         try
+    //         {
+    //             _dictionary.TryAdd(header,fieldsType);
+    //         }
+    //         catch (Exception)
+    //         {
+    //             throw new ArgumentException("Key is null");
+    //         }
+    //     }
+    // }
 
-        //get fields of first line
-        var firstRow = await streamReader.ReadLineAsync();
-        if (firstRow is null)
-        {
-            throw new ArgumentException("First row is null");
-        }
-        var fields = firstRow.Split(_separators);
-        
-        //added values in dictionary with headers, values and type of this values
-        for (var index = 0; index < fields.Length; index++)
-        {
-            var header = headers[index];
-            var field = fields[index];
-            
-            var fieldsType = float.TryParse(field, out _)
-                 ? typeof(float)
-                 : typeof(string);
-            try
-            {
-                _dictionary.TryAdd(header,fieldsType);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException("Key is null");
-            }
-        }
-    }
-
-    private Type GetTypeOfCurrentModel()
-    {
-        var nameTypePair = _dictionary
-            .Select(x => (x.Key, x.Value));
-        
-        return MyTypeBuilder.CompileResultType(nameTypePair);
-    }
+    // private Type GetTypeOfCurrentModel()
+    // {
+    //     var nameTypePair = _dictionary
+    //         .Select(x => (x.Key, x.Value));
+    //     
+    //     return MyTypeBuilder.CompileResultType(nameTypePair);
+    // }
 
     private EstimatorChain<ColumnConcatenatingTransformer>? CreateTrainingPipeline(IEnumerable<TextLoader.Column> columns)
     {
@@ -148,9 +150,11 @@ public class DataPredictionModelTrainer : IModelTrainer
 
     public async Task<ITrainedModel> Train()
     {
-        await CompletionTheDictionaryAsync(_nameOfTrainSet);
+        await _dictionaryCreator.CompletionTheDictionaryAsync(_nameOfTrainSet, _separators);
+        var dictionary = _dictionaryCreator.GetDictionary();
+        //await CompletionTheDictionaryAsync(_nameOfTrainSet);
         
-        var columns = CreateTheTextLoaderColumn().ToArray();
+        var columns = CreateTheTextLoaderColumn(dictionary).ToArray();
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
         {
@@ -177,7 +181,7 @@ public class DataPredictionModelTrainer : IModelTrainer
         return new DataPredictionTrainedModel(
             trainingPipeline.Fit(trainingView), 
             _mlContext, 
-            GetTypeOfCurrentModel(), 
+            _dictionaryCreator.GetTypeOfCurrentFields(dictionary), 
             _nameOfTargetColumn);
     }
 }

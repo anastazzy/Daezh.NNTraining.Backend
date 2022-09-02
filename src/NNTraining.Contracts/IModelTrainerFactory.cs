@@ -4,5 +4,5 @@ namespace NNTraining.Contracts;
 
 public interface IModelTrainerFactory
 {
-    public IModelTrainer CreateTrainer(NNParameters parameters);
+    public IModelTrainer CreateTrainer(NNParameters parameters, IDictionaryCreator dictionaryCreator);
 }

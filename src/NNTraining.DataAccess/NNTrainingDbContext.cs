@@ -15,6 +15,7 @@ public class NNTrainingDbContext : DbContext
     public DbSet<Model> Models { get; set; }
     public DbSet<File> Files { get; set; }
     public DbSet<ModelFile> ModelFiles { get; set; }
+    public DbSet<ModelFieldNameType> ModelFieldNameTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +25,11 @@ public class NNTrainingDbContext : DbContext
         modelBuilder.Entity<ModelFile>().HasKey(x => new {
             x.ModelId, 
             x.FileId
+        });
+        modelBuilder.Entity<ModelFieldNameType>().HasKey(x => new
+        {
+            x.IdPair,
+            x.IdModel
         });
     }
 }
