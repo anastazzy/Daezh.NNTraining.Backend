@@ -10,9 +10,9 @@ namespace NNTraining.Api.Controllers;
 [Route("api/[controller]")]
 public class CrudModelController
 {
-    private readonly ICrudForModelService _modelService;
+    private readonly IBaseModelService _modelService;
 
-    public CrudModelController(ICrudForModelService modelService)
+    public CrudModelController(IBaseModelService modelService)
     {
         _modelService = modelService;
     }

@@ -17,7 +17,7 @@ builder.Services.AddSingleton<IFileStorage, FileStorage>();
 builder.Services.AddSingleton<MLContext>();
 builder.Services.AddScoped<IModelStorage, ModelStorage>();
 
-builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
+builder.Services.AddScoped<IBaseModelService, BaseModelService>();
 
 builder.Services.AddScoped<ModelInteractionService, ModelInteractionService>();
 builder.Services.AddSingleton<IModelTrainerFactory, ModelTrainerFactory>();

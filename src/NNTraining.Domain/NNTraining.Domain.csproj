@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <PackageReference Include="Innofactor.EfCoreJsonValueConverter.Attributes" Version="2.0.1" />
-      <PackageReference Include="Microsoft.ML.DataView" Version="1.7.1" />
     </ItemGroup>
 
 </Project>

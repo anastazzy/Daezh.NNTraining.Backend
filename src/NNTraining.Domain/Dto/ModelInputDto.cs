@@ -1,6 +1,4 @@
-﻿using NNTraining.Domain.Models;
-
-namespace NNTraining.Domain.Dto;
+﻿namespace NNTraining.Domain.Dto;
 
 public abstract class ModelInputDto<T> where T: NNParameters
 {

@@ -22,25 +22,25 @@ public class DataPredictionModelTrainer : IModelTrainer
         _hasHeader = hasHeader;
         _separators = separators;
     }
-    private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn(Dictionary<string, Type> dictionary)
-    {
-        List<TextLoader.Column> columns = new();
-        var keys = dictionary.Keys.ToArray();
-        
-        for (var index = 0; index < keys.Length; index++)
-        {
-            dictionary.TryGetValue(keys[index], out var typeOfColumn);
-            if (typeOfColumn is null)
-            {
-                throw new ArgumentException("Null value in dictionary.");
-            }
-
-            columns.Add(typeOfColumn == typeof(float)
-                ? new TextLoader.Column(keys[index], DataKind.Single, index)
-                : new TextLoader.Column(keys[index], DataKind.String, index));
-        }
-        return columns;
-    }
+    // private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn(Dictionary<string, Type> dictionary)
+    // {
+    //     List<TextLoader.Column> columns = new();
+    //     var keys = dictionary.Keys.ToArray();
+    //     
+    //     for (var index = 0; index < keys.Length; index++)
+    //     {
+    //         dictionary.TryGetValue(keys[index], out var typeOfColumn);
+    //         if (typeOfColumn is null)
+    //         {
+    //             throw new ArgumentException("Null value in dictionary.");
+    //         }
+    //
+    //         columns.Add(typeOfColumn == typeof(float)
+    //             ? new TextLoader.Column(keys[index], DataKind.Single, index)
+    //             : new TextLoader.Column(keys[index], DataKind.String, index));
+    //     }
+    //     return columns;
+    // }
 
     // public IEnumerable<(string,Type)> GetSchemaOfModel()
     // {
@@ -55,47 +55,47 @@ public class DataPredictionModelTrainer : IModelTrainer
     // }
 
 
-    private async Task<Dictionary<string, Type>> CompletionTheDictionaryAsync(string fileName)
-    {
-        var mapColumnNameColumnType = new Dictionary<string, Type>();
-        using var streamReader = new StreamReader(fileName);
-        
-        //get headers
-        var lineWithHeaders = await streamReader.ReadLineAsync();
-        if (lineWithHeaders is null)
-        {
-            throw new ArgumentException("Headers is null");
-        }
-        var headers = lineWithHeaders.Split(_separators);
-    
-        //get fields of first line
-        var firstRow = await streamReader.ReadLineAsync();
-        if (firstRow is null)
-        {
-            throw new ArgumentException("First row is null");
-        }
-        var fields = firstRow.Split(_separators);
-        
-        //added values in dictionary with headers, values and type of this values
-        for (var index = 0; index < fields.Length; index++)
-        {
-            var header = headers[index];
-            var field = fields[index];
-            
-            var fieldsType = float.TryParse(field, out _)
-                 ? typeof(float)
-                 : typeof(string);
-            try
-            {
-                mapColumnNameColumnType.TryAdd(header,fieldsType);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException("Key is null");
-            }
-        }
-        return mapColumnNameColumnType;
-    }
+    // private async Task<Dictionary<string, Type>> CompletionTheDictionaryAsync(string fileName)
+    // {
+    //     var mapColumnNameColumnType = new Dictionary<string, Type>();
+    //     using var streamReader = new StreamReader(fileName);
+    //     
+    //     //get headers
+    //     var lineWithHeaders = await streamReader.ReadLineAsync();
+    //     if (lineWithHeaders is null)
+    //     {
+    //         throw new ArgumentException("Headers is null");
+    //     }
+    //     var headers = lineWithHeaders.Split(_separators);
+    //
+    //     //get fields of first line
+    //     var firstRow = await streamReader.ReadLineAsync();
+    //     if (firstRow is null)
+    //     {
+    //         throw new ArgumentException("First row is null");
+    //     }
+    //     var fields = firstRow.Split(_separators);
+    //     
+    //     //added values in dictionary with headers, values and type of this values
+    //     for (var index = 0; index < fields.Length; index++)
+    //     {
+    //         var header = headers[index];
+    //         var field = fields[index];
+    //         
+    //         var fieldsType = float.TryParse(field, out _)
+    //              ? typeof(float)
+    //              : typeof(string);
+    //         try
+    //         {
+    //             mapColumnNameColumnType.TryAdd(header,fieldsType);
+    //         }
+    //         catch (Exception)
+    //         {
+    //             throw new ArgumentException("Key is null");
+    //         }
+    //     }
+    //     return mapColumnNameColumnType;
+    // }
 
     private EstimatorChain<ColumnConcatenatingTransformer>? CreateTrainingPipeline(IEnumerable<TextLoader.Column> columns)
     {
@@ -139,11 +139,11 @@ public class DataPredictionModelTrainer : IModelTrainer
         return result;
     }
 
-    public async Task<ITrainedModel> Train()
+    public ITrainedModel Train(Dictionary<string, Type> mapColumnNameColumnType)
     {
-        var mapColumnNameColumnType = await CompletionTheDictionaryAsync(_nameOfTrainSet);
+        //var mapColumnNameColumnType = await CompletionTheDictionaryAsync(_nameOfTrainSet);
         
-        var columns = CreateTheTextLoaderColumn(mapColumnNameColumnType).ToArray();
+        var columns = Helper.CreateTheTextLoaderColumn(mapColumnNameColumnType).ToArray();
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
         {

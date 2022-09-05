@@ -7,7 +7,7 @@ using NNTraining.Domain.Models;
 
 namespace NNTraining.App;
 
-public class CrudForModelService : ICrudForModelService
+public class BaseModelService : IBaseModelService
 {
     private readonly NNTrainingDbContext _dbContext;
 
@@ -15,7 +15,7 @@ public class CrudForModelService : ICrudForModelService
 
     private const string BucketDataPrediction = "dataprediction";
 
-    public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
+    public BaseModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
     {
         _dbContext = dbContext;
         _storage = storage;
@@ -31,8 +31,6 @@ public class CrudForModelService : ICrudForModelService
             Separators = modelDto.Parameters.Separators
         };
         
-        
-        
         var model = new Model
         {
             Name = modelDto.Name,
@@ -44,10 +42,14 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
+    
     public async Task<bool> UpdateFileForModelAsync(Guid idModel, Guid idFile)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
-        if (model is null) throw new Exception("Model update ERROR");
+        if (model is null)
+        {
+            throw new Exception("Model update ERROR");
+        }
         model.Parameters.NameOfTrainSet = idFile.ToString();
         model.ModelStatus = ModelStatus.ReadyToTraining;
         await _dbContext.SaveChangesAsync();

@@ -1,6 +1,4 @@
-﻿using NNTraining.Domain.Models;
-
-namespace NNTraining.Domain;
+﻿namespace NNTraining.Domain;
 
 public class NNParameters
 {

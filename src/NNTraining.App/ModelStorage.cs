@@ -14,18 +14,15 @@ public class ModelStorage: IModelStorage// save model in minio?
     private readonly MLContext _mlContext;
     private readonly NNTrainingDbContext _dbContext;
     private readonly IFileStorage _storage;
-    private readonly IHashDataForModel _hashDataForModel;
 
     public ModelStorage(
         MLContext mlContext,
         NNTrainingDbContext dbContext,
-        IFileStorage storage, 
-        IHashDataForModel hashDataForModel)
+        IFileStorage storage)
     {
         _mlContext = mlContext;
         _dbContext = dbContext;
         _storage = storage;
-        _hashDataForModel = hashDataForModel;
     }
     public async Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataView)
     {
@@ -51,9 +48,9 @@ public class ModelStorage: IModelStorage// save model in minio?
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model?.PairFieldType is null)
         {
-            throw new ArgumentException("The model was not found");
+            throw new ArgumentException("The model or it`s field name type was not found");
         }
-        var type = _hashDataForModel.GetTypeOfCurrentFields(model.PairFieldType);
+        var type = Helper.GetTypeOfCurrentFields(model.PairFieldType);
 
         var targetColumn = "";
 

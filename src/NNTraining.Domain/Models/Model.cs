@@ -1,5 +1,4 @@
 ﻿using Innofactor.EfCoreJsonValueConverter;
-using Microsoft.ML;
 
 namespace NNTraining.Domain.Models;
 
@@ -13,6 +12,4 @@ public class Model
     public NNParameters? Parameters { get; set; }
     [JsonField]
     public Dictionary<string, Type>? PairFieldType { get; set; }
-    [JsonField]
-    public DataViewSchema? DataViewSchema { get; set; }
 }

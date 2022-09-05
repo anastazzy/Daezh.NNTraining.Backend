@@ -3,27 +3,28 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
+using NNTraining.Domain;
 using NNTraining.Domain.Models;
 
 namespace NNTraining.App;
 
-public class ModelInteractionService: IModelInteractionService
+public class ModelInteractionService : IModelInteractionService
 {
     private readonly NNTrainingDbContext _dbContext;
-    private ITrainedModel? _trainedModel = null;
     private readonly IModelStorage _storage;
-    private readonly IModelTrainerFactory _modelTrainerFactory;
 
-    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage, IModelTrainerFactory modelTrainerFactory)
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage,
+        IModelTrainerFactory modelTrainerFactory)
     {
         _dbContext = dbContext;
         _storage = storage;
-        _modelTrainerFactory = modelTrainerFactory;
     }
+
     public async void Train(Guid id)
     {
         // 
         // 1 получить данные из бд для обучения модели
+        // 1.1 дозаполнить данные, если они предоставлены
         // 2 получить из фабрики тренер
         // 3 сохранить обчуенную модель
 
@@ -32,25 +33,43 @@ public class ModelInteractionService: IModelInteractionService
         {
             throw new ArgumentException("The model with current id not found");
         }
+
+        if (model.ModelStatus != ModelStatus.ReadyToTraining)
+        {
+            throw new ApplicationException(
+                "The model not ready for training. You must specify the file - train set for training.");
+        }
+
+        //save the field type and name to params of model
+        switch (model.Parameters)
+        {
+            case DataPredictionNnParameters dataPredictionNnParameters:
+            {
+                model.PairFieldType = await Helper.CompletionTheDictionaryAsync(
+                    dataPredictionNnParameters.NameOfTrainSet,
+                    dataPredictionNnParameters.Separators);
+                break;
+            }
+            default: throw new Exception();
+        }
+        await _dbContext.SaveChangesAsync();
+
+        //creation of dataViewSchema for save model in storage
+        var columns = Helper.CreateTheTextLoaderColumn(model.PairFieldType);
+        var data = new DataViewSchema.Builder();
+        foreach (var item in columns)
+        {
+            data.AddColumn(item.Name, new KeyDataViewType(item.GetType(), item.KeyCount.Count!.Value));
+        }
+
+        //creation the trainer and train model
         var factory = new ModelTrainerFactory();
         var trainer = factory.CreateTrainer(model.Parameters!);
-        var trainedModel = await trainer.Train();//var trainedMdel
-
-        model.DataViewSchema = null;//где сделать сохранение схемы и словаря в базу?
-        var dictionary = model.PairFieldType; //null
-        await _dbContext.SaveChangesAsync();
-        var data = new DataViewSchema.Builder();
-        
-        foreach (var field in model.PairFieldType)
-        {
-            data.AddColumn(field.Key, new KeyDataViewType());
-        }
-        
-        //мб сохранять саму схему, а не словарь 
+        var trainedModel = trainer.Train(model.PairFieldType);
 
         await _storage.SaveAsync(trainedModel, model, data.ToSchema());
-        
     }
+
     public object Predict(Guid id, object modelForPrediction)
     {
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
@@ -64,14 +83,15 @@ public class ModelInteractionService: IModelInteractionService
         // {
         //     ModelType.DataPrediction => new DataPredictionTrainedModel(modelForPrediction)
         // };
-        
+
     }
-    
-    
-    
-    
-    
-    // private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
+}
+
+
+
+
+
+// private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
     // {
     //     return T switch
     //     {
