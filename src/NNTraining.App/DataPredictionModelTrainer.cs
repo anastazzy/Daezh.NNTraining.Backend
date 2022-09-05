@@ -8,21 +8,19 @@ public class DataPredictionModelTrainer : IModelTrainer
 {
     private readonly MLContext _mlContext = new (0);
     private readonly string _nameOfTrainSet;
-    //private readonly Dictionary<string, Type> _dictionary;
+    //private readonly Dictionary<string, Type> _mapColumnNameColumnType;
     private readonly string _nameOfTargetColumn;
     private readonly bool _hasHeader;
     private readonly char[] _separators;
-    private readonly IDictionaryCreator _dictionaryCreator;
 
     public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn,
-        bool hasHeader, char[] separators, IDictionaryCreator dictionaryCreator) //"train-set.csv", "price", true, ';'
+        bool hasHeader, char[] separators) //"train-set.csv", "price", true, ';'
     {
         _nameOfTargetColumn = nameOfTargetColumn;
         _nameOfTrainSet = nameOfTrainSet;
-       // _dictionary = new Dictionary<string, Type>();
+        //_mapColumnNameColumnType = new Dictionary<string, Type>();
         _hasHeader = hasHeader;
         _separators = separators;
-        _dictionaryCreator = dictionaryCreator;
     }
     private IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn(Dictionary<string, Type> dictionary)
     {
@@ -31,7 +29,6 @@ public class DataPredictionModelTrainer : IModelTrainer
         
         for (var index = 0; index < keys.Length; index++)
         {
-            
             dictionary.TryGetValue(keys[index], out var typeOfColumn);
             if (typeOfColumn is null)
             {
@@ -58,53 +55,47 @@ public class DataPredictionModelTrainer : IModelTrainer
     // }
 
 
-    // private async Task CompletionTheDictionaryAsync(string fileName)
-    // {
-    //     using var streamReader = new StreamReader(fileName);
-    //     
-    //     //get headers
-    //     var lineWithHeaders = await streamReader.ReadLineAsync();
-    //     if (lineWithHeaders is null)
-    //     {
-    //         throw new ArgumentException("Headers is null");
-    //     }
-    //     var headers = lineWithHeaders.Split(_separators);
-    //
-    //     //get fields of first line
-    //     var firstRow = await streamReader.ReadLineAsync();
-    //     if (firstRow is null)
-    //     {
-    //         throw new ArgumentException("First row is null");
-    //     }
-    //     var fields = firstRow.Split(_separators);
-    //     
-    //     //added values in dictionary with headers, values and type of this values
-    //     for (var index = 0; index < fields.Length; index++)
-    //     {
-    //         var header = headers[index];
-    //         var field = fields[index];
-    //         
-    //         var fieldsType = float.TryParse(field, out _)
-    //              ? typeof(float)
-    //              : typeof(string);
-    //         try
-    //         {
-    //             _dictionary.TryAdd(header,fieldsType);
-    //         }
-    //         catch (Exception)
-    //         {
-    //             throw new ArgumentException("Key is null");
-    //         }
-    //     }
-    // }
-
-    // private Type GetTypeOfCurrentModel()
-    // {
-    //     var nameTypePair = _dictionary
-    //         .Select(x => (x.Key, x.Value));
-    //     
-    //     return MyTypeBuilder.CompileResultType(nameTypePair);
-    // }
+    private async Task<Dictionary<string, Type>> CompletionTheDictionaryAsync(string fileName)
+    {
+        var mapColumnNameColumnType = new Dictionary<string, Type>();
+        using var streamReader = new StreamReader(fileName);
+        
+        //get headers
+        var lineWithHeaders = await streamReader.ReadLineAsync();
+        if (lineWithHeaders is null)
+        {
+            throw new ArgumentException("Headers is null");
+        }
+        var headers = lineWithHeaders.Split(_separators);
+    
+        //get fields of first line
+        var firstRow = await streamReader.ReadLineAsync();
+        if (firstRow is null)
+        {
+            throw new ArgumentException("First row is null");
+        }
+        var fields = firstRow.Split(_separators);
+        
+        //added values in dictionary with headers, values and type of this values
+        for (var index = 0; index < fields.Length; index++)
+        {
+            var header = headers[index];
+            var field = fields[index];
+            
+            var fieldsType = float.TryParse(field, out _)
+                 ? typeof(float)
+                 : typeof(string);
+            try
+            {
+                mapColumnNameColumnType.TryAdd(header,fieldsType);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Key is null");
+            }
+        }
+        return mapColumnNameColumnType;
+    }
 
     private EstimatorChain<ColumnConcatenatingTransformer>? CreateTrainingPipeline(IEnumerable<TextLoader.Column> columns)
     {
@@ -150,19 +141,17 @@ public class DataPredictionModelTrainer : IModelTrainer
 
     public async Task<ITrainedModel> Train()
     {
-        await _dictionaryCreator.CompletionTheDictionaryAsync(_nameOfTrainSet, _separators);
-        var dictionary = _dictionaryCreator.GetDictionary();
-        //await CompletionTheDictionaryAsync(_nameOfTrainSet);
+        var mapColumnNameColumnType = await CompletionTheDictionaryAsync(_nameOfTrainSet);
         
-        var columns = CreateTheTextLoaderColumn(dictionary).ToArray();
+        var columns = CreateTheTextLoaderColumn(mapColumnNameColumnType).ToArray();
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
         {
             HasHeader = _hasHeader,
             Separators = _separators,
             Columns = columns
-
         });
+        
 
         // creation the training pipelines
         var dataProcessPipeline = CreateTrainingPipeline(columns);
@@ -181,7 +170,7 @@ public class DataPredictionModelTrainer : IModelTrainer
         return new DataPredictionTrainedModel(
             trainingPipeline.Fit(trainingView), 
             _mlContext, 
-            _dictionaryCreator.GetTypeOfCurrentFields(dictionary), 
+            Helper.GetTypeOfCurrentFields(mapColumnNameColumnType), 
             _nameOfTargetColumn);
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NNTraining.DataAccess.Migrations
 {
-    public partial class init : Migration
+    public partial class tableWithDictionary : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -44,7 +44,8 @@ namespace NNTraining.DataAccess.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     ModelType = table.Column<int>(type: "integer", nullable: false),
                     ModelStatus = table.Column<int>(type: "integer", nullable: false),
-                    Parameters = table.Column<string>(type: "text", nullable: false)
+                    Parameters = table.Column<string>(type: "text", nullable: false),
+                    PairFieldType = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

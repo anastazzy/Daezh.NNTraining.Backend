@@ -818,6 +818,7 @@
       },
       "NNTraining.Contracts/1.0.0": {
         "dependencies": {
+          "Microsoft.ML": "1.7.1",
           "Minio": "4.0.5",
           "NNTraining.Domain": "1.0.0"
         },

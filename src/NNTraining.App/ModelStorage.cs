@@ -5,39 +5,41 @@ using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Models;
+using File = System.IO.File;
 
 namespace NNTraining.App;
 
 public class ModelStorage: IModelStorage// save model in minio?
 {
-    private readonly ITransformer _trainedModel;
-    private readonly DataViewSchema _dataView;
     private readonly MLContext _mlContext;
     private readonly NNTrainingDbContext _dbContext;
     private readonly IFileStorage _storage;
+    private readonly IHashDataForModel _hashDataForModel;
 
     public ModelStorage(
-        MLContext mlContext, 
-        ITransformer trainedModel, 
-        DataViewSchema dataView,
+        MLContext mlContext,
         NNTrainingDbContext dbContext,
-        IFileStorage storage)
+        IFileStorage storage, 
+        IHashDataForModel hashDataForModel)
     {
-        _trainedModel = trainedModel;
-        _dataView = dataView;
         _mlContext = mlContext;
         _dbContext = dbContext;
         _storage = storage;
+        _hashDataForModel = hashDataForModel;
     }
-    public async Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model)
+    public async Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataView)
     {
         var fileName = model.Name + ".zip";
-        _mlContext.Model.Save(trainedModel as ITransformer, _dataView, fileName);/////? было _trainedModel
-        var idFile = await _storage.UploadAsync(model.Name!, ".zip", 
-            new FileStream(fileName,FileMode.Open), 
+        var contentType = "application/zip";
+        _mlContext.Model.Save(trainedModel.GetTransformer(), dataView, fileName);
+        await using var stream = File.OpenRead(fileName);
+        var idFile = await _storage.UploadAsync(model.Name!, contentType,
+            //сделать сохранение в бд, а не в upload???/ что имелось ввиду
+            stream, 
             model.ModelType, 
             model.Id,
             FileType.SavedModelInStorage);
+
         return idFile;
     }
 
@@ -46,19 +48,12 @@ public class ModelStorage: IModelStorage// save model in minio?
         var tempFileNameOfModel = "temp.zip";
         var a = await _storage.GetAsync(id, bucketName, tempFileNameOfModel);
         var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
-        var dictionary = _dbContext.ModelFieldNameTypes.FirstOrDefault(x => x.IdModel == id);
-        if (dictionary?.PairFieldType is null)
-        {
-            throw new ArgumentException("The dictionary was not found");
-        }
-        var dictionaryCreator = new DictionaryCreator();
-        var type = dictionaryCreator.GetTypeOfCurrentFields(dictionary.PairFieldType);
-
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
-        if (model is null)
+        if (model?.PairFieldType is null)
         {
-            throw new  ArgumentException("The model was not found");
+            throw new ArgumentException("The model was not found");
         }
+        var type = _hashDataForModel.GetTypeOfCurrentFields(model.PairFieldType);
 
         var targetColumn = "";
 
@@ -89,6 +84,5 @@ public class ModelStorage: IModelStorage// save model in minio?
                 new DataPredictionTrainedModel(trainedModelAsTransformer, _mlContext, type, targetColumn!),
             _ => throw new Exception()
         };
-        return trainedModel as ITrainedModel;
     }
 }

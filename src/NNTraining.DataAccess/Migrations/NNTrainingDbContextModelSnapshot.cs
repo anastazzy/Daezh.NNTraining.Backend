@@ -60,6 +60,9 @@ namespace NNTraining.DataAccess.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<string>("PairFieldType")
+                        .HasColumnType("text");
+
                     b.Property<string>("Parameters")
                         .IsRequired()
                         .HasColumnType("text");

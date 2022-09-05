@@ -5,7 +5,7 @@ namespace NNTraining.App;
 
 public class ModelTrainerFactory : IModelTrainerFactory
 {
-    public IModelTrainer CreateTrainer(NNParameters parameters, IDictionaryCreator dictionaryCreator)
+    public IModelTrainer CreateTrainer(NNParameters parameters)
     {
         switch (parameters)
         {
@@ -14,7 +14,7 @@ public class ModelTrainerFactory : IModelTrainerFactory
                     dataPredictionNnParameters.NameOfTrainSet!, 
                     dataPredictionNnParameters.NameOfTargetColumn!,
                     dataPredictionNnParameters.HasHeader,
-                    dataPredictionNnParameters.Separators!, dictionaryCreator);
+                    dataPredictionNnParameters.Separators!);
             
             default: throw new Exception();
         }

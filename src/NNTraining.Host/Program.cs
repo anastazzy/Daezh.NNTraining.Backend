@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.ML;
 using Minio;
 using NNTraining.App;
 using NNTraining.Contracts;
@@ -13,13 +14,13 @@ builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
 
 builder.Services.AddSingleton<IFileStorage, FileStorage>();
+builder.Services.AddSingleton<MLContext>();
 builder.Services.AddScoped<IModelStorage, ModelStorage>();
 
 builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
 
-builder.Services.AddScoped<IDictionaryCreator, DictionaryCreator>();
 builder.Services.AddScoped<ModelInteractionService, ModelInteractionService>();
-builder.Services.AddScoped<IModelTrainerFactory, ModelTrainerFactory>();
+builder.Services.AddSingleton<IModelTrainerFactory, ModelTrainerFactory>();
 
 // Add services to the container.
 

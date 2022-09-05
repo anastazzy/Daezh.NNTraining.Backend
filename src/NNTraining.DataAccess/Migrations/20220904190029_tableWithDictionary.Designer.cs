@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NNTraining.DataAccess.Migrations
 {
     [DbContext(typeof(NNTrainingDbContext))]
-    [Migration("20220901081211_init")]
-    partial class init
+    [Migration("20220904190029_tableWithDictionary")]
+    partial class tableWithDictionary
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -60,6 +60,9 @@ namespace NNTraining.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PairFieldType")
                         .HasColumnType("text");
 
                     b.Property<string>("Parameters")

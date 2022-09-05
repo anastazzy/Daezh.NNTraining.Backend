@@ -1,4 +1,7 @@
-﻿using NNTraining.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain.Models;
 
@@ -9,32 +12,43 @@ public class ModelInteractionService: IModelInteractionService
     private readonly NNTrainingDbContext _dbContext;
     private ITrainedModel? _trainedModel = null;
     private readonly IModelStorage _storage;
+    private readonly IModelTrainerFactory _modelTrainerFactory;
 
-    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage)
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage, IModelTrainerFactory modelTrainerFactory)
     {
         _dbContext = dbContext;
         _storage = storage;
+        _modelTrainerFactory = modelTrainerFactory;
     }
     public async void Train(Guid id)
     {
+        // 
+        // 1 получить данные из бд для обучения модели
+        // 2 получить из фабрики тренер
+        // 3 сохранить обчуенную модель
+
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model is null)
         {
             throw new ArgumentException("The model with current id not found");
         }
-        var dictionaryCreator = new DictionaryCreator();
         var factory = new ModelTrainerFactory();
-        var trainer = factory.CreateTrainer(model.Parameters, dictionaryCreator);
-        _trainedModel = await trainer.Train();
+        var trainer = factory.CreateTrainer(model.Parameters!);
+        var trainedModel = await trainer.Train();//var trainedMdel
 
-        var dictionary = dictionaryCreator.GetDictionary();
-        await _dbContext.ModelFieldNameTypes.AddAsync(new ModelFieldNameType()
+        model.DataViewSchema = null;//где сделать сохранение схемы и словаря в базу?
+        var dictionary = model.PairFieldType; //null
+        await _dbContext.SaveChangesAsync();
+        var data = new DataViewSchema.Builder();
+        
+        foreach (var field in model.PairFieldType)
         {
-            IdModel = id,
-            PairFieldType = dictionary
-        });
+            data.AddColumn(field.Key, new KeyDataViewType());
+        }
+        
+        //мб сохранять саму схему, а не словарь 
 
-        await _storage.SaveAsync(_trainedModel, model);
+        await _storage.SaveAsync(trainedModel, model, data.ToSchema());
         
     }
     public object Predict(Guid id, object modelForPrediction)
@@ -64,21 +78,8 @@ public class ModelInteractionService: IModelInteractionService
     //         ModelType.DataPrediction => new DataPredictionNNParameters(),
     //     };
     // }
-    
-    //
-    // public Task CreateTheDataPrediction()
-    // {
-    //     return _creator.Create();
-    // }
-    //
 
     // public Dictionary<string,string> GetSchemaOfModel()
     // {
     //     return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
     // }
-    //
-    // public object UsingModel(Dictionary<string,string> inputModelForUsing)
-    // {
-    //     return _creator.UsingModel(inputModelForUsing);
-    // }
-}

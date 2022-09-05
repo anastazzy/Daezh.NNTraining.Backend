@@ -107,4 +107,9 @@ public class DataPredictionTrainedModel: ITrainedModel
         
         return result.Score;
     }
+
+    public ITransformer GetTransformer()
+    {
+        return _trainedModel;
+    }
 }
