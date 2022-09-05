@@ -2,5 +2,6 @@
 
 public interface IModelTrainer
 {
-    public ITrainedModel Train();
+    // public Task<ITrainedModel> Train();
+    public ITrainedModel Train(Dictionary<string, Type> mapColumnNameColumnType);
 }

@@ -1,6 +1,6 @@
 ﻿namespace NNTraining.Domain.Dto;
 
-public class DataPredictionInputDto : ModelInputDto<DataPredictionNNParameters>
+public class DataPredictionInputDto : ModelInputDto<DataPredictionNnParameters>
 {
     
 }

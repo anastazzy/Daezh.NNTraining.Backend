@@ -10,36 +10,36 @@ namespace NNTraining.Api.Controllers;
 [Route("api/[controller]")]
 public class CrudModelController
 {
-    private readonly ICrudForModelService _modelService;
+    private readonly IBaseModelService _modelService;
 
-    public CrudModelController(ICrudForModelService modelService)
+    public CrudModelController(IBaseModelService modelService)
     {
         _modelService = modelService;
     }
 
     [HttpPost]
-    public Task<long> CreateModelAsync(DataPredictionInputDto modelDto)
+    public Task<Guid> SaveModelAsync(DataPredictionInputDto modelDto)
     {
-        return _modelService.SaveAsync(modelDto);
+        return _modelService.SaveDataPredictionModelAsync(modelDto);
     }
     
-    [HttpPost("createDataPrediction")]
-    public Task CreateDataPredictModel()
-    {
-        return _modelService.CreateTheDataPrediction();
-    }
+    // [HttpPost("createDataPrediction")]
+    // public Task CreateDataPredictModel()
+    // {
+    //     return _modelService.CreateTheDataPrediction();
+    // }
     
-    [HttpGet("dataPredictionSchema")]
-    public Dictionary<string, string> GetSchemaOfModel()
-    {
-        return _modelService.GetSchemaOfModel();
-    }
+    // [HttpGet("dataPredictionSchema")]
+    // public Dictionary<string, string> GetSchemaOfModel()
+    // {
+    //     return _modelService.GetSchemaOfModel();
+    // }
     
-    [HttpPost("dataPredictionModel")]
-    public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
-    {
-        return _modelService.UsingModel(inputModelForUsing);
-    }
+    // [HttpPost("dataPredictionModel")]
+    // public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
+    // {
+    //     return _modelService.UsingModel(inputModelForUsing);
+    // }
 
     [HttpGet]
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()
@@ -48,13 +48,13 @@ public class CrudModelController
     }
 
     [HttpPut("id")]
-    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, long id)
+    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, Guid id)
     {
         return _modelService.UpdateModelAsync(id, modelDto);
     }
 
     [HttpDelete("id")]
-    public Task<bool> DeleteModelAsync(long id)
+    public Task<bool> DeleteModelAsync(Guid id)
     {
         return _modelService.DeleteModelAsync(id);
     }

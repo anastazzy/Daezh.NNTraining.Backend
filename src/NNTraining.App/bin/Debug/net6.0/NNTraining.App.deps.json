@@ -789,6 +789,7 @@
       "System.ValueTuple/4.4.0": {},
       "NNTraining.Contracts/1.0.0": {
         "dependencies": {
+          "Microsoft.ML": "1.7.1",
           "Minio": "4.0.5",
           "NNTraining.Domain": "1.0.0"
         },
@@ -809,7 +810,8 @@
       },
       "NNTraining.Domain/1.0.0": {
         "dependencies": {
-          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1",
+          "Microsoft.ML.DataView": "1.7.1"
         },
         "runtime": {
           "NNTraining.Domain.dll": {}

@@ -1,9 +1,40 @@
-﻿namespace NNTraining.Host;
+﻿using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
+using NNTraining.Contracts;
 
-public class TrainedModel
+namespace NNTraining.App;
+
+public class DataPredictionTrainedModel: ITrainedModel
 {
-     public object Use(Dictionary<string,string> inputModelForUsing)
+    private readonly TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>> _trainedModel;
+    private readonly MLContext _mlContext;
+    private readonly Type _type;
+    private readonly string _nameOfTargetColumn;
+    
+    public DataPredictionTrainedModel(
+        TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>> trainedModel,
+        MLContext mlContext,
+        Type type,
+        string nameOfTargetColumn)
     {
+        _trainedModel = trainedModel;
+        _mlContext = mlContext;
+        _type = type;
+        _nameOfTargetColumn = nameOfTargetColumn;
+    }
+    public object Predict(object data)
+    {
+        Dictionary<string, string> inputModelForUsing;
+        try
+        {
+            inputModelForUsing = (Dictionary<string, string>) data;
+        }
+        catch (InvalidCastException e)
+        {
+            throw new InvalidCastException("The data not be able passing in dictionary",e);
+        }
+
         if (_type is null)
         {
             throw new ArgumentException("The type of model is null");
@@ -37,10 +68,10 @@ public class TrainedModel
                 else
                 {
                     throw new ArgumentException("Error with parse of input value to Single");
-                };
+                }
             }
         }
-
+        
         var method = typeof(ModelOperationsCatalog).GetMethod(nameof(ModelOperationsCatalog.CreatePredictionEngine),
             new []
             {
@@ -49,12 +80,12 @@ public class TrainedModel
                 typeof(SchemaDefinition),
                 typeof(SchemaDefinition),
             });
-        var generic = method!.MakeGenericMethod(_type!, typeof(PredictionResult));
+        var generic = method!.MakeGenericMethod(_type, typeof(PredictionResult));
         if (_trainedModel is null)
         {
             throw new ArgumentException("The Model does not exist at the current moment");
         }
-        dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null, null });
+        dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null!, null! })!;
         if (predictor is null)
         {
             throw new ArgumentException("Error with invoke the generis function");
@@ -73,7 +104,12 @@ public class TrainedModel
             throw new ArgumentException("Error with invoke the generis function");
         }
         var result = (PredictionResult) res;
-       
+        
         return result.Score;
+    }
+
+    public ITransformer GetTransformer()
+    {
+        return _trainedModel;
     }
 }

@@ -2,6 +2,7 @@
 using Minio.DataModel;
 using NNTraining.Contracts;
 using NNTraining.Domain;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.Api.Controllers;
 
@@ -18,14 +19,15 @@ public class FileStorageController
     }
     
     [HttpPost]
-    public async Task UploadFile(IFormFile formFile)
+    public async Task<Guid> UploadFile(IFormFile formFile, ModelType bucketName, Guid idModel, FileType type)
     {
-        await _storage.UploadAsync(formFile.FileName, formFile.ContentType, formFile.OpenReadStream(), formFile.Length);
+        return await _storage.UploadAsync(
+            formFile.FileName, formFile.ContentType, formFile.OpenReadStream(), bucketName, idModel, type);
     }
     
     [HttpGet]
-    public async Task GetFile(string fileName)
+    public async Task GetFile(Guid fileName,  ModelType bucketName)
     {
-        await _storage.GetAsync(fileName);
+        await _storage.GetAsync(fileName, bucketName);
     }
 }
