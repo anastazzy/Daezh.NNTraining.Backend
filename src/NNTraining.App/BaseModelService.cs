@@ -11,14 +11,9 @@ public class BaseModelService : IBaseModelService
 {
     private readonly NNTrainingDbContext _dbContext;
 
-    private readonly IFileStorage _storage;
-
-    private const string BucketDataPrediction = "dataprediction";
-
-    public BaseModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
+    public BaseModelService(NNTrainingDbContext dbContext)
     {
         _dbContext = dbContext;
-        _storage = storage;
     }
 
     public async Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
@@ -43,10 +38,10 @@ public class BaseModelService : IBaseModelService
         return model.Id;
     }
     
-    public async Task<bool> UpdateFileForModelAsync(Guid idModel, Guid idFile)
+    public async Task<bool> SetNameOfTrainSetAsync(Guid idModel, Guid idFile)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
-        if (model is null)
+        if (model?.Parameters is null)
         {
             throw new Exception("Model update ERROR");
         }
@@ -71,10 +66,12 @@ public class BaseModelService : IBaseModelService
     public async Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
-        if (model is null) throw new Exception("Model update ERROR");
+        if (model is null)
+        {
+            throw new Exception("Model update ERROR");
+        }
         model.Name = modelDto.Name;
-        //model.Parameters = modelDto.Parameters;
-        model.ModelType = ModelType.DataPrediction;
+        model.Parameters = modelDto.Parameters;
         await _dbContext.SaveChangesAsync();
         return true;
     }
@@ -84,7 +81,10 @@ public class BaseModelService : IBaseModelService
     public async Task<bool> DeleteModelAsync(Guid id)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
-        if (model is null) throw new Exception("Delete model ERROR");
+        if (model is null)
+        {
+            throw new Exception("Delete model ERROR");
+        }
         _dbContext.Models.Remove(model);
         await _dbContext.SaveChangesAsync();
         return true;

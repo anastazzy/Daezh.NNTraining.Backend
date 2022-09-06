@@ -13,8 +13,7 @@ public class ModelInteractionService : IModelInteractionService
     private readonly NNTrainingDbContext _dbContext;
     private readonly IModelStorage _storage;
 
-    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage,
-        IModelTrainerFactory modelTrainerFactory)
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage)
     {
         _dbContext = dbContext;
         _storage = storage;
@@ -45,7 +44,7 @@ public class ModelInteractionService : IModelInteractionService
         {
             case DataPredictionNnParameters dataPredictionNnParameters:
             {
-                model.PairFieldType = await Helper.CompletionTheDictionaryAsync(
+                model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
                     dataPredictionNnParameters.NameOfTrainSet,
                     dataPredictionNnParameters.Separators);
                 break;
@@ -55,7 +54,7 @@ public class ModelInteractionService : IModelInteractionService
         await _dbContext.SaveChangesAsync();
 
         //creation of dataViewSchema for save model in storage
-        var columns = Helper.CreateTheTextLoaderColumn(model.PairFieldType);
+        var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
         var data = new DataViewSchema.Builder();
         foreach (var item in columns)
         {

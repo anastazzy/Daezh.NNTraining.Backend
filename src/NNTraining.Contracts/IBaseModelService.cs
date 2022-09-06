@@ -7,9 +7,10 @@ namespace NNTraining.Contracts;
 
 public interface IBaseModelService
 {
-    public Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto);
-    public Task<ModelOutputDto[]> GetListOfModelsAsync();
-    public Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto);
-    public Task<bool> DeleteModelAsync(Guid id);
-    public IEnumerable<TypeOutputDto> GetModelTypes();
+    Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto);
+    Task<bool> SetNameOfTrainSetAsync(Guid idModel, Guid idFile);
+    Task<ModelOutputDto[]> GetListOfModelsAsync();
+    Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto);
+    Task<bool> DeleteModelAsync(Guid id);
+    IEnumerable<TypeOutputDto> GetModelTypes();
 }

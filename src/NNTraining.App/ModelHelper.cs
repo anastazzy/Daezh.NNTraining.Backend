@@ -2,7 +2,7 @@
 
 namespace NNTraining.App;
 
-public static class Helper
+public static class ModelHelper
 {
     public static Type GetTypeOfCurrentFields(Dictionary<string, Type> dictionary)
     {

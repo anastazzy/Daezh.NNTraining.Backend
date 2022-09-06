@@ -16,10 +16,6 @@ public class FileStorage: IFileStorage
     private readonly MinioClient _minio;
     private readonly NNTrainingDbContext _dbContext;
 
-    //private const string Location = "datasets";
-    //
-    
-//"dataprediction"
     public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider)
     {
         _minio = new MinioClient()
@@ -80,37 +76,12 @@ public class FileStorage: IFileStorage
         
         if (result is null)
         {
-            throw new Exception("null blin");
+            throw new ArgumentException("The file with current name ");
         }
 
         return result;
     }
 
-    /// <summary>
-
-    // private void SaveTrainSet(Guid idModel, string fileName, long size)
-    // {
-    //     
-    // }
-    // private void SaveModel(Guid idModel, string fileName, long size)
-    // {
-    //     var file = new File
-    //     {
-    //         OriginalName = fileName,
-    //         Extension = ".zip", //get extension from string
-    //         Size = 0
-    //     };
-    //     _dbContext.Files.Add(file);
-    //     var idFile = file.Id;
-    //     _dbContext.ModelFiles.Add(new ModelFile()
-    //     {
-    //         FileId = idFile,
-    //         ModelId = idModel
-    //     });
-    // }
-
-
-    
     private async Task CreateBucketAsync(ModelType bucketName, FileType location)
     {
         try

@@ -113,3 +113,7 @@ public class DataPredictionTrainedModel: ITrainedModel
         return _trainedModel;
     }
 }
+class PredictionResult
+{
+    public float Score { get; init; }
+}
