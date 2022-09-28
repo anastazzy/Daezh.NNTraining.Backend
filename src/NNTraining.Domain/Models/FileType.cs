@@ -4,5 +4,5 @@ public enum FileType
 {
     TrainSet,
     PredictSet,
-    SaveModelInStorage
+    Model
 }

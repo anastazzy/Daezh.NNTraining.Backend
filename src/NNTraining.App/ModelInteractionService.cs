@@ -8,10 +8,13 @@ namespace NNTraining.Host;
 public class ModelInteractionService: IModelInteractionService
 {
     private readonly NNTrainingDbContext _dbContext;
-    private ITrainedModel? _trainedModel = null;
-    public ModelInteractionService(NNTrainingDbContext dbContext)
+    private ITrainedModel? _trainedModel;
+    private readonly IModelStorage _modelStorage;
+
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage modelStorage)
     {
         _dbContext = dbContext;
+        _modelStorage = modelStorage;
     }
     public async void Train(Guid id)
     {
@@ -23,6 +26,7 @@ public class ModelInteractionService: IModelInteractionService
         var factory = new ModelTrainerFactory();
         var trainer = factory.CreateTrainer(model.Parameters);
         _trainedModel = await trainer.Train();
+        await _modelStorage.SaveAsync(_trainedModel, model);
         //save in Db or minio with modelStorage
         //fileNae = model.name
     }
