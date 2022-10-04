@@ -810,8 +810,7 @@
       },
       "NNTraining.Domain/1.0.0": {
         "dependencies": {
-          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1",
-          "Microsoft.ML.DataView": "1.7.1"
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
         },
         "runtime": {
           "NNTraining.Domain.dll": {}

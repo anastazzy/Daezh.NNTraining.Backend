@@ -8,8 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "NNTraining.Domain/1.0.0": {
         "dependencies": {
-          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1",
-          "Microsoft.ML.DataView": "1.7.1"
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
         },
         "runtime": {
           "NNTraining.Domain.dll": {}
@@ -22,21 +21,7 @@
             "fileVersion": "1.0.0.0"
           }
         }
-      },
-      "Microsoft.ML.DataView/1.7.1": {
-        "dependencies": {
-          "System.Collections.Immutable": "1.5.0",
-          "System.Memory": "4.5.3"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.ML.DataView.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.700.122.15804"
-          }
-        }
-      },
-      "System.Collections.Immutable/1.5.0": {},
-      "System.Memory/4.5.3": {}
+      }
     }
   },
   "libraries": {
@@ -51,27 +36,6 @@
       "sha512": "sha512-HJgBGFqYUe1yaHbCiNWmFz1ZTVEwYo/RxK3KSPuqCsgbaJl+U2J8TEIjz2bi4TM2sK+y3LecYUEztMeLHTnOMA==",
       "path": "innofactor.efcorejsonvalueconverter.attributes/2.0.1",
       "hashPath": "innofactor.efcorejsonvalueconverter.attributes.2.0.1.nupkg.sha512"
-    },
-    "Microsoft.ML.DataView/1.7.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-j7BwSzNJUjxI8aSkzv4yCi0/kem1mYFVWiuLQcG0vcMEs3BNqvkunt+qdRmUMYuPY7/9AK22a70laAxjcJ2GGA==",
-      "path": "microsoft.ml.dataview/1.7.1",
-      "hashPath": "microsoft.ml.dataview.1.7.1.nupkg.sha512"
-    },
-    "System.Collections.Immutable/1.5.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-EXKiDFsChZW0RjrZ4FYHu9aW6+P4MCgEDCklsVseRfhoO0F+dXeMSsMRAlVXIo06kGJ/zv+2w1a2uc2+kxxSaQ==",
-      "path": "system.collections.immutable/1.5.0",
-      "hashPath": "system.collections.immutable.1.5.0.nupkg.sha512"
-    },
-    "System.Memory/4.5.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA==",
-      "path": "system.memory/4.5.3",
-      "hashPath": "system.memory.4.5.3.nupkg.sha512"
     }
   }
 }

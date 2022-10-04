@@ -11,12 +11,13 @@ namespace NNTraining.App;
 public class ModelInteractionService : IModelInteractionService
 {
     private readonly NNTrainingDbContext _dbContext;
-    private readonly IModelStorage _storage;
+    private ITrainedModel? _trainedModel;
+    private readonly IModelStorage _modelStorage;
 
-    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage storage)
+    public ModelInteractionService(NNTrainingDbContext dbContext, IModelStorage modelStorage)
     {
         _dbContext = dbContext;
-        _storage = storage;
+        _modelStorage = modelStorage;
     }
 
     public async void Train(Guid id)
@@ -32,6 +33,8 @@ public class ModelInteractionService : IModelInteractionService
         {
             throw new ArgumentException("The model with current id not found");
         }
+       
+    
 
         if (model.ModelStatus != ModelStatus.ReadyToTraining)
         {
@@ -64,9 +67,12 @@ public class ModelInteractionService : IModelInteractionService
         //creation the trainer and train model
         var factory = new ModelTrainerFactory();
         var trainer = factory.CreateTrainer(model.Parameters!);
-        var trainedModel = trainer.Train(model.PairFieldType);
-
-        await _storage.SaveAsync(trainedModel, model, data.ToSchema());
+        _trainedModel = trainer.Train(model.PairFieldType);
+        //save in Db or minio with modelStorage
+        //fileNae = model.name
+        
+        await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
+        
     }
 
     public object Predict(Guid id, object modelForPrediction)

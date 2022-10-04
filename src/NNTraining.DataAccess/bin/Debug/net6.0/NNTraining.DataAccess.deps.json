@@ -200,18 +200,6 @@
           }
         }
       },
-      "Microsoft.ML.DataView/1.7.1": {
-        "dependencies": {
-          "System.Collections.Immutable": "6.0.0",
-          "System.Memory": "4.5.3"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.ML.DataView.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.700.122.15804"
-          }
-        }
-      },
       "Newtonsoft.Json/13.0.1": {
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {
@@ -255,12 +243,10 @@
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         }
       },
-      "System.Memory/4.5.3": {},
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "NNTraining.Domain/1.0.0": {
         "dependencies": {
-          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1",
-          "Microsoft.ML.DataView": "1.7.1"
+          "Innofactor.EfCoreJsonValueConverter.Attributes": "2.0.1"
         },
         "runtime": {
           "NNTraining.Domain.dll": {}
@@ -393,13 +379,6 @@
       "path": "microsoft.extensions.primitives/6.0.0",
       "hashPath": "microsoft.extensions.primitives.6.0.0.nupkg.sha512"
     },
-    "Microsoft.ML.DataView/1.7.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-j7BwSzNJUjxI8aSkzv4yCi0/kem1mYFVWiuLQcG0vcMEs3BNqvkunt+qdRmUMYuPY7/9AK22a70laAxjcJ2GGA==",
-      "path": "microsoft.ml.dataview/1.7.1",
-      "hashPath": "microsoft.ml.dataview.1.7.1.nupkg.sha512"
-    },
     "Newtonsoft.Json/13.0.1": {
       "type": "package",
       "serviceable": true,
@@ -434,13 +413,6 @@
       "sha512": "sha512-frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
       "path": "system.diagnostics.diagnosticsource/6.0.0",
       "hashPath": "system.diagnostics.diagnosticsource.6.0.0.nupkg.sha512"
-    },
-    "System.Memory/4.5.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA==",
-      "path": "system.memory/4.5.3",
-      "hashPath": "system.memory.4.5.3.nupkg.sha512"
     },
     "System.Runtime.CompilerServices.Unsafe/6.0.0": {
       "type": "package",

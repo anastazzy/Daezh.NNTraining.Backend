@@ -1,19 +1,18 @@
-﻿using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.Trainers;
+using Microsoft.ML;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
-using NNTraining.Domain;
 using NNTraining.Domain.Models;
-using File = System.IO.File;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
+using NNTraining.Domain;
 
 namespace NNTraining.App;
 
 public class ModelStorage: IModelStorage// save model in minio?
 {
     private readonly MLContext _mlContext;
-    private readonly NNTrainingDbContext _dbContext;
     private readonly IFileStorage _storage;
+    private readonly NNTrainingDbContext _dbContext;
 
     public ModelStorage(
         MLContext mlContext,
@@ -21,21 +20,30 @@ public class ModelStorage: IModelStorage// save model in minio?
         IFileStorage storage)
     {
         _mlContext = mlContext;
-        _dbContext = dbContext;
         _storage = storage;
+        _dbContext = dbContext;
     }
-    public async Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataView)
+    
+    public Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
     {
-        var fileName = model.Name + ".zip";
         var contentType = "application/zip";
-        _mlContext.Model.Save(trainedModel.GetTransformer(), dataView, fileName);
-        await using var stream = File.OpenRead(fileName);
-        var idFile = await _storage.UploadAsync(model.Name!, contentType,
-            stream, 
-            model.ModelType, 
+        var transformer = trainedModel as ITransformer;
+        if (transformer is null)
+        {
+            return new Task<Guid>(() => Guid.Empty);
+        }
+        var idFile = Guid.NewGuid();// reflection in Model? - idFileInStorage
+        var fileName = idFile + ".zip";
+        _mlContext.Model.Save(transformer, dataViewSchema, fileName);
+        using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
+        return _storage.UploadAsync(
+            fileName,
+            contentType,
+            stream,
+            model.ModelType,
             model.Id,
-            FileType.SavedModelInStorage);
-        return idFile;
+            FileType.Model
+        );
     }
 
     public async Task<ITrainedModel> GetAsync(Guid id, ModelType bucketName)

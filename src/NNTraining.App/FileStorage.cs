@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using System.Transactions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel;
@@ -16,7 +17,11 @@ public class FileStorage: IFileStorage
     private readonly MinioClient _minio;
     private readonly NNTrainingDbContext _dbContext;
 
-    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider)
+    private const string Location = "datasets";
+    //location = fileType
+    //"dataprediction" - modelType - bucket
+
+    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider, NNTrainingDbContext dbContext)
     {
         _minio = new MinioClient()
             .WithEndpoint(options.Value.Endpoint)
@@ -34,13 +39,53 @@ public class FileStorage: IFileStorage
         ModelType modelType, Guid idModel, FileType fileType)
     {
         var size = fileStream.Length;
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        switch (fileType)
+        {
+            case FileType.TrainSet :
+                SaveTrainSet(idModel, fileName, size);
+                break;
+            case FileType.Model :
+                SaveModel(idModel, fileName, size);
+                break;
+        };
         var newFileName = Guid.NewGuid();
+        await transaction.CommitAsync();
+        await _dbContext.SaveChangesAsync(); 
+        await CreateBucketAsync(modelType, FileType.PredictSet);      
+        await _minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(modelType.ToString())
+            .WithStreamData(fileStream)
+            .WithObjectSize(size)
+            .WithObject(newFileName.ToString())
+            .WithContentType(contentType));
+        
+        return newFileName;
+    }
+
+    private void SaveTrainSet(Guid idModel, string fileName, long size)
+    {
         var file = new File
         {
             OriginalName = fileName,
             Extension = fileName[fileName.IndexOf('.')..], //get extension from string
-            Size = size,
-            FileType = fileType
+            Size = size
+        };
+        _dbContext.Files.Add(file);
+        var idFile = file.Id;
+        _dbContext.ModelFiles.Add(new ModelFile()
+        {
+            FileId = idFile,
+            ModelId = idModel
+        });
+    }
+    private async void SaveModel(Guid idModel, string fileName, long size)
+    {
+        var file = new File
+        {
+            OriginalName = fileName,
+            Extension = ".zip", 
+            Size = size
         };
         _dbContext.Files.Add(file);
         var idFile = file.Id;
@@ -50,15 +95,6 @@ public class FileStorage: IFileStorage
             ModelId = idModel
         });
         await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
-        
-        await CreateBucketAsync(modelType, fileType);      
-        await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(modelType.ToString())
-            .WithStreamData(fileStream)
-            .WithObjectSize(size)
-            .WithObject(newFileName.ToString())
-            .WithContentType(contentType));
-        return newFileName;
     }
 
     public async Task<ObjectStat> GetAsync(Guid fileName, ModelType bucketName, string outputFileName = "temp.csv")
@@ -76,7 +112,7 @@ public class FileStorage: IFileStorage
         
         if (result is null)
         {
-            throw new ArgumentException("The file with current name ");
+            throw new ArgumentException(nameof(result));
         }
 
         return result;
@@ -91,7 +127,7 @@ public class FileStorage: IFileStorage
             if (!found)
             {
                 await _minio.MakeBucketAsync(new MakeBucketArgs()
-                    .WithBucket(bucketName.ToString())
+                        .WithBucket(bucketName.ToString())
                     .WithLocation(location.ToString()));
             }
         }
