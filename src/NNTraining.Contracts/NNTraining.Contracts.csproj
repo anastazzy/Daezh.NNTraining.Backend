@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.ML" Version="1.7.1" />
       <PackageReference Include="Minio" Version="4.0.5" />
     </ItemGroup>
 

@@ -1,27 +1,36 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.ML;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain.Models;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
+using NNTraining.Contracts;
+using NNTraining.DataAccess;
+using NNTraining.Domain;
+using NNTraining.Domain.Models;
+using File = System.IO.File;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class ModelStorage: IModelStorage// save model in minio?
 {
-    private readonly DataViewSchema _dataView;
     private readonly MLContext _mlContext;
     private readonly IFileStorage _storage;
+    private readonly NNTrainingDbContext _dbContext;
 
     public ModelStorage(
-        MLContext mlContext,  
-        DataViewSchema dataView,
+        MLContext mlContext,
+        NNTrainingDbContext dbContext,
         IFileStorage storage)
     {
-        _dataView = dataView;
         _mlContext = mlContext;
         _storage = storage;
+        _dbContext = dbContext;
     }
-    public Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model)
+    
+    public Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
     {
         var contentType = "application/zip";
         var transformer = trainedModel as ITransformer;
@@ -31,21 +40,58 @@ public class ModelStorage: IModelStorage// save model in minio?
         }
         var idFile = Guid.NewGuid();// reflection in Model? - idFileInStorage
         var fileName = idFile + ".zip";
-        _mlContext.Model.Save(transformer, _dataView, fileName);
+        _mlContext.Model.Save(transformer, dataViewSchema, fileName);
         using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
         return _storage.UploadAsync(
             fileName,
             contentType,
             stream,
-            stream.Length,
-            model.ModelType.ToString(),
+            model.ModelType,
             model.Id,
             FileType.Model
         );
     }
 
-    public Task<ITrainedModel> GetAsync(Guid id)
+    public async Task<ITrainedModel> GetAsync(Guid id, ModelType bucketName)
     {
-        _storage.GetAsync(id,)
+        var tempFileNameOfModel = "temp.zip";
+        var a = await _storage.GetAsync(id, bucketName, tempFileNameOfModel);
+        var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
+        var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
+        if (model?.PairFieldType is null)
+        {
+            throw new ArgumentException("The model or it`s field name type was not found");
+        }
+        var type = Helper.GetTypeOfCurrentFields(model.PairFieldType);
+
+        var targetColumn = "";
+
+        switch (model.ModelType)
+        {
+            case ModelType.DataPrediction:
+            {
+                var parameters = model.Parameters as DataPredictionNnParameters;
+                if (parameters is null)
+                {
+                    throw new ArgumentException("Error of conversion parameters");
+                }
+                targetColumn = parameters.NameOfTargetColumn;
+                break;
+            }
+                
+        }
+
+        var trainedModelAsTransformer =
+            trainedModel as TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>;
+        if (trainedModelAsTransformer is null)
+        {
+            throw new ArgumentException("Error of conversion to transformer");
+        }
+        return bucketName switch
+        {
+            ModelType.DataPrediction =>
+                new DataPredictionTrainedModel(trainedModelAsTransformer, _mlContext, type, targetColumn!),
+            _ => throw new Exception()
+        };
     }
 }

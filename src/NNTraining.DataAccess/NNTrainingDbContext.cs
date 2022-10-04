@@ -21,6 +21,9 @@ public class NNTrainingDbContext : DbContext
         modelBuilder.Entity<Model>()
             .Property(x => x.Parameters)
             .HasJsonValueConversion();
+        modelBuilder.Entity<Model>()
+            .Property(x => x.PairFieldType)
+            .HasJsonValueConversion();
         modelBuilder.Entity<ModelFile>().HasKey(x => new {
             x.ModelId, 
             x.FileId

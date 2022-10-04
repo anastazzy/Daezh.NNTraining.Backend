@@ -1,7 +1,7 @@
 ﻿using NNTraining.Contracts;
 using NNTraining.Domain;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class ModelTrainerFactory : IModelTrainerFactory
 {

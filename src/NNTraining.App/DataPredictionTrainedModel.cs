@@ -3,7 +3,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using NNTraining.Contracts;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class DataPredictionTrainedModel: ITrainedModel
 {
@@ -106,5 +106,10 @@ public class DataPredictionTrainedModel: ITrainedModel
         var result = (PredictionResult) res;
         
         return result.Score;
+    }
+
+    public ITransformer GetTransformer()
+    {
+        return _trainedModel;
     }
 }

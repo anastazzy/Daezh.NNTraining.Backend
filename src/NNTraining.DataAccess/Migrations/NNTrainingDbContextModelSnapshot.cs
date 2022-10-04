@@ -31,6 +31,9 @@ namespace NNTraining.DataAccess.Migrations
                     b.Property<string>("Extension")
                         .HasColumnType("text");
 
+                    b.Property<int>("FileType")
+                        .HasColumnType("integer");
+
                     b.Property<string>("OriginalName")
                         .HasColumnType("text");
 
@@ -44,11 +47,9 @@ namespace NNTraining.DataAccess.Migrations
 
             modelBuilder.Entity("NNTraining.Domain.Models.Model", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("ModelStatus")
                         .HasColumnType("integer");
@@ -57,6 +58,9 @@ namespace NNTraining.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PairFieldType")
                         .HasColumnType("text");
 
                     b.Property<string>("Parameters")
@@ -70,8 +74,8 @@ namespace NNTraining.DataAccess.Migrations
 
             modelBuilder.Entity("NNTraining.Domain.Models.ModelFile", b =>
                 {
-                    b.Property<long>("ModelId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("ModelId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("FileId")
                         .HasColumnType("uuid");

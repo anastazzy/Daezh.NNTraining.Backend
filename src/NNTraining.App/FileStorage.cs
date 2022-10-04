@@ -1,4 +1,5 @@
-﻿using System.Transactions;
+using System.Transactions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel;
@@ -9,7 +10,7 @@ using NNTraining.DataAccess;
 using NNTraining.Domain.Models;
 using File = NNTraining.Domain.Models.File;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
 public class FileStorage: IFileStorage
 {
@@ -18,8 +19,9 @@ public class FileStorage: IFileStorage
 
     private const string Location = "datasets";
     //location = fileType
-//"dataprediction" - modelType
-    public FileStorage(IOptions<MinioOptions> options, NNTrainingDbContext dbContext)
+    //"dataprediction" - modelType - bucket
+
+    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider, NNTrainingDbContext dbContext)
     {
         _minio = new MinioClient()
             .WithEndpoint(options.Value.Endpoint)
@@ -29,12 +31,14 @@ public class FileStorage: IFileStorage
             _minio.WithSSL();
         }
         _minio.Build();
-
-        _dbContext = dbContext;
+        using var scope = serviceProvider.CreateScope();
+        _dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
     }
     
-    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream, long size, string bucketName, Guid idModel, FileType fileType)
+    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream,
+        ModelType modelType, Guid idModel, FileType fileType)
     {
+        var size = fileStream.Length;
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
         switch (fileType)
         {
@@ -48,9 +52,9 @@ public class FileStorage: IFileStorage
         var newFileName = Guid.NewGuid();
         await transaction.CommitAsync();
         await _dbContext.SaveChangesAsync(); 
-        await CreateBucketAsync(bucketName, FileType.PredictSet.ToString());      
+        await CreateBucketAsync(modelType, FileType.PredictSet);      
         await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(bucketName)
+            .WithBucket(modelType.ToString())
             .WithStreamData(fileStream)
             .WithObjectSize(size)
             .WithObject(newFileName.ToString())
@@ -75,7 +79,7 @@ public class FileStorage: IFileStorage
             ModelId = idModel
         });
     }
-    private void SaveModel(Guid idModel, string fileName, long size)
+    private async void SaveModel(Guid idModel, string fileName, long size)
     {
         var file = new File
         {
@@ -90,22 +94,21 @@ public class FileStorage: IFileStorage
             FileId = idFile,
             ModelId = idModel
         });
+        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
     }
 
-    public async Task<ObjectStat> GetAsync(string fileName, string bucketName)
+    public async Task<ObjectStat> GetAsync(Guid fileName, ModelType bucketName, string outputFileName = "temp.csv")
     {
-        var tempFileName = "temp.csv";
-        
-        var file = new FileInfo(tempFileName);
+        var file = new FileInfo(outputFileName);
         if (!file.Exists)
         {
             file.Create();
         }
         
         var result = await _minio.GetObjectAsync(new GetObjectArgs()
-            .WithBucket(bucketName)
-            .WithObject(fileName)
-            .WithFile(tempFileName));
+            .WithBucket(bucketName.ToString())
+            .WithObject(fileName.ToString())
+            .WithFile(outputFileName));
         
         if (result is null)
         {
@@ -115,17 +118,42 @@ public class FileStorage: IFileStorage
         return result;
     }
 
+    /// <summary>
+
+    // private void SaveTrainSet(Guid idModel, string fileName, long size)
+    // {
+    //     
+    // }
+    // private void SaveModel(Guid idModel, string fileName, long size)
+    // {
+    //     var file = new File
+    //     {
+    //         OriginalName = fileName,
+    //         Extension = ".zip", //get extension from string
+    //         Size = 0
+    //     };
+    //     _dbContext.Files.Add(file);
+    //     var idFile = file.Id;
+    //     _dbContext.ModelFiles.Add(new ModelFile()
+    //     {
+    //         FileId = idFile,
+    //         ModelId = idModel
+    //     });
+    // }
+
+
     
-    private async Task CreateBucketAsync(string bucketName, string location)
+    private async Task CreateBucketAsync(ModelType bucketName, FileType location)
     {
         try
         {
-            var found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            var found = await _minio.BucketExistsAsync(
+                new BucketExistsArgs().WithBucket(bucketName.ToString()));
             if (!found)
             {
                 await _minio.MakeBucketAsync(new MakeBucketArgs()
-                    .WithBucket(bucketName)
-                    .WithLocation(location));
+                        .WithBucket(bucketName.ToString())
+                    .WithLocation(location.ToString()));
             }
         }
         catch (MinioException e)

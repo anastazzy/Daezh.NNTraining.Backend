@@ -1,17 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.ML;
 using Minio;
+using NNTraining.App;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Options;
 using NNTraining.DataAccess;
-using NNTraining.Host;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
-builder.Services.AddScoped<ICrudForModelService, CrudForModelService>();
+
+builder.Services.AddSingleton<IFileStorage, FileStorage>();
+builder.Services.AddSingleton<MLContext>();
+builder.Services.AddScoped<IModelStorage, ModelStorage>();
+
+builder.Services.AddScoped<IBaseModelService, BaseModelService>();
+
+builder.Services.AddScoped<ModelInteractionService, ModelInteractionService>();
+builder.Services.AddSingleton<IModelTrainerFactory, ModelTrainerFactory>();
 
 // Add services to the container.
 
@@ -23,7 +32,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOptions<MinioOptions>();
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
 
-builder.Services.AddSingleton<IFileStorage, FileStorage>();
+
 
 
 

@@ -1,27 +1,23 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
 using NNTraining.Domain.Models;
 
-namespace NNTraining.Host;
+namespace NNTraining.App;
 
-public class CrudForModelService : ICrudForModelService
+public class BaseModelService : IBaseModelService
 {
     private readonly NNTrainingDbContext _dbContext;
 
     private readonly IFileStorage _storage;
 
     private const string BucketDataPrediction = "dataprediction";
-    // private CreatorOfModel _creator;
 
-    public CrudForModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
+    public BaseModelService(NNTrainingDbContext dbContext, IServiceProvider serviceProvider, IFileStorage storage)
     {
         _dbContext = dbContext;
-        // _creator = (CreatorOfModel) serviceProvider.GetService(typeof(CreatorOfModel))!;
         _storage = storage;
     }
 
@@ -34,6 +30,7 @@ public class CrudForModelService : ICrudForModelService
             HasHeader = modelDto.Parameters.HasHeader,
             Separators = modelDto.Parameters.Separators
         };
+        
         var model = new Model
         {
             Name = modelDto.Name,
@@ -45,10 +42,14 @@ public class CrudForModelService : ICrudForModelService
         await _dbContext.SaveChangesAsync();
         return model.Id;
     }
+    
     public async Task<bool> UpdateFileForModelAsync(Guid idModel, Guid idFile)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
-        if (model is null) throw new Exception("Model update ERROR");
+        if (model is null)
+        {
+            throw new Exception("Model update ERROR");
+        }
         model.Parameters.NameOfTrainSet = idFile.ToString();
         model.ModelStatus = ModelStatus.ReadyToTraining;
         await _dbContext.SaveChangesAsync();
