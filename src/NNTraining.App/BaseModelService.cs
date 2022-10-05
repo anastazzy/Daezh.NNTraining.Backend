@@ -59,7 +59,8 @@ public class BaseModelService : IBaseModelService
             Id = model.Id,
             Name = model.Name,
             ModelStatus = model.ModelStatus,
-            //Parameters = model.Parameters,
+            ModelType = model.ModelType,
+            NameTrainSet = model.Parameters?.NameOfTrainSet
         }).ToArray();
     }
 
@@ -75,8 +76,6 @@ public class BaseModelService : IBaseModelService
         await _dbContext.SaveChangesAsync();
         return true;
     }
-    
-    
 
     public async Task<bool> DeleteModelAsync(Guid id)
     {

@@ -34,12 +34,9 @@ public class ModelInteractionService : IModelInteractionService
             throw new ArgumentException("The model with current id not found");
         }
        
-    
-
         if (model.ModelStatus != ModelStatus.ReadyToTraining)
         {
-            throw new ApplicationException(
-                "The model not ready for training. You must specify the file - train set for training.");
+            throw new ArgumentException("The model not ready for training. You must specify the file - train set for training.");
         }
 
         //save the field type and name to params of model
@@ -63,48 +60,50 @@ public class ModelInteractionService : IModelInteractionService
         {
             data.AddColumn(item.Name, new KeyDataViewType(item.GetType(), item.KeyCount.Count!.Value));
         }
-
+        
         //creation the trainer and train model
         var factory = new ModelTrainerFactory();
-        var trainer = factory.CreateTrainer(model.Parameters!);
+        var trainer = factory.CreateTrainer(model.Parameters);
         _trainedModel = trainer.Train(model.PairFieldType);
-        //save in Db or minio with modelStorage
-        //fileNae = model.name
-        
+
         await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
         
     }
 
-    public object Predict(Guid id, object modelForPrediction)
+    public async Task<object> Predict(Guid id, object modelForPrediction)
     {
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model is null)
         {
             throw new ArgumentException("The model with current id not found");
         }
+        
+        //getting trained model from a model storage
 
-        return null;
-        //     model.ModelType switch
-        // {
-        //     ModelType.DataPrediction => new DataPredictionTrainedModel(modelForPrediction)
-        // };
-
+        var trainedModel = await _modelStorage.GetAsync(id, model.ModelType);
+        
+        //there dataset or object need for prediction
+        var result = trainedModel.Predict(modelForPrediction);
+        return result;
     }
+    
+    
+    public Dictionary<string,string> GetSchemaOfModel(Guid id)
+    {
+        var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
+        if (model?.PairFieldType is null)
+        {
+            throw new ArgumentException("Not found");
+        }
+
+        var fieldTypeField = new Dictionary<string, string>();
+        foreach (var (name, type) in model.PairFieldType)
+        {
+            fieldTypeField.Add(name, type.ToString());
+        }
+
+        return fieldTypeField;
+    }
+    
 }
-
-
-
-
-
-// private TParametrs GetParameters<TDto>() where TDto: ModelInputDto<TParametrs>
-    // {
-    //     return T switch
-    //     {
-    //         ModelType.DataPrediction => new DataPredictionNNParameters(),
-    //     };
-    // }
-
-    // public Dictionary<string,string> GetSchemaOfModel()
-    // {
-    //     return _creator.GetSchemaOfModel().ToDictionary(x => x.Item1, x => x.Item2.ToString());
-    // }
+    
