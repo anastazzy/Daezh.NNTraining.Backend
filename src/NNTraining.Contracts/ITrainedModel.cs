@@ -4,6 +4,6 @@ namespace NNTraining.Contracts;
 
 public interface ITrainedModel
 {
-    public object Predict(object data);
-    public ITransformer GetTransformer();
+    object Predict(object data);
+    ITransformer GetTransformer();
 }

@@ -5,6 +5,6 @@ namespace NNTraining.Contracts;
 
 public interface IModelStorage
 {
-    public Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataView);
-    public Task<ITrainedModel> GetAsync(Guid id, ModelType modelType);
+    Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataView);
+    Task<ITrainedModel> GetAsync(Guid id, ModelType modelType);
 }

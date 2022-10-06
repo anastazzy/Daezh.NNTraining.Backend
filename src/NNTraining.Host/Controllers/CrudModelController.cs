@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Minio.DataModel;
 using NNTraining.Contracts;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
@@ -10,58 +11,22 @@ namespace NNTraining.Api.Controllers;
 [Route("api/[controller]")]
 public class CrudModelController
 {
-    private readonly IBaseModelService _modelService;
+    private readonly IModelInteractionService _modelService;
 
-    public CrudModelController(IBaseModelService modelService)
+    public CrudModelController(IModelInteractionService modelService)
     {
         _modelService = modelService;
     }
 
-    [HttpPost]
-    public Task<Guid> SaveModelAsync(DataPredictionInputDto modelDto)
+    [HttpPost("train/{id}")]
+    public void TrainModel([FromRoute] Guid id)
     {
-        return _modelService.SaveDataPredictionModelAsync(modelDto);
+        _modelService.Train(id);
     }
     
-    // [HttpPost("createDataPrediction")]
-    // public Task CreateDataPredictModel()
-    // {
-    //     return _modelService.CreateTheDataPrediction();
-    // }
-    
-    // [HttpGet("dataPredictionSchema")]
-    // public Dictionary<string, string> GetSchemaOfModel()
-    // {
-    //     return _modelService.GetSchemaOfModel();
-    // }
-    
-    // [HttpPost("dataPredictionModel")]
-    // public object UsingModel([FromBody] Dictionary<string,string> inputModelForUsing)
-    // {
-    //     return _modelService.UsingModel(inputModelForUsing);
-    // }
-
-    [HttpGet]
-    public Task<ModelOutputDto[]> GetArrayOfModelsAsync()
+    [HttpPost("predict/{id}")]
+    public Task<object> Predict([FromRoute] Guid id, [FromBody] object objectToPredict)
     {
-        return _modelService.GetListOfModelsAsync();
-    }
-
-    [HttpPut("id")]
-    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, Guid id)
-    {
-        return _modelService.UpdateModelAsync(id, modelDto);
-    }
-
-    [HttpDelete("id")]
-    public Task<bool> DeleteModelAsync(Guid id)
-    {
-        return _modelService.DeleteModelAsync(id);
-    }
-    
-    [HttpGet("types")]
-    public IEnumerable<TypeOutputDto> GetModelTypes()
-    {
-        return _modelService.GetModelTypes();
+        return _modelService.Predict(id, objectToPredict);
     }
 }

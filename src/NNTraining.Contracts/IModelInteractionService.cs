@@ -4,6 +4,7 @@ namespace NNTraining.Contracts;
 
 public interface IModelInteractionService
 {
-    public void Train(Guid id);
-    public Task<object> Predict(Guid id, object modelForPrediction);
+    void Train(Guid id);
+    Task<object> Predict(Guid id, object modelForPrediction);
+    Dictionary<string, string> GetSchemaOfModel(Guid id);
 }
