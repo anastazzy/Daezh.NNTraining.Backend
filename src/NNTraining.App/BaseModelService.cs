@@ -20,7 +20,7 @@ public class BaseModelService : IBaseModelService
     {
         var modelParameters = new DataPredictionNnParameters
         {
-            NameOfTrainSet = null,
+            NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
             NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
             HasHeader = modelDto.Parameters.HasHeader,
             Separators = modelDto.Parameters.Separators

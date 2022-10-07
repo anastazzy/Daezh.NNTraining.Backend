@@ -21,7 +21,7 @@ public class FileStorage: IFileStorage
     //location = fileType
     //"dataprediction" - modelType - bucket
 
-    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider, NNTrainingDbContext dbContext)
+    public FileStorage(IOptions<MinioOptions> options, IServiceProvider serviceProvider)
     {
         _minio = new MinioClient()
             .WithEndpoint(options.Value.Endpoint)

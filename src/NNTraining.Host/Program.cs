@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NNTrainingDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("Postgre")));
 
-builder.Services.AddScoped<IFileStorage, FileStorage>();
+builder.Services.AddSingleton<IFileStorage, FileStorage>();
 builder.Services.AddSingleton<MLContext>();
 builder.Services.AddScoped<IModelStorage, ModelStorage>();
 
