@@ -28,6 +28,7 @@ wiki-generator
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+**/obj/*
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
