@@ -49,6 +49,7 @@ public class FileStorage: IFileStorage
                 SaveModel(idModel, fileName, size);
                 break;
         };
+        
         var newFileName = Guid.NewGuid();
         await transaction.CommitAsync();
         await _dbContext.SaveChangesAsync(); 

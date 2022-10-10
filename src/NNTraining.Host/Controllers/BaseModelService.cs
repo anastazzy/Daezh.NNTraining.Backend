@@ -22,7 +22,7 @@ public class BaseModelService
     {
         return _modelService.SaveDataPredictionModelAsync(modelDto);
     }
-
+    
     [HttpGet]
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()
     {
