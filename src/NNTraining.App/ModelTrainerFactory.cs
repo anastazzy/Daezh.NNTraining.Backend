@@ -11,7 +11,7 @@ public class ModelTrainerFactory : IModelTrainerFactory
         {
             case DataPredictionNnParameters dataPredictionNnParameters:
                 return new DataPredictionModelTrainer(
-                    dataPredictionNnParameters.NameOfTrainSet!, 
+                    dataPredictionNnParameters.NameOfTrainSet.ToString()!, 
                     dataPredictionNnParameters.NameOfTargetColumn!,
                     dataPredictionNnParameters.HasHeader,
                     dataPredictionNnParameters.Separators!);

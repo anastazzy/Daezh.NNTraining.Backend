@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
@@ -10,47 +11,94 @@ namespace NNTraining.App;
 public class BaseModelService : IBaseModelService
 {
     private readonly NNTrainingDbContext _dbContext;
+    private readonly IFileStorage _fileStorage;
 
-    public BaseModelService(NNTrainingDbContext dbContext)
+    public BaseModelService(NNTrainingDbContext dbContext, IFileStorage fileStorage)
     {
+        _fileStorage = fileStorage;
         _dbContext = dbContext;
     }
 
-    public async Task<Guid> SaveDataPredictionModelAsync(DataPredictionInputDto modelDto)
+    public async Task<Guid> InitializeModelAsync(ModelInitializeDto modelInitializeDto)
     {
-        var modelParameters = new DataPredictionNnParameters
-        {
-            NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
-            NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
-            HasHeader = modelDto.Parameters.HasHeader,
-            Separators = modelDto.Parameters.Separators
-        };
-        
         var model = new Model
         {
-            Name = modelDto.Name,
-            ModelStatus = ModelStatus.Created,
-            ModelType = ModelType.DataPrediction,
-            Parameters = modelParameters
+            Name = modelInitializeDto.Name,
+            ModelType = modelInitializeDto.ModelType,
+            ModelStatus = ModelStatus.Initialized
         };
-        _dbContext.Models.Add(model);
-        await _dbContext.SaveChangesAsync();
+
+        await _dbContext.Models.AddAsync(model);
         return model.Id;
     }
     
-    public async Task<bool> SetNameOfTrainSetAsync(Guid idModel, Guid idFile)
+    public async Task<string> UploadDatasetOfModelAsync(UploadingDatasetModelDto modelDto)
     {
-        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == idModel);
-        if (model?.Parameters is null)
+        var transaction = await _dbContext.Database.BeginTransactionAsync();
+        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
+        if (model is null)
         {
             throw new Exception("Model update ERROR");
         }
-        model.Parameters.NameOfTrainSet = idFile.ToString();
-        model.ModelStatus = ModelStatus.ReadyToTraining;
+
+        var formFile = modelDto.UploadTrainSet;
+        var contentType = formFile.ContentType;
+        if (!contentType.Contains("csv", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("The extension of file must be .csv");
+        }
+
+        var guidNameTrainSet = await _fileStorage.UploadAsync(
+            formFile.Name,
+            formFile.ContentType,
+            formFile.OpenReadStream(),
+            model.ModelType,
+            model.Id,
+            FileType.TrainSet);
+
+        model.Parameters = new NNParameters
+        {
+            NameOfTrainSet = guidNameTrainSet
+        };
+        
+        _dbContext.Update(model);
+        
         await _dbContext.SaveChangesAsync();
-        return true;
+        await transaction.CommitAsync();
+        return guidNameTrainSet;
     }
 
+    public async Task<Guid> FillingDataPredictionParamsAsync(DataPredictionInputDto modelDto)
+    {
+        var transaction = await _dbContext.Database.BeginTransactionAsync();
+        var modelParameters = new DataPredictionNnParameters();
+        if (modelDto.Parameters is not null)
+        {
+            modelParameters = new DataPredictionNnParameters
+            {
+                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
+                NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
+                HasHeader = modelDto.Parameters.HasHeader,
+                Separators = modelDto.Parameters.Separators
+            };
+        }
+        
+        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
+        if (model is null)
+        {
+            throw new Exception("Model update ERROR");
+        }
+
+        model.ModelStatus = ModelStatus.Created;
+        model.Parameters = modelParameters;
+
+        _dbContext.Models.Update(model);
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        
+        return model.Id;
+    }
+    
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {
         var models = await _dbContext.Models.ToArrayAsync();
@@ -60,7 +108,7 @@ public class BaseModelService : IBaseModelService
             Name = model.Name,
             ModelStatus = model.ModelStatus,
             ModelType = model.ModelType,
-            NameTrainSet = model.Parameters?.NameOfTrainSet
+            NameTrainSet = model.Parameters.NameOfTrainSet
         }).ToArray();
     }
 
@@ -71,7 +119,6 @@ public class BaseModelService : IBaseModelService
         {
             throw new Exception("Model update ERROR");
         }
-        model.Name = modelDto.Name;
         model.Parameters = modelDto.Parameters;
         await _dbContext.SaveChangesAsync();
         return true;

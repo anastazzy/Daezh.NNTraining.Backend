@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NNTraining.Domain.Dto;
 
-public abstract class ModelInputDto<T> where T: NNParameters
+public class UploadingDatasetModelDto
 {
     [FromRoute]
     public Guid Id { get; set; }
     
     [FromBody]
-    public T? Parameters { get; set; }
+    public IFormFile? UploadTrainSet { get; set; }
 }

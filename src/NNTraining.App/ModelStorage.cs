@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using NNTraining.Contracts;
 using NNTraining.DataAccess;
@@ -24,13 +25,13 @@ public class ModelStorage: IModelStorage// save model in minio?
         _dbContext = dbContext;
     }
     
-    public Task<Guid> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
+    public Task<string> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
     {
         var contentType = "application/zip";
         var transformer = trainedModel as ITransformer;
         if (transformer is null)
         {
-            return new Task<Guid>(() => Guid.Empty);
+            return new Task<string>(() => string.Empty);
         }
         var idFile = Guid.NewGuid();// reflection in Model? - idFileInStorage
         var fileName = idFile + ".zip";
@@ -48,15 +49,30 @@ public class ModelStorage: IModelStorage// save model in minio?
 
     public async Task<ITrainedModel> GetAsync(Guid id, ModelType bucketName)
     {
-        const string tempFileNameOfModel = "temp.zip";
-        await _storage.GetAsync(id, bucketName, tempFileNameOfModel);
-        
-        var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
         var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model?.PairFieldType is null)
         {
             throw new ArgumentException("The model or it`s field name type was not found");
         }
+
+        var modelFile = await _dbContext.ModelFiles.FirstOrDefaultAsync(x =>
+            x.ModelId == id && x.FileType == FileType.TrainSet);
+        if (modelFile is null)
+        {
+            throw new ArgumentException("The file with this model was not found");
+        }
+
+        var fileWithModel = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);
+        if (fileWithModel is null)
+        {
+            throw new ArgumentException("The file with this model was not found");
+        }
+        
+        const string tempFileNameOfModel = "temp.zip";
+        await _storage.GetAsync(fileWithModel.GuidName, bucketName, tempFileNameOfModel);
+        
+        var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
+        
         var type = ModelHelper.GetTypeOfCurrentFields(model.PairFieldType);
         
 

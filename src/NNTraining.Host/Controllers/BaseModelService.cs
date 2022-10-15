@@ -17,10 +17,16 @@ public class BaseModelService
         _modelService = modelService;
     }
 
-    [HttpPost]
-    public Task<Guid> SaveModelAsync(DataPredictionInputDto modelDto)
+    [HttpPost("init")]
+    public Task<Guid> InitModel(ModelInitializeDto modelDto)
     {
-        return _modelService.SaveDataPredictionModelAsync(modelDto);
+        return _modelService.InitializeModelAsync(modelDto);
+    }
+    
+    [HttpPost("filling-params")]
+    public Task<Guid> FillingParamsModel(DataPredictionInputDto modelDto)
+    {
+        return _modelService.FillingDataPredictionParamsAsync(modelDto);
     }
     
     [HttpGet]

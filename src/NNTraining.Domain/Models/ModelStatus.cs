@@ -2,6 +2,7 @@
 
 public enum ModelStatus
 {
+    Initialized,
     Created,
     ReadyToTraining,
     StillTraining,

@@ -45,7 +45,7 @@ public class ModelInteractionService : IModelInteractionService
             case DataPredictionNnParameters dataPredictionNnParameters:
             {
                 model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
-                    dataPredictionNnParameters.NameOfTrainSet,
+                    dataPredictionNnParameters.NameOfTrainSet.ToString(),
                     dataPredictionNnParameters.Separators);
                 break;
             }

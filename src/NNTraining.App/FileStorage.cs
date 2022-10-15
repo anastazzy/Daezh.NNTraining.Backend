@@ -1,4 +1,3 @@
-using System.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
@@ -35,22 +34,22 @@ public class FileStorage: IFileStorage
         _dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
     }
     
-    public async Task<Guid> UploadAsync(string fileName, string contentType, Stream fileStream,
+    public async Task<string> UploadAsync(string fileName, string contentType, Stream fileStream,
         ModelType modelType, Guid idModel, FileType fileType)
     {
         var size = fileStream.Length;
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-        switch (fileType)
+        var newFileName = fileType switch 
         {
-            case FileType.TrainSet :
-                SaveTrainSet(idModel, fileName, size);
-                break;
-            case FileType.Model :
-                SaveModel(idModel, fileName, size);
-                break;
+            FileType.TrainSet => SaveTrainSet(idModel, fileName, size),
+            FileType.Model => SaveModel(idModel, fileName, size),
+            _ => null,
         };
-        
-        var newFileName = Guid.NewGuid();
+        if (newFileName is null)
+        {
+            return string.Empty;
+        }
+
         await transaction.CommitAsync();
         await _dbContext.SaveChangesAsync(); 
         await CreateBucketAsync(modelType, FileType.PredictSet);      
@@ -58,47 +57,53 @@ public class FileStorage: IFileStorage
             .WithBucket(modelType.ToString())
             .WithStreamData(fileStream)
             .WithObjectSize(size)
-            .WithObject(newFileName.ToString())
+            .WithObject(newFileName)
             .WithContentType(contentType));
         
         return newFileName;
     }
 
-    private void SaveTrainSet(Guid idModel, string fileName, long size)
+    private string? SaveTrainSet(Guid idModel, string fileName, long size)
     {
         var file = new File
         {
             OriginalName = fileName,
-            Extension = fileName[fileName.IndexOf('.')..], //get extension from string
-            Size = size
+            Extension = ".csv",
+            Size = size,
+            GuidName =   Guid.NewGuid() + ".csv",
         };
         _dbContext.Files.Add(file);
         var idFile = file.Id;
         _dbContext.ModelFiles.Add(new ModelFile()
         {
             FileId = idFile,
-            ModelId = idModel
+            ModelId = idModel,
+            FileType = FileType.TrainSet
         });
+        return file.GuidName;
     }
-    private async void SaveModel(Guid idModel, string fileName, long size)
+    
+    private string SaveModel(Guid idModel, string fileName, long size)
     {
         var file = new File
         {
             OriginalName = fileName,
             Extension = ".zip", 
-            Size = size
+            Size = size,
+            GuidName =  Guid.NewGuid() + ".zip",
         };
         _dbContext.Files.Add(file);
         var idFile = file.Id;
         _dbContext.ModelFiles.Add(new ModelFile()
         {
             FileId = idFile,
-            ModelId = idModel
+            ModelId = idModel,
+            FileType = FileType.Model
         });
-        await _dbContext.SaveChangesAsync(); // where should be located await _dbContext?
+        return file.GuidName;
     }
 
-    public async Task<ObjectStat> GetAsync(Guid fileName, ModelType bucketName, string outputFileName = "temp.csv")
+    public async Task<ObjectStat> GetAsync(string fileName, ModelType bucketName, string outputFileName = "temp.csv")
     {
         var file = new FileInfo(outputFileName);
         if (!file.Exists)
@@ -108,7 +113,7 @@ public class FileStorage: IFileStorage
         
         var result = await _minio.GetObjectAsync(new GetObjectArgs()
             .WithBucket(bucketName.ToString())
-            .WithObject(fileName.ToString())
+            .WithObject(fileName)
             .WithFile(outputFileName));
         
         if (result is null)

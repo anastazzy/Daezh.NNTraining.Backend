@@ -16,6 +16,21 @@ wiki-generator
 *.pubxml
 *.xml
 
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+bin/
+Bin/
+obj/
+Obj/
+.idea/
+
 # User-specific stuff:
 .idea/*
 
