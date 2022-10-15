@@ -34,6 +34,9 @@ namespace NNTraining.DataAccess.Migrations
                     b.Property<int>("FileType")
                         .HasColumnType("integer");
 
+                    b.Property<string>("GuidName")
+                        .HasColumnType("text");
+
                     b.Property<string>("OriginalName")
                         .HasColumnType("text");
 
@@ -64,7 +67,6 @@ namespace NNTraining.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Parameters")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -79,6 +81,9 @@ namespace NNTraining.DataAccess.Migrations
 
                     b.Property<Guid>("FileId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("FileType")
+                        .HasColumnType("integer");
 
                     b.HasKey("ModelId", "FileId");
 

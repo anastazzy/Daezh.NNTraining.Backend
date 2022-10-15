@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NNTraining.DataAccess.Migrations
 {
     [DbContext(typeof(NNTrainingDbContext))]
-    [Migration("20220904190029_tableWithDictionary")]
-    partial class tableWithDictionary
+    [Migration("20221015174622_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,6 +35,9 @@ namespace NNTraining.DataAccess.Migrations
 
                     b.Property<int>("FileType")
                         .HasColumnType("integer");
+
+                    b.Property<string>("GuidName")
+                        .HasColumnType("text");
 
                     b.Property<string>("OriginalName")
                         .HasColumnType("text");
@@ -66,7 +69,6 @@ namespace NNTraining.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Parameters")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -81,6 +83,9 @@ namespace NNTraining.DataAccess.Migrations
 
                     b.Property<Guid>("FileId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("FileType")
+                        .HasColumnType("integer");
 
                     b.HasKey("ModelId", "FileId");
 
