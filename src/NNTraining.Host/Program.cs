@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
@@ -19,15 +20,16 @@ builder.Services.AddScoped<IModelStorage, ModelStorage>();
 
 builder.Services.AddScoped<IBaseModelService, BaseModelService>();
 
-builder.Services.AddScoped<ModelInteractionService, ModelInteractionService>();
+builder.Services.AddScoped<IModelInteractionService, ModelInteractionService>();
 builder.Services.AddSingleton<IModelTrainerFactory, ModelTrainerFactory>();
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options => 
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(v => v.UseInlineDefinitionsForEnums());
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddOptions<MinioOptions>();
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));

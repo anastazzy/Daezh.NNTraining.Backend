@@ -3,7 +3,7 @@
 public enum ModelStatus
 {
     Initialized,
-    Created,
+    NeedAParameters,
     ReadyToTraining,
     StillTraining,
     Trained,

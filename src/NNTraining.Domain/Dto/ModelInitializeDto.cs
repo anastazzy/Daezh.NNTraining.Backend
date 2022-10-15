@@ -1,4 +1,5 @@
-﻿using NNTraining.Domain.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using NNTraining.Domain.Models;
 
 namespace NNTraining.Domain.Dto;
 

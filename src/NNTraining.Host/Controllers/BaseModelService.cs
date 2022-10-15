@@ -17,16 +17,30 @@ public class BaseModelService
         _modelService = modelService;
     }
 
-    [HttpPost("init")]
+    [HttpPost]
     public Task<Guid> InitModel(ModelInitializeDto modelDto)
     {
         return _modelService.InitializeModelAsync(modelDto);
     }
     
-    [HttpPost("filling-params")]
-    public Task<Guid> FillingParamsModel(DataPredictionInputDto modelDto)
+    [HttpPost("{id:Guid}/filling-params")]
+    public Task<Guid> FillingParamsModel([FromRoute] Guid id, [FromBody] DataPredictionNnParameters parameters)
     {
-        return _modelService.FillingDataPredictionParamsAsync(modelDto);
+        return _modelService.FillingDataPredictionParamsAsync(new DataPredictionInputDto
+        {
+            Id = id,
+            Parameters = parameters, 
+        });
+    }
+
+    [HttpPost("{id:Guid}/upload-train-set")]
+    public Task<string> UploadTrainSet([FromRoute] Guid id, IFormFile trainSet)
+    {
+        return _modelService.UploadDatasetOfModelAsync(new UploadingDatasetModelDto
+        {
+            Id = id,
+            UploadTrainSet = trainSet,
+        });
     }
     
     [HttpGet]

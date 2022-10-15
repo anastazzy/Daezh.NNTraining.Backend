@@ -29,6 +29,7 @@ public class BaseModelService : IBaseModelService
         };
 
         await _dbContext.Models.AddAsync(model);
+        await _dbContext.SaveChangesAsync();
         return model.Id;
     }
     
@@ -56,10 +57,15 @@ public class BaseModelService : IBaseModelService
             model.Id,
             FileType.TrainSet);
 
-        model.Parameters = new NNParameters
+        model.Parameters =  model.ModelType switch 
         {
-            NameOfTrainSet = guidNameTrainSet
+            ModelType.DataPrediction => new DataPredictionNnParameters()
+            {
+                NameOfTrainSet = guidNameTrainSet
+            },
+            _ => throw new Exception()
         };
+        model.ModelStatus = ModelStatus.NeedAParameters;
         
         _dbContext.Update(model);
         
@@ -72,31 +78,33 @@ public class BaseModelService : IBaseModelService
     {
         var transaction = await _dbContext.Database.BeginTransactionAsync();
         var modelParameters = new DataPredictionNnParameters();
-        if (modelDto.Parameters is not null)
-        {
-            modelParameters = new DataPredictionNnParameters
-            {
-                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
-                NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
-                HasHeader = modelDto.Parameters.HasHeader,
-                Separators = modelDto.Parameters.Separators
-            };
-        }
-        
+
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
         if (model is null)
         {
             throw new Exception("Model update ERROR");
         }
 
-        model.ModelStatus = ModelStatus.Created;
+        if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
+        {
+            modelParameters = new DataPredictionNnParameters
+            {
+                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// может быть несколько сетов, спрашивать, но решить как-то с названиями
+                NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
+                HasHeader = modelDto.Parameters.HasHeader,
+                Separators = modelDto.Parameters.Separators
+            };
+        }
+        
+
+        model.ModelStatus = ModelStatus.ReadyToTraining;
         model.Parameters = modelParameters;
 
         _dbContext.Models.Update(model);
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         
-        return model.Id;
+        return model.Id;// true or nothing
     }
     
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
@@ -108,7 +116,7 @@ public class BaseModelService : IBaseModelService
             Name = model.Name,
             ModelStatus = model.ModelStatus,
             ModelType = model.ModelType,
-            NameTrainSet = model.Parameters.NameOfTrainSet
+            NameTrainSet = model.Parameters?.NameOfTrainSet
         }).ToArray();
     }
 

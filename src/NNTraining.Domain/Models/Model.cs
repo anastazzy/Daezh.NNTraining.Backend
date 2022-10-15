@@ -2,7 +2,7 @@
 
 namespace NNTraining.Domain.Models;
 
-public class Model
+public class Model<T> where T: NNParameters
 {
     public Guid Id { get; set; }
     
@@ -13,7 +13,7 @@ public class Model
     public ModelStatus ModelStatus { get; set; }
     
     [JsonField]
-    public NNParameters? Parameters { get; set; }
+    public T? Parameters { get; set; }
     
     [JsonField]
     public Dictionary<string, Type>? PairFieldType { get; set; }
