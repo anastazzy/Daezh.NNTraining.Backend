@@ -134,3 +134,8 @@ C:\Repos\pet\Daezh.NNTraining.Backend\src\NNTraining.Host\obj\Debug\net6.0\refin
 C:\Repos\pet\Daezh.NNTraining.Backend\src\NNTraining.Host\obj\Debug\net6.0\NNTraining.Host.pdb
 C:\Repos\pet\Daezh.NNTraining.Backend\src\NNTraining.Host\obj\Debug\net6.0\NNTraining.Host.genruntimeconfig.cache
 C:\Repos\pet\Daezh.NNTraining.Backend\src\NNTraining.Host\obj\Debug\net6.0\ref\NNTraining.Host.dll
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\obj\Debug\net6.0\staticwebassets\msbuild.NNTraining.Host.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\obj\Debug\net6.0\staticwebassets\msbuild.build.NNTraining.Host.props
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\obj\Debug\net6.0\staticwebassets\msbuild.buildMultiTargeting.NNTraining.Host.props
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\obj\Debug\net6.0\staticwebassets\msbuild.buildTransitive.NNTraining.Host.props
+C:\Repos\Pet-projects\Daezh.NNTraining\NNTraining\src\NNTraining.Host\obj\Debug\net6.0\staticwebassets.pack.json

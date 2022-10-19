@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NNTraining.Domain;
 
 #nullable disable
 
 namespace NNTraining.DataAccess.Migrations
 {
-    public partial class init : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -46,8 +48,8 @@ namespace NNTraining.DataAccess.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     ModelType = table.Column<int>(type: "integer", nullable: false),
                     ModelStatus = table.Column<int>(type: "integer", nullable: false),
-                    Parameters = table.Column<string>(type: "text", nullable: true),
-                    PairFieldType = table.Column<string>(type: "text", nullable: true)
+                    Parameters = table.Column<NNParameters>(type: "jsonb", nullable: true),
+                    PairFieldType = table.Column<Dictionary<string, Type>>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {

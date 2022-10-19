@@ -1,14 +1,21 @@
-﻿using Innofactor.EfCoreJsonValueConverter;
+﻿using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using NNTraining.Domain;
 using NNTraining.Domain.Models;
+using NNTraining.Domain.Tools;
 using File = NNTraining.Domain.Models.File;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NNTraining.DataAccess;
 
 public class NNTrainingDbContext : DbContext
 {
-    public NNTrainingDbContext(DbContextOptions<NNTrainingDbContext> options): base(options)
+    public NNTrainingDbContext(DbContextOptions<NNTrainingDbContext> options) : base(options)
     {
     }
 
@@ -20,13 +27,37 @@ public class NNTrainingDbContext : DbContext
     {
         modelBuilder.Entity<Model>()
             .Property(x => x.Parameters)
-            .HasJsonValueConversion();
-        modelBuilder.Entity<Model>()
-            .Property(x => x.PairFieldType)
-            .HasJsonValueConversion();
-        modelBuilder.Entity<ModelFile>().HasKey(x => new {
-            x.ModelId, 
+            .HasConversion(new JsonValueConverter<NNParameters>());
+        modelBuilder.Entity<ModelFile>().HasKey(x => new
+        {
+            x.ModelId,
             x.FileId
         });
+    }
+
+    public class JsonValueConverter<T> : ValueConverter<T, string> where T : class
+    {
+        public JsonValueConverter()
+            : base(
+                (v => JsonHelper.Serialize(v)),
+                (v => JsonHelper.Deserialize<T>(v)))
+        {
+        }
+    }
+    
+    internal static class JsonHelper
+    {
+        private static readonly JsonSerializerOptions options = new JsonSerializerOptions
+        {
+            Converters = { new CustomModelParametersConverter() }
+        };
+        
+        public static T Deserialize<T>(string json) where T : class => 
+            string.IsNullOrWhiteSpace(json) ? default (T) : JsonSerializer.Deserialize<T>(
+                json,
+                options);
+
+        public static string Serialize<T>(T obj) where T : class =>
+            obj == null ? null : JsonSerializer.Serialize(obj, options);
     }
 }

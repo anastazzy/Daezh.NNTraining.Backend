@@ -1,8 +1,11 @@
-﻿using Innofactor.EfCoreJsonValueConverter;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Innofactor.EfCoreJsonValueConverter;
+using NNTraining.Domain.Tools;
 
 namespace NNTraining.Domain.Models;
 
-public class Model<T> where T: NNParameters
+public class Model
 {
     public Guid Id { get; set; }
     
@@ -12,9 +15,9 @@ public class Model<T> where T: NNParameters
     
     public ModelStatus ModelStatus { get; set; }
     
-    [JsonField]
-    public T? Parameters { get; set; }
+    [Column(TypeName = "jsonb")]
+    public NNParameters? Parameters { get; set; }
     
-    [JsonField]
+    [Column(TypeName = "jsonb")]
     public Dictionary<string, Type>? PairFieldType { get; set; }
 }
