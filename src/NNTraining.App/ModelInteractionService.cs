@@ -7,6 +7,7 @@ using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Enums;
 using NNTraining.Domain.Models;
+using File = System.IO.File;
 
 namespace NNTraining.App;
 
@@ -79,6 +80,8 @@ public class ModelInteractionService : IModelInteractionService
             data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
         }
 
+        var fileNames = Directory.GetFiles(Directory.GetCurrentDirectory());
+        
         var tempFileForTrainModel = $"{model.Name}.csv";
         var objectWithFileFromStorage = await _fileStorage.GetAsync(
             model.Parameters?.NameOfTrainSet!, 
@@ -95,7 +98,15 @@ public class ModelInteractionService : IModelInteractionService
         
         _trainedModel = trainer.Train(model.PairFieldType);
 
-        var a = await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
+        await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
+        
+        var fileNamesAfterSave = Directory.GetFiles(Directory.GetCurrentDirectory());
+
+        var filesToDelete = fileNamesAfterSave.Except(fileNames).ToArray();
+        for (int index = 0; index < filesToDelete.Length; index++)
+        {
+            File.Delete(filesToDelete[index]);
+        }
     }
 
     public async Task<object> Predict(Guid id, object modelForPrediction)
