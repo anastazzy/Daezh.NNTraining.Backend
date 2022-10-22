@@ -1,6 +1,7 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using NNTraining.Contracts;
+using NNTraining.Domain.Enums;
 
 namespace NNTraining.App;
 
@@ -63,7 +64,7 @@ public class DataPredictionModelTrainer : IModelTrainer
         return result;
     }
 
-    public ITrainedModel Train(Dictionary<string, Type> mapColumnNameColumnType)
+    public ITrainedModel Train(Dictionary<string, Types> mapColumnNameColumnType)
     {
         var columns = ModelHelper.CreateTheTextLoaderColumn(mapColumnNameColumnType).ToArray();
 

@@ -6,6 +6,7 @@ using Minio.Exceptions;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Options;
 using NNTraining.DataAccess;
+using NNTraining.Domain.Enums;
 using NNTraining.Domain.Models;
 using File = NNTraining.Domain.Models.File;
 
@@ -121,7 +122,7 @@ public class FileStorage: IFileStorage
         var file = new FileInfo(outputFileName);
         if (!file.Exists)
         {
-            file.Create();
+            file.Create().Close();
         }
         
         var result = await _minio.GetObjectAsync(new GetObjectArgs()
@@ -135,6 +136,25 @@ public class FileStorage: IFileStorage
         }
 
         return result;
+    }
+    
+    public async Task<Stream> GetStreamAsync(string fileName, ModelType bucketName)
+    {
+        var fileStream = new MemoryStream(); 
+        
+        var bucket = bucketName.ToString().ToLower();
+        
+        var result = await _minio.GetObjectAsync(new GetObjectArgs()
+            .WithBucket(bucket)
+            .WithObject(fileName)
+            .WithCallbackStream(stream => stream.CopyToAsync(fileStream)));
+
+        if (result is null)
+        {
+            throw new ArgumentException(nameof(result));
+        }
+
+        return fileStream;
     }
 
     private async Task CreateBucketAsync(ModelType bucketName, FileType location)

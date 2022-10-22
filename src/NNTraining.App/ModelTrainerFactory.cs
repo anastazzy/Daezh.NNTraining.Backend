@@ -5,13 +5,15 @@ namespace NNTraining.App;
 
 public class ModelTrainerFactory : IModelTrainerFactory
 {
+    public string NameOfTrainSet { get; set; }
+    
     public IModelTrainer CreateTrainer(NNParameters parameters)
     {
         switch (parameters)
         {
             case DataPredictionNnParameters dataPredictionNnParameters:
                 return new DataPredictionModelTrainer(
-                    dataPredictionNnParameters.NameOfTrainSet!, 
+                    NameOfTrainSet, 
                     dataPredictionNnParameters.NameOfTargetColumn!,
                     dataPredictionNnParameters.HasHeader,
                     dataPredictionNnParameters.Separators!);

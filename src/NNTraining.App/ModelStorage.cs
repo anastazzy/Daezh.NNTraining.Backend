@@ -6,6 +6,7 @@ using NNTraining.Domain.Models;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using NNTraining.Domain;
+using NNTraining.Domain.Enums;
 
 namespace NNTraining.App;
 
@@ -25,19 +26,19 @@ public class ModelStorage: IModelStorage// save model in minio?
         _dbContext = dbContext;
     }
     
-    public Task<string> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
+    public async Task<string> SaveAsync(ITrainedModel trainedModel, Model model, DataViewSchema dataViewSchema)
     {
         var contentType = "application/zip";
-        var transformer = trainedModel as ITransformer;
+        var transformer = trainedModel.GetTransformer();
         if (transformer is null)
         {
-            return new Task<string>(() => string.Empty);
+            throw new Exception();
         }
         var idFile = Guid.NewGuid();// reflection in Model? - idFileInStorage
         var fileName = idFile + ".zip";
         _mlContext.Model.Save(transformer, dataViewSchema, fileName);
-        using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
-        return _storage.UploadAsync(
+        await using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
+        return await _storage.UploadAsync(
             fileName,
             contentType,
             stream,

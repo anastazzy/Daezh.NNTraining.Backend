@@ -1,4 +1,6 @@
-﻿namespace NNTraining.Domain.Models;
+﻿using NNTraining.Domain.Enums;
+
+namespace NNTraining.Domain.Models;
 
 public class File
 {

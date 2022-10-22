@@ -5,7 +5,7 @@ using NNTraining.Contracts;
 
 namespace NNTraining.App;
 
-public class DataPredictionTrainedModel: ITrainedModel
+public class DataPredictionTrainedModel: ITrainedModel 
 {
     private readonly TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>> _trainedModel;
     private readonly MLContext _mlContext;

@@ -1,4 +1,5 @@
 using NNTraining.Domain.Models;using Microsoft.ML;
+using NNTraining.Domain.Enums;
 using NNTraining.Domain.Models;
 
 namespace NNTraining.Contracts;

@@ -1,6 +1,8 @@
-﻿namespace NNTraining.Contracts;
+﻿using NNTraining.Domain.Enums;
+
+namespace NNTraining.Contracts;
 
 public interface IModelTrainer
 {
-    ITrainedModel Train(Dictionary<string, Type> mapColumnNameColumnType);
+    ITrainedModel Train(Dictionary<string, Types> mapColumnNameColumnType);
 }

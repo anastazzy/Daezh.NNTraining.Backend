@@ -4,6 +4,7 @@ using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
+using NNTraining.Domain.Enums;
 using NNTraining.Domain.Models;
 
 namespace NNTraining.App;
@@ -77,7 +78,6 @@ public class BaseModelService : IBaseModelService
     public async Task<Guid> FillingDataPredictionParamsAsync(DataPredictionInputDto modelDto)
     {
         var transaction = await _dbContext.Database.BeginTransactionAsync();
-        var modelParameters = new DataPredictionNnParameters();
 
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
         if (model is null)
@@ -87,23 +87,21 @@ public class BaseModelService : IBaseModelService
 
         if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
         {
-            modelParameters = new DataPredictionNnParameters
+            var newParameters = new DataPredictionNnParameters
             {
                 NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// может быть несколько сетов, спрашивать, но решить как-то с названиями
                 NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
                 HasHeader = modelDto.Parameters.HasHeader,
                 Separators = modelDto.Parameters.Separators
             };
+
+            model.Parameters = newParameters;
+            model.ModelStatus = ModelStatus.ReadyToTraining;
+            _dbContext.Models.Update(model);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
-        
 
-        model.ModelStatus = ModelStatus.ReadyToTraining;
-        model.Parameters = modelParameters;
-
-        _dbContext.Models.Update(model);
-        await _dbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
-        
         return model.Id;// true or nothing
     }
     

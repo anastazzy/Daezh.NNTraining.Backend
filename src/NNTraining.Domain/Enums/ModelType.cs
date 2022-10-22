@@ -1,4 +1,4 @@
-﻿namespace NNTraining.Domain.Models;
+﻿namespace NNTraining.Domain.Enums;
 
 public enum ModelType
 {

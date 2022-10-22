@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Innofactor.EfCoreJsonValueConverter;
+using NNTraining.Domain.Enums;
 using NNTraining.Domain.Tools;
 
 namespace NNTraining.Domain.Models;
@@ -19,5 +20,5 @@ public class Model
     public NNParameters? Parameters { get; set; }
     
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, Type>? PairFieldType { get; set; }
+    public Dictionary<string, Types>? PairFieldType { get; set; }
 }

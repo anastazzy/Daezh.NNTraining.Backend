@@ -45,7 +45,7 @@ public class NNTrainingDbContext : DbContext
         }
     }
     
-    internal static class JsonHelper
+    private static class JsonHelper
     {
         private static readonly JsonSerializerOptions options = new JsonSerializerOptions
         {
