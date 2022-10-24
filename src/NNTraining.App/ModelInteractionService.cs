@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -109,7 +110,7 @@ public class ModelInteractionService : IModelInteractionService
         }
     }
 
-    public async Task<object> Predict(Guid id, object modelForPrediction)
+    public async Task<object> Predict(Guid id, Dictionary<string, JsonElement> modelForPrediction)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -130,7 +131,7 @@ public class ModelInteractionService : IModelInteractionService
     }
     
     
-    public Dictionary<string,string> GetSchemaOfModel(Guid id)
+    public Dictionary<string,string> GetSchemaOfModel(Guid id)//убрать из схемы целевое поле
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;

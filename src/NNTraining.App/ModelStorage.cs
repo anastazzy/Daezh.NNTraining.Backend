@@ -34,8 +34,7 @@ public class ModelStorage: IModelStorage// save model in minio?
         {
             throw new Exception();
         }
-        var idFile = Guid.NewGuid();// reflection in Model? - idFileInStorage
-        var fileName = idFile + ".zip";
+        var fileName = model.Id + ".zip";
         _mlContext.Model.Save(transformer, dataViewSchema, fileName);
         await using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
         return await _storage.UploadAsync(
@@ -57,13 +56,13 @@ public class ModelStorage: IModelStorage// save model in minio?
         }
 
         var modelFile = await _dbContext.ModelFiles.FirstOrDefaultAsync(x =>
-            x.ModelId == id && x.FileType == FileType.TrainSet);
+            x.ModelId == id && x.FileType == FileType.Model);
         if (modelFile is null)
         {
             throw new ArgumentException("The file with this model was not found");
         }
 
-        var fileWithModel = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);
+        var fileWithModel = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);// при сохранении модели сделать нормальным тип файла
         if (fileWithModel is null)
         {
             throw new ArgumentException("The file with this model was not found");
@@ -75,14 +74,6 @@ public class ModelStorage: IModelStorage// save model in minio?
         var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
         
         var type = ModelHelper.GetTypeOfCurrentFields(model.PairFieldType);
-        
-
-        var trainedModelAsTransformer =
-            trainedModel as TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>>;
-        if (trainedModelAsTransformer is null)
-        {
-            throw new ArgumentException("Error of conversion to transformer");
-        }
 
         switch (bucketName)
         {
@@ -93,7 +84,7 @@ public class ModelStorage: IModelStorage// save model in minio?
                 {
                     throw new ArgumentException("Error of conversion parameters");
                 }
-                return new DataPredictionTrainedModel(trainedModelAsTransformer, _mlContext, type, parameters.NameOfTargetColumn);
+                return new DataPredictionTrainedModel(trainedModel, _mlContext, type, parameters.NameOfTargetColumn);
             }
             default: throw new Exception();
         }

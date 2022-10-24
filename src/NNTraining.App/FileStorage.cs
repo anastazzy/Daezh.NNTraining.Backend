@@ -103,6 +103,7 @@ public class FileStorage: IFileStorage
             Extension = ".zip", 
             Size = size,
             GuidName =  Guid.NewGuid() + ".zip",
+            FileType = FileType.Model
         };
         dbContext.Files.Add(file);
         var idFile = file.Id;

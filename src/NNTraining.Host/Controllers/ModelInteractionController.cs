@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Minio.DataModel;
 using NNTraining.Contracts;
 using NNTraining.Domain;
@@ -25,8 +26,14 @@ public class ModelInteractionController
     }
     
     [HttpPost("predict/{id}")]
-    public Task<object> Predict([FromRoute] Guid id, [FromBody] object objectToPredict)
+    public Task<object> Predict([FromRoute] Guid id, [FromBody] Dictionary<string, JsonElement> objectToPredict)
     {
         return _modelService.Predict(id, objectToPredict);
+    }
+    
+    [HttpGet("predict/{id}")]
+    public Dictionary<string,string> GetSchema([FromRoute] Guid id)
+    {
+        return _modelService.GetSchemaOfModel(id);
     }
 }

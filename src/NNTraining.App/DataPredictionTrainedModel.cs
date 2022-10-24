@@ -1,4 +1,5 @@
-﻿using Microsoft.ML;
+﻿using System.Text.Json;
+using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using NNTraining.Contracts;
@@ -7,13 +8,13 @@ namespace NNTraining.App;
 
 public class DataPredictionTrainedModel: ITrainedModel 
 {
-    private readonly TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>> _trainedModel;
+    private readonly ITransformer _trainedModel;
     private readonly MLContext _mlContext;
     private readonly Type _type;
     private readonly string _nameOfTargetColumn;
     
     public DataPredictionTrainedModel(
-        TransformerChain<RegressionPredictionTransformer<LinearRegressionModelParameters>> trainedModel,
+        ITransformer trainedModel,
         MLContext mlContext,
         Type type,
         string nameOfTargetColumn)
@@ -23,18 +24,8 @@ public class DataPredictionTrainedModel: ITrainedModel
         _type = type;
         _nameOfTargetColumn = nameOfTargetColumn;
     }
-    public object Predict(object data)
+    public object Predict(Dictionary<string, JsonElement> data)
     {
-        Dictionary<string, string> inputModelForUsing;
-        try
-        {
-            inputModelForUsing = (Dictionary<string, string>) data;
-        }
-        catch (InvalidCastException e)
-        {
-            throw new InvalidCastException("The data not be able passing in dictionary",e);
-        }
-
         if (_type is null)
         {
             throw new ArgumentException("The type of model is null");
@@ -51,23 +42,23 @@ public class DataPredictionTrainedModel: ITrainedModel
             .Where(x => x.Name != _nameOfTargetColumn);
         foreach (var currentPropertyInfo in prop)
         {
-            var inputFieldValue = inputModelForUsing
+            var inputFieldValue = data
                 .Where(x => x.Key == currentPropertyInfo.Name)
                 .Select(x => x.Value)
                 .FirstOrDefault();
-            if (currentPropertyInfo.PropertyType == typeof(string))
+            if (inputFieldValue.ValueKind == JsonValueKind.String)
             {
-                currentPropertyInfo.SetValue(instance, inputFieldValue);
+                currentPropertyInfo.SetValue(instance, inputFieldValue.GetString());
             }
             else
             {
-                if(float.TryParse(inputFieldValue, out var value))
+                if (inputFieldValue.ValueKind == JsonValueKind.Number)
                 {
-                    currentPropertyInfo.SetValue(instance, value);
+                    currentPropertyInfo.SetValue(instance, inputFieldValue.GetSingle());
                 }
                 else
                 {
-                    throw new ArgumentException("Error with parse of input value to Single");
+                    throw new ArgumentException("The was not determined");
                 }
             }
         }
