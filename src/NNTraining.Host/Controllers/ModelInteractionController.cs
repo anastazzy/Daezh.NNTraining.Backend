@@ -1,11 +1,8 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Minio.DataModel;
 using NNTraining.Contracts;
-using NNTraining.Domain;
-using NNTraining.Domain.Dto;
 
-namespace NNTraining.Api.Controllers;
+namespace NNTraining.Host.Controllers;
 
 
 [ApiController]

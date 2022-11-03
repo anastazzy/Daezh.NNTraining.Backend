@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Minio.DataModel;
 using NNTraining.Contracts;
-using NNTraining.Domain;
 using NNTraining.Domain.Enums;
-using NNTraining.Domain.Models;
 
-namespace NNTraining.Api.Controllers;
+namespace NNTraining.Host.Controllers;
 
 
 [ApiController]

@@ -2,8 +2,9 @@
 using NNTraining.Contracts;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
+using NNTraining.Domain.Models;
 
-namespace NNTraining.Api.Controllers;
+namespace NNTraining.Host.Controllers;
 
 
 [ApiController]
@@ -47,6 +48,12 @@ public class BaseModelService
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()
     {
         return _modelService.GetListOfModelsAsync();
+    }
+    
+    [HttpGet("{id:guid}")]
+    public Task<Model?> GetModelAsync([FromRoute] Guid id)
+    {
+        return _modelService.GetModelAsync(id);
     }
 
     [HttpPut("id")]

@@ -118,6 +118,12 @@ public class BaseModelService : IBaseModelService
         }).ToArray();
     }
 
+    public async Task<Model?> GetModelAsync(Guid id)
+    {
+        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
+        return model;
+    }
+
     public async Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
