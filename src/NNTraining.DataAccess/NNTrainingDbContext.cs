@@ -28,11 +28,12 @@ public class NNTrainingDbContext : DbContext
         modelBuilder.Entity<Model>()
             .Property(x => x.Parameters)
             .HasConversion(new JsonValueConverter<NNParameters>());
-        modelBuilder.Entity<ModelFile>().HasKey(x => new
+        
+        modelBuilder.Entity<ModelFile>().HasIndex(x => new
         {
             x.ModelId,
             x.FileId
-        });
+        }).IsUnique();
     }
 
     public class JsonValueConverter<T> : ValueConverter<T, string> where T : class

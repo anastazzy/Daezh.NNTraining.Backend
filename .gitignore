@@ -30,6 +30,10 @@ Bin/
 obj/
 Obj/
 .idea/
+*/**/bin/Debug
+*/**/bin/Release
+*/**/obj/Debug
+*/**/obj/Release
 
 # User-specific stuff:
 .idea/*

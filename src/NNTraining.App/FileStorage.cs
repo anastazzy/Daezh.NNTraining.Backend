@@ -70,7 +70,7 @@ public class FileStorage: IFileStorage
         return newFileName;
     }
 
-    private async Task<string?> SaveTrainSet(Guid idModel, string fileName, long size)
+    private async Task<string?> SaveTrainSet(Guid modelId, string fileName, long size)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -81,19 +81,22 @@ public class FileStorage: IFileStorage
             Size = size,
             GuidName =   Guid.NewGuid() + ".csv",
         };
+        
         dbContext.Files.Add(file);
         var idFile = file.Id;
+        
         dbContext.ModelFiles.Add(new ModelFile()
         {
             FileId = idFile,
-            ModelId = idModel,
+            ModelId = modelId,
             FileType = FileType.TrainSet
         });
+        
         await dbContext.SaveChangesAsync();
         return file.GuidName;
     }
     
-    private async Task<string?> SaveModel(Guid idModel, string fileName, long size)
+    private async Task<string?> SaveModel(Guid modelId, string fileName, long size)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -105,14 +108,25 @@ public class FileStorage: IFileStorage
             GuidName =  Guid.NewGuid() + ".zip",
             FileType = FileType.Model
         };
+        
         dbContext.Files.Add(file);
-        var idFile = file.Id;
-        dbContext.ModelFiles.Add(new ModelFile()
+        var fileId = file.Id;
+
+        var currentModelFile = dbContext.ModelFiles.FirstOrDefault(x => x.ModelId == modelId && x.FileType == FileType.Model);
+        if (currentModelFile is null)
         {
-            FileId = idFile,
-            ModelId = idModel,
-            FileType = FileType.Model
-        });
+            dbContext.ModelFiles.Add(new ModelFile()
+            {
+                FileId = fileId,
+                ModelId = modelId,
+                FileType = FileType.Model
+            });
+        }
+        else
+        {
+            currentModelFile.FileId = fileId;
+        }
+
         await dbContext.SaveChangesAsync();
         return file.GuidName;
     }

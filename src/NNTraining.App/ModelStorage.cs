@@ -34,9 +34,12 @@ public class ModelStorage: IModelStorage// save model in minio?
         {
             throw new Exception();
         }
+        
         var fileName = model.Id + ".zip";
+        
         _mlContext.Model.Save(transformer, dataViewSchema, fileName);
         await using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
+        
         return await _storage.UploadAsync(
             fileName,
             contentType,

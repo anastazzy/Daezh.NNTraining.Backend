@@ -40,7 +40,7 @@ public class BaseModelService : IBaseModelService
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
         if (model is null)
         {
-            throw new Exception("Model update ERROR");
+            throw new Exception("Model not found");
         }
 
         var formFile = modelDto.UploadTrainSet;
@@ -84,12 +84,14 @@ public class BaseModelService : IBaseModelService
         {
             throw new Exception("Model update ERROR");
         }
+        //добавить проверку, что такое имя файла действительно существует
+        //здесь пишется имя потому, что человек может несколько тренировочных сетов загрузить
 
         if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
         {
             var newParameters = new DataPredictionNnParameters
             {
-                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// может быть несколько сетов, спрашивать, но решить как-то с названиями
+                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// TODO: может быть несколько сетов, спрашивать, но решить как-то с названиями
                 NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
                 HasHeader = modelDto.Parameters.HasHeader,
                 Separators = modelDto.Parameters.Separators

@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using Microsoft.ML.Trainers;
 using NNTraining.Contracts;
 
 namespace NNTraining.App;
@@ -24,6 +23,7 @@ public class DataPredictionTrainedModel: ITrainedModel
         _type = type;
         _nameOfTargetColumn = nameOfTargetColumn;
     }
+    
     public object Predict(Dictionary<string, JsonElement> data)
     {
         if (_type is null)
@@ -71,29 +71,35 @@ public class DataPredictionTrainedModel: ITrainedModel
                 typeof(SchemaDefinition),
                 typeof(SchemaDefinition),
             });
+        
         var generic = method!.MakeGenericMethod(_type, typeof(PredictionResult));
         if (_trainedModel is null)
         {
             throw new ArgumentException("The Model does not exist at the current moment");
         }
+        
         dynamic predictor = generic.Invoke(_mlContext.Model, new object[]{ _trainedModel, true, null!, null! })!;
         if (predictor is null)
         {
             throw new ArgumentException("Error with invoke the generis function");
         }
+        
         var a = (object) predictor;
         var engine = a.GetType().GetMethods()
             .Where(x => x.GetParameters().Length < 2)
             .FirstOrDefault(x => x.Name == "Predict");
+        
         if (engine is null)
         {
             throw new ArgumentException("Engine is null");
         }
+        
         var res = engine.Invoke((object) predictor, new []{instance});
         if (res is null)
         {
             throw new ArgumentException("Error with invoke the generis function");
         }
+        
         var result = (PredictionResult) res;
         
         return result.Score;
@@ -104,6 +110,7 @@ public class DataPredictionTrainedModel: ITrainedModel
         return _trainedModel;
     }
 }
+
 class PredictionResult
 {
     public float Score { get; init; }

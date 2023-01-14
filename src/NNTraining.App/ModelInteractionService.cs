@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -7,7 +6,6 @@ using NNTraining.Contracts;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Enums;
-using NNTraining.Domain.Models;
 using File = System.IO.File;
 
 namespace NNTraining.App;
@@ -38,6 +36,7 @@ public class ModelInteractionService : IModelInteractionService
         // 1.1 дозаполнить данные, если они предоставлены
         // 2 получить из фабрики тренер
         // 3 сохранить обчуенную модель
+        // 4 если обученная модель уже есть, заменить идентификатор файла
 
         var model = dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model is null)
@@ -81,10 +80,11 @@ public class ModelInteractionService : IModelInteractionService
             data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
         }
 
-        var fileNames = Directory.GetFiles(Directory.GetCurrentDirectory());
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var oldFiles = Directory.GetFiles(currentDirectory);
         
         var tempFileForTrainModel = $"{model.Name}.csv";
-        var objectWithFileFromStorage = await _fileStorage.GetAsync(
+        await _fileStorage.GetAsync(
             model.Parameters?.NameOfTrainSet!, 
             ModelType.DataPrediction,
             tempFileForTrainModel);
@@ -94,19 +94,17 @@ public class ModelInteractionService : IModelInteractionService
         {
             NameOfTrainSet = tempFileForTrainModel
         };
+        
         var trainer = factory.CreateTrainer(model.Parameters);
-        
-        
         _trainedModel = trainer.Train(model.PairFieldType);
-
         await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
         
-        var fileNamesAfterSave = Directory.GetFiles(Directory.GetCurrentDirectory());
+        var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
 
-        var filesToDelete = fileNamesAfterSave.Except(fileNames).ToArray();
-        for (int index = 0; index < filesToDelete.Length; index++)
+        var filesToDelete = fileNamesAfterSave.Except(oldFiles).ToArray();
+        foreach (var item in filesToDelete)
         {
-            File.Delete(filesToDelete[index]);
+            File.Delete(item);
         }
     }
 
