@@ -37,6 +37,10 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddLocalization();
+builder.Services.AddControllersWithViews()
+    .AddDataAnnotationsLocalization();
+
 builder.Services.AddOptions<MinioOptions>();
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
 
@@ -49,6 +53,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    ApplyCurrentCultureToResponseHeaders = true
+});
 
 app.UseHttpsRedirection();
 

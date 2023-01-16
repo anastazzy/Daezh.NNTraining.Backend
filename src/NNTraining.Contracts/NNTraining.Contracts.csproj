@@ -21,4 +21,32 @@
       <PackageReference Include="Minio" Version="4.0.5" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\EnumDescriptionResources.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>EnumDescriptionResources.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\EnumDescriptionResources.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>EnumDescriptionResources.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\EnumDescriptionResources.ru.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>EnumDescriptionResources.ru.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\EnumDescriptionResources.en.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>EnumTranslationResources.resx</DependentUpon>
+      </Compile>
+      <Compile Update="Resources\EnumDescriptionResources.ru.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>EnumDescriptionResources.ru.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

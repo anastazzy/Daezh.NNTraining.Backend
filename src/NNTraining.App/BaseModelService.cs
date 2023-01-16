@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using NNTraining.Contracts;
+using NNTraining.Contracts.Resources;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
@@ -13,10 +15,15 @@ public class BaseModelService : IBaseModelService
 {
     private readonly NNTrainingDbContext _dbContext;
     private readonly IFileStorage _fileStorage;
+    private readonly IStringLocalizer<EnumDescriptionResources> _localizer;
 
-    public BaseModelService(NNTrainingDbContext dbContext, IFileStorage fileStorage)
+    public BaseModelService(
+        NNTrainingDbContext dbContext, 
+        IFileStorage fileStorage, 
+        IStringLocalizer<EnumDescriptionResources> localizer)
     {
         _fileStorage = fileStorage;
+        _localizer = localizer;
         _dbContext = dbContext;
     }
 
@@ -152,11 +159,11 @@ public class BaseModelService : IBaseModelService
 
     public IEnumerable<TypeOutputDto> GetModelTypes()
     {
-        return Enum.GetValues<ModelType>()
+         return Enum.GetValues<ModelType>()
             .Select(x => new TypeOutputDto
             {
                 Id = (int) x,
-                Name = x.ToString(),
+                Name = _localizer[x.ToString()],
             });
     }
 }
