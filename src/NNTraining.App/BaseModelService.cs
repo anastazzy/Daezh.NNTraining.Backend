@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Resources;
@@ -91,14 +90,13 @@ public class BaseModelService : IBaseModelService
         {
             throw new Exception("Model update ERROR");
         }
-        //добавить проверку, что такое имя файла действительно существует
-        //здесь пишется имя потому, что человек может несколько тренировочных сетов загрузить
+        //TODO: добавить проверку, что такое имя файла действительно существует
 
         if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
         {
             var newParameters = new DataPredictionNnParameters
             {
-                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// TODO: может быть несколько сетов, спрашивать, но решить как-то с названиями
+                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// TODO: может быть несколько сетов, спрашивать, но решить как-то с человекочитаемым названиями
                 NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
                 HasHeader = modelDto.Parameters.HasHeader,
                 Separators = modelDto.Parameters.Separators
@@ -121,16 +119,28 @@ public class BaseModelService : IBaseModelService
         {
             Id = model.Id,
             Name = model.Name,
-            ModelStatus = model.ModelStatus,
-            ModelType = model.ModelType,
-            NameTrainSet = model.Parameters?.NameOfTrainSet
+            StatusName = _localizer[model.ModelStatus.ToString()],
+            TypeName = _localizer[model.ModelType.ToString()],
+            Parameters = model.Parameters
         }).ToArray();
     }
 
-    public async Task<Model?> GetModelAsync(Guid id)
+    public async Task<ModelOutputDto?> GetModelAsync(Guid id)
     {
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == id);
-        return model;
+        //TODO: Add the custom exceptions and middleware for catching them
+        if (model is null)
+        {
+            throw new ArgumentException("Not found model");
+        }
+        return new ModelOutputDto
+        {
+            Id = model.Id,
+            Name = model.Name,
+            StatusName = _localizer[model.ModelStatus.ToString()],
+            TypeName = _localizer[model.ModelType.ToString()],
+            Parameters = model.Parameters
+        };
     }
 
     public async Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto)

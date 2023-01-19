@@ -16,7 +16,7 @@ public interface IBaseModelService
     
     Task<ModelOutputDto[]> GetListOfModelsAsync();
     
-    Task<Model?> GetModelAsync(Guid id);
+    Task<ModelOutputDto?> GetModelAsync(Guid id);
     
     Task<bool> UpdateModelAsync(Guid id, DataPredictionInputDto modelDto);
     

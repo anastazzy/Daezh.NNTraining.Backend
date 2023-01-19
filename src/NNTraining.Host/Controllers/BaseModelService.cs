@@ -51,7 +51,7 @@ public class BaseModelService
     }
     
     [HttpGet("{id:guid}")]
-    public Task<Model?> GetModelAsync([FromRoute] Guid id)
+    public Task<ModelOutputDto?> GetModelAsync([FromRoute] Guid id)
     {
         return _modelService.GetModelAsync(id);
     }
