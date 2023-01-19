@@ -31,12 +31,6 @@ public class ModelInteractionService : IModelInteractionService
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
-        // 
-        // 1 получить данные из бд для обучения модели
-        // 1.1 дозаполнить данные, если они предоставлены
-        // 2 получить из фабрики тренер
-        // 3 сохранить обчуенную модель
-        // 4 если обученная модель уже есть, заменить идентификатор файла
 
         var model = dbContext.Models.FirstOrDefault(x => x.Id == id);
         if (model is null)
@@ -48,8 +42,7 @@ public class ModelInteractionService : IModelInteractionService
         {
             throw new ArgumentException("The model not ready for training. You must specify the file - train set for training.");
         }
-        //для следующего пункта необходимо скачать а потом удалить с хоста файл - тренировочкный сет
-        //попробовать получить стрим с минио
+        
         var parameters = model.Parameters;
         if (parameters?.NameOfTrainSet is null) 
         {
@@ -70,6 +63,7 @@ public class ModelInteractionService : IModelInteractionService
             }
             default: throw new Exception();
         }
+
         await dbContext.SaveChangesAsync();
 
         //creation of dataViewSchema for save model in storage
@@ -89,7 +83,7 @@ public class ModelInteractionService : IModelInteractionService
             ModelType.DataPrediction,
             tempFileForTrainModel);
         
-        //creation the trainer and train model
+        //creation the trainer and train the model
         var factory = new ModelTrainerFactory
         {
             NameOfTrainSet = tempFileForTrainModel
@@ -98,6 +92,9 @@ public class ModelInteractionService : IModelInteractionService
         var trainer = factory.CreateTrainer(model.Parameters);
         _trainedModel = trainer.Train(model.PairFieldType);
         await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
+        
+        model.ModelStatus = ModelStatus.Trained;
+        await dbContext.SaveChangesAsync();
         
         var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
 
@@ -120,7 +117,6 @@ public class ModelInteractionService : IModelInteractionService
         }
         
         //getting trained model from a model storage
-
         var trainedModel = await _modelStorage.GetAsync(id, model.ModelType);
         
         //there dataset or object need for prediction
@@ -129,7 +125,7 @@ public class ModelInteractionService : IModelInteractionService
     }
     
     
-    public Dictionary<string,string> GetSchemaOfModel(Guid id)//убрать из схемы целевое поле
+    public Dictionary<string,string> GetSchemaOfModel(Guid id)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -144,6 +140,23 @@ public class ModelInteractionService : IModelInteractionService
         foreach (var (name, type) in model.PairFieldType)
         {
             fieldTypeField.Add(name, type.ToString());
+        }
+
+        string? targetFieldName;
+        
+        switch (model.Parameters)
+        {
+            case DataPredictionNnParameters dataPredictionNnParameters:
+            {
+                targetFieldName = dataPredictionNnParameters.NameOfTargetColumn;
+                break;
+            }
+            default: throw new Exception();
+        }
+
+        if (targetFieldName is not null)
+        {
+            fieldTypeField.Remove(targetFieldName);
         }
 
         return fieldTypeField;

@@ -69,8 +69,14 @@ public class BaseModelService
     }
     
     [HttpGet("types")]
-    public IEnumerable<TypeOutputDto> GetModelTypes()
+    public IEnumerable<EnumOutputDto> GetModelTypes()
     {
         return _modelService.GetModelTypes();
+    }
+    
+    [HttpGet("statuses")]
+    public IEnumerable<EnumOutputDto> GetModelStatuses()
+    {
+        return _modelService.GetModelStatuses();
     }
 }

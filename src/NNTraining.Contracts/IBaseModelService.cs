@@ -22,5 +22,7 @@ public interface IBaseModelService
     
     Task<bool> DeleteModelAsync(Guid id);
     
-    IEnumerable<TypeOutputDto> GetModelTypes();
+    IEnumerable<EnumOutputDto> GetModelTypes();
+    
+    IEnumerable<EnumOutputDto> GetModelStatuses();
 }

@@ -157,10 +157,20 @@ public class BaseModelService : IBaseModelService
         return true;
     }
 
-    public IEnumerable<TypeOutputDto> GetModelTypes()
+    public IEnumerable<EnumOutputDto> GetModelTypes()
     {
          return Enum.GetValues<ModelType>()
-            .Select(x => new TypeOutputDto
+            .Select(x => new EnumOutputDto
+            {
+                Id = (int) x,
+                Name = _localizer[x.ToString()],
+            });
+    }
+    
+    public IEnumerable<EnumOutputDto> GetModelStatuses()
+    {
+        return Enum.GetValues<ModelStatus>()
+            .Select(x => new EnumOutputDto
             {
                 Id = (int) x,
                 Name = _localizer[x.ToString()],
