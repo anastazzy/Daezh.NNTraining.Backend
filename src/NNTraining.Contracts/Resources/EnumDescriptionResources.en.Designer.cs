@@ -88,11 +88,65 @@ namespace NNTraining.Contracts.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deleted.
+        /// </summary>
+        internal static string Deleted {
+            get {
+                return ResourceManager.GetString("Deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initialized.
+        /// </summary>
+        internal static string Initialized {
+            get {
+                return ResourceManager.GetString("Initialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Need a parameters.
+        /// </summary>
+        internal static string NeedAParameters {
+            get {
+                return ResourceManager.GetString("NeedAParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Paints.
         /// </summary>
         internal static string Paints {
             get {
                 return ResourceManager.GetString("Paints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready to training.
+        /// </summary>
+        internal static string ReadyToTraining {
+            get {
+                return ResourceManager.GetString("ReadyToTraining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Still training.
+        /// </summary>
+        internal static string StillTraining {
+            get {
+                return ResourceManager.GetString("StillTraining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trained.
+        /// </summary>
+        internal static string Trained {
+            get {
+                return ResourceManager.GetString("Trained", resourceCulture);
             }
         }
     }

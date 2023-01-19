@@ -29,4 +29,22 @@
     <data name="Paints" xml:space="preserve">
       <value>Paints</value>
     </data>
+    <data name="Initialized" xml:space="preserve">
+        <value>Initialized</value>
+    </data>
+    <data name="NeedAParameters" xml:space="preserve">
+        <value>Need a parameters</value>
+    </data>
+    <data name="ReadyToTraining" xml:space="preserve">
+        <value>Ready to training</value>
+    </data>
+    <data name="StillTraining" xml:space="preserve">
+        <value>Still training</value>
+    </data>
+    <data name="Trained" xml:space="preserve">
+        <value>Trained</value>
+    </data>
+    <data name="Deleted" xml:space="preserve">
+        <value>Deleted</value>
+    </data>
 </root>

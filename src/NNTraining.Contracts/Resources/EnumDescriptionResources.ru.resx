@@ -19,7 +19,7 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="DataPrediction" xml:space="preserve">
-        <value>Закономерность значений</value>
+        <value>Вычисление закономерностей</value>
     </data>
     <data name="ClassifyMnist" xml:space="preserve">
         <value>Распознавание чисел</value>
@@ -29,5 +29,23 @@
     </data>
     <data name="Paints" xml:space="preserve">
         <value>Рисование</value>
+    </data>
+    <data name="Initialized" xml:space="preserve">
+        <value>Инициализованна</value>
+    </data>
+    <data name="NeedAParameters" xml:space="preserve">
+        <value>Необходимо задать параметры</value>
+    </data>
+    <data name="ReadyToTraining" xml:space="preserve">
+        <value>Готова к тренировке</value>
+    </data>
+    <data name="StillTraining" xml:space="preserve">
+        <value>В процессе тренировки</value>
+    </data>
+    <data name="Trained" xml:space="preserve">
+        <value>Готова к использованию</value>
+    </data>
+    <data name="Deleted" xml:space="preserve">
+        <value>Удалена</value>
     </data>
 </root>

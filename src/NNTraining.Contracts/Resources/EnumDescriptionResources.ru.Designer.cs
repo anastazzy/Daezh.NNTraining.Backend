@@ -79,11 +79,38 @@ namespace NNTraining.Contracts.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Закономерность значений.
+        ///   Looks up a localized string similar to Вычисление закономерностей.
         /// </summary>
         internal static string DataPrediction {
             get {
                 return ResourceManager.GetString("DataPrediction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Удалена.
+        /// </summary>
+        internal static string Deleted {
+            get {
+                return ResourceManager.GetString("Deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Инициализованна.
+        /// </summary>
+        internal static string Initialized {
+            get {
+                return ResourceManager.GetString("Initialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Необходимо задать параметры.
+        /// </summary>
+        internal static string NeedAParameters {
+            get {
+                return ResourceManager.GetString("NeedAParameters", resourceCulture);
             }
         }
         
@@ -93,6 +120,33 @@ namespace NNTraining.Contracts.Resources {
         internal static string Paints {
             get {
                 return ResourceManager.GetString("Paints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Готова к тренировке.
+        /// </summary>
+        internal static string ReadyToTraining {
+            get {
+                return ResourceManager.GetString("ReadyToTraining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to В процессе тренировки.
+        /// </summary>
+        internal static string StillTraining {
+            get {
+                return ResourceManager.GetString("StillTraining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Готова к использованию.
+        /// </summary>
+        internal static string Trained {
+            get {
+                return ResourceManager.GetString("Trained", resourceCulture);
             }
         }
     }
