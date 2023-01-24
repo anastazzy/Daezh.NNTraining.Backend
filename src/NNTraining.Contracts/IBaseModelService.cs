@@ -14,6 +14,8 @@ public interface IBaseModelService
     
     Task<string> UploadDatasetOfModelAsync(UploadingDatasetModelDto modelDto);
     
+    Task<string> SetDatasetOfModelAsync(ModelFileDto modelDto);
+    
     Task<ModelOutputDto[]> GetListOfModelsAsync();
     
     Task<ModelOutputDto?> GetModelAsync(Guid id);
@@ -25,4 +27,6 @@ public interface IBaseModelService
     IEnumerable<EnumOutputDto> GetModelTypes();
     
     IEnumerable<EnumOutputDto> GetModelStatuses();
+
+    FileOutputDto[] GetUploadedTrainSetsForModel(Guid modelId);
 }

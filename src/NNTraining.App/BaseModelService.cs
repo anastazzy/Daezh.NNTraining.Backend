@@ -55,9 +55,11 @@ public class BaseModelService : IBaseModelService
         {
             throw new ArgumentException("The extension of file must be .csv");
         }
-
+        
+        var currentTime = DateTime.UtcNow.TimeOfDay;
+        
         var guidNameTrainSet = await _fileStorage.UploadAsync(
-            formFile.Name,
+            formFile.Name + "_" + currentTime,
             formFile.ContentType,
             formFile.OpenReadStream(),
             model.ModelType,
@@ -79,6 +81,47 @@ public class BaseModelService : IBaseModelService
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
         return guidNameTrainSet;
+    }
+
+    public async Task<string> SetDatasetOfModelAsync(ModelFileDto modelDto)
+    {
+        var transaction = await _dbContext.Database.BeginTransactionAsync();
+        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
+        if (model is null)
+        {
+            throw new Exception("Model not found");
+        }
+        
+        var currentTime = DateTime.UtcNow.TimeOfDay;
+
+        model.Parameters =  model.ModelType switch 
+        {
+            ModelType.DataPrediction => new DataPredictionNnParameters()
+            {
+                NameOfTrainSet = modelDto.FileName
+            },
+            _ => throw new Exception()
+        };
+        model.ModelStatus = ModelStatus.NeedAParameters;
+        
+        _dbContext.Update(model);
+        
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return modelDto.FileName;
+    }
+
+    public FileOutputDto[] GetUploadedTrainSetsForModel(Guid modelId)
+    { 
+        return _dbContext.ModelFiles
+            .Where(x => x.ModelId == modelId && x.FileType == FileType.TrainSet)
+            .Join(_dbContext.Files, mf => mf.FileId, f => f.Id, (mf, f) => new FileOutputDto
+            {
+                ModelFileId = mf.Id,
+                FileId = f.Id,
+                FileName = f.OriginalName,
+                FileNameInStorage = f.GuidName
+            }).ToArray();
     }
 
     public async Task<Guid> FillingDataPredictionParamsAsync(DataPredictionInputDto modelDto)

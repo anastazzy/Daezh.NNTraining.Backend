@@ -24,7 +24,7 @@ public class BaseModelService
         return _modelService.InitializeModelAsync(modelDto);
     }
     
-    [HttpPost("{id:Guid}/filling-params")]
+    [HttpPost("{id:Guid}/params")]
     public Task<Guid> FillingParamsModel([FromRoute] Guid id, [FromBody] DataPredictionNnParameters parameters)
     {
         return _modelService.FillingDataPredictionParamsAsync(new DataPredictionInputDto
@@ -34,16 +34,6 @@ public class BaseModelService
         });
     }
 
-    [HttpPost("{id:Guid}/upload-train-set")]
-    public Task<string> UploadTrainSet([FromRoute] Guid id, IFormFile trainSet)
-    {
-        return _modelService.UploadDatasetOfModelAsync(new UploadingDatasetModelDto
-        {
-            Id = id,
-            UploadTrainSet = trainSet,
-        });
-    }
-    
     [HttpGet]
     public Task<ModelOutputDto[]> GetArrayOfModelsAsync()
     {
@@ -54,6 +44,32 @@ public class BaseModelService
     public Task<ModelOutputDto?> GetModelAsync([FromRoute] Guid id)
     {
         return _modelService.GetModelAsync(id);
+    } 
+    
+    [HttpPost("{id:Guid}/train-sets")]
+    public Task<string> UploadTrainSet([FromRoute] Guid id, IFormFile trainSet)
+    {
+        return _modelService.UploadDatasetOfModelAsync(new UploadingDatasetModelDto
+        {
+            Id = id,
+            UploadTrainSet = trainSet,
+        });
+    }
+    
+    [HttpPatch("{id:Guid}/train-sets")]
+    public Task<string> SettingTrainSet([FromRoute] Guid id, [FromQuery] string name)
+    {
+        return _modelService.SetDatasetOfModelAsync(new ModelFileDto
+        {
+            Id = id,
+            FileName = name,
+        });
+    }
+    
+    [HttpGet("{id:guid}/train-sets")]
+    public FileOutputDto[] GetUploadedTrainSetsOfModel([FromRoute] Guid id)
+    {
+        return _modelService.GetUploadedTrainSetsForModel(id);
     }
 
     [HttpPut("id")]
