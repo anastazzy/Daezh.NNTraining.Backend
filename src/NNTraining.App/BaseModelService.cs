@@ -59,7 +59,7 @@ public class BaseModelService : IBaseModelService
         var currentTime = DateTime.UtcNow.TimeOfDay;
         
         var guidNameTrainSet = await _fileStorage.UploadAsync(
-            formFile.Name + "_" + currentTime,
+            formFile.FileName + "_" + currentTime,
             formFile.ContentType,
             formFile.OpenReadStream(),
             model.ModelType,
@@ -139,7 +139,7 @@ public class BaseModelService : IBaseModelService
         {
             var newParameters = new DataPredictionNnParameters
             {
-                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,// TODO: может быть несколько сетов, спрашивать, но решить как-то с человекочитаемым названиями
+                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
                 NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
                 HasHeader = modelDto.Parameters.HasHeader,
                 Separators = modelDto.Parameters.Separators
@@ -152,7 +152,7 @@ public class BaseModelService : IBaseModelService
             await transaction.CommitAsync();
         }
 
-        return model.Id;// true or nothing
+        return model.Id;
     }
     
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
