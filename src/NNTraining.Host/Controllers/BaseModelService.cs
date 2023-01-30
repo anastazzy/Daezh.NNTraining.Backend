@@ -2,7 +2,6 @@
 using NNTraining.Contracts;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
-using NNTraining.Domain.Models;
 
 namespace NNTraining.Host.Controllers;
 
@@ -52,7 +51,12 @@ public class BaseModelService
         return _modelService.UploadDatasetOfModelAsync(new UploadingDatasetModelDto
         {
             Id = id,
-            UploadTrainSet = trainSet,
+            UploadTrainSet = new FileInputDto
+            {
+                ContentType = trainSet.ContentType,
+                FileName = trainSet.FileName,
+                Stream = trainSet.OpenReadStream()
+            },
         });
     }
     

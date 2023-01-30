@@ -49,9 +49,13 @@ public class BaseModelService : IBaseModelService
             throw new Exception("Model not found");
         }
 
-        var formFile = modelDto.UploadTrainSet;
-        var contentType = formFile.ContentType;
-        if (!contentType.Contains("csv", StringComparison.OrdinalIgnoreCase))
+        var file = modelDto.UploadTrainSet;
+        if (file?.ContentType is null || file.Stream is null)
+        {
+            throw new ArgumentException("File is not reading");
+        }
+        
+        if (!file.ContentType.Contains("csv", StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException("The extension of file must be .csv");
         }
@@ -59,9 +63,9 @@ public class BaseModelService : IBaseModelService
         var currentTime = DateTime.UtcNow.TimeOfDay;
         
         var guidNameTrainSet = await _fileStorage.UploadAsync(
-            formFile.FileName + "_" + currentTime,
-            formFile.ContentType,
-            formFile.OpenReadStream(),
+            file.FileName + "_" + currentTime,
+            file.ContentType,
+            file.Stream,
             model.ModelType,
             model.Id,
             FileType.TrainSet);

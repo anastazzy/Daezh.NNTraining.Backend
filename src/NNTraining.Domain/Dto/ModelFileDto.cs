@@ -4,5 +4,5 @@ public class ModelFileDto
 {
     public Guid Id { get; set; }
     
-    public string FileName { get; set; }
+    public string? FileName { get; set; }
 }

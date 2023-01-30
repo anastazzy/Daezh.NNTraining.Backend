@@ -7,5 +7,5 @@ public class UploadingDatasetModelDto
 {
     public Guid Id { get; set; }
     
-    public IFormFile? UploadTrainSet { get; set; }
+    public FileInputDto? UploadTrainSet { get; set; }
 }
