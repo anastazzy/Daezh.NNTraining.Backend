@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Localization;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Resources;
@@ -43,7 +44,8 @@ public class BaseModelService : IBaseModelService
     public async Task<string> UploadDatasetOfModelAsync(UploadingDatasetModelDto modelDto)
     {
         var transaction = await _dbContext.Database.BeginTransactionAsync();
-        var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
+        var model = await _dbContext.Models
+            .FirstOrDefaultAsync(x => x.Id == modelDto.Id);
         if (model is null)
         {
             throw new Exception("Model not found");
@@ -72,7 +74,7 @@ public class BaseModelService : IBaseModelService
 
         model.Parameters =  model.ModelType switch 
         {
-            ModelType.DataPrediction => new DataPredictionNnParameters()
+            ModelType.DataPrediction => new DataPredictionNnParameters
             {
                 NameOfTrainSet = guidNameTrainSet
             },
@@ -87,7 +89,7 @@ public class BaseModelService : IBaseModelService
         return guidNameTrainSet;
     }
 
-    public async Task<string> SetDatasetOfModelAsync(ModelFileDto modelDto)
+    public async Task<string?> SetDatasetOfModelAsync(ModelFileDto modelDto)
     {
         var transaction = await _dbContext.Database.BeginTransactionAsync();
         var model = await _dbContext.Models.FirstOrDefaultAsync(x => x.Id == modelDto.Id);
@@ -95,9 +97,26 @@ public class BaseModelService : IBaseModelService
         {
             throw new Exception("Model not found");
         }
-        
-        var currentTime = DateTime.UtcNow.TimeOfDay;
 
+        var filesOfCurrentModel = _dbContext.ModelFiles
+            .Where(x => x.ModelId == modelDto.Id && x.FileType == FileType.TrainSet)
+            .Join(_dbContext.Files,
+                modelFile => modelFile.FileId,
+                file => file.Id,
+                (modelFile, file) => new
+                {
+                    OriginalName = file.OriginalName,
+                })
+            .ToHashSet();
+
+        if (!filesOfCurrentModel.Contains(new
+            {
+                OriginalName = modelDto.FileName
+            }))
+        {
+            throw new Exception("The same file does not contains in file list of current model");
+        }
+        
         model.Parameters =  model.ModelType switch 
         {
             ModelType.DataPrediction => new DataPredictionNnParameters()
@@ -137,13 +156,13 @@ public class BaseModelService : IBaseModelService
         {
             throw new Exception("Model update ERROR");
         }
-        //TODO: добавить проверку, что такое имя файла действительно существует
+        //TODO: delete the nameOfTrainSet property from dto
 
         if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
         {
             var newParameters = new DataPredictionNnParameters
             {
-                NameOfTrainSet = modelDto.Parameters.NameOfTrainSet,
+                NameOfTrainSet = model.Parameters?.NameOfTrainSet?? modelDto.Parameters.NameOfTrainSet,
                 NameOfTargetColumn = modelDto.Parameters.NameOfTargetColumn,
                 HasHeader = modelDto.Parameters.HasHeader,
                 Separators = modelDto.Parameters.Separators

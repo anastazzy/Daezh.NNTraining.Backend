@@ -14,7 +14,7 @@ public interface IBaseModelService
     
     Task<string> UploadDatasetOfModelAsync(UploadingDatasetModelDto modelDto);
     
-    Task<string> SetDatasetOfModelAsync(ModelFileDto modelDto);
+    Task<string?> SetDatasetOfModelAsync(ModelFileDto modelDto);
     
     Task<ModelOutputDto[]> GetListOfModelsAsync();
     
