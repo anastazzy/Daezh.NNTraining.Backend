@@ -158,7 +158,7 @@ public class BaseModelService : IBaseModelService
         }
         //TODO: delete the nameOfTrainSet property from dto
 
-        if (modelDto.Parameters is not null && model.ModelStatus == ModelStatus.NeedAParameters)
+        if (modelDto.Parameters is not null && model.ModelStatus is ModelStatus.NeedAParameters or ModelStatus.ReadyToTraining)
         {
             var newParameters = new DataPredictionNnParameters
             {
