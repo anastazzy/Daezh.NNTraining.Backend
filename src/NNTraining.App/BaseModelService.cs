@@ -186,6 +186,7 @@ public class BaseModelService : IBaseModelService
             Id = model.Id,
             Name = model.Name,
             StatusName = _localizer[model.ModelStatus.ToString()],
+            StatusId = (int)model.ModelStatus,
             TypeName = _localizer[model.ModelType.ToString()],
             Parameters = model.Parameters
         }).ToArray();
@@ -204,6 +205,7 @@ public class BaseModelService : IBaseModelService
             Id = model.Id,
             Name = model.Name,
             StatusName = _localizer[model.ModelStatus.ToString()],
+            StatusId = (int)model.ModelStatus,
             TypeName = _localizer[model.ModelType.ToString()],
             Parameters = model.Parameters
         };

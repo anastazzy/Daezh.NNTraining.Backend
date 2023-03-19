@@ -13,5 +13,7 @@ public class ModelOutputDto
     
     public string? StatusName { get; set; }
     
+    public int StatusId { get; set; }
+    
     public object? Parameters { get; set; }
 }
