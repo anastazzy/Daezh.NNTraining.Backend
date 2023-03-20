@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -15,16 +16,19 @@ public class ModelInteractionService : IModelInteractionService
     private ITrainedModel? _trainedModel;
     private readonly IModelStorage _modelStorage;
     private readonly IFileStorage _fileStorage;
+    private readonly INotifyService _notifyService;
     private readonly IServiceProvider _serviceProvider;
 
     public ModelInteractionService(
         IServiceProvider serviceProvider, 
         IModelStorage modelStorage, 
-        IFileStorage fileStorage)
+        IFileStorage fileStorage,
+        INotifyService notifyService)
     {
         _serviceProvider = serviceProvider;
         _modelStorage = modelStorage;
         _fileStorage = fileStorage;
+        _notifyService = notifyService;
     }
 
     public async void Train(Guid id)
@@ -37,7 +41,7 @@ public class ModelInteractionService : IModelInteractionService
         {
             throw new ArgumentException("The model with current id not found");
         }
-       
+
         if (model.ModelStatus != ModelStatus.ReadyToTraining)
         {
             throw new ArgumentException("The model not ready for training. You must specify the file - train set for training.");
@@ -50,7 +54,7 @@ public class ModelInteractionService : IModelInteractionService
         }
         
         await using var stream = await _fileStorage.GetStreamAsync(parameters?.NameOfTrainSet!, model.ModelType);
-            
+        
         //save the field type and name to params of model
         switch (parameters)
         {
@@ -63,7 +67,8 @@ public class ModelInteractionService : IModelInteractionService
             }
             default: throw new Exception();
         }
-
+        
+        model = await _notifyService.UpdateStateAndNotify(model, ModelStatus.StillTraining);
         await dbContext.SaveChangesAsync();
 
         //creation of dataViewSchema for save model in storage
@@ -93,9 +98,9 @@ public class ModelInteractionService : IModelInteractionService
         _trainedModel = trainer.Train(model.PairFieldType);
         await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
         
-        model.ModelStatus = ModelStatus.Trained;
+        await _notifyService.UpdateStateAndNotify(model, ModelStatus.Trained);
         await dbContext.SaveChangesAsync();
-        
+
         var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
 
         var filesToDelete = fileNamesAfterSave.Except(oldFiles).ToArray();

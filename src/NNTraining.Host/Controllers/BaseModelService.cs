@@ -61,7 +61,7 @@ public class BaseModelService
     }
     
     [HttpPatch("{id:Guid}/train-sets")]
-    public Task<string> SettingTrainSet([FromRoute] Guid id, [FromQuery] string name)
+    public Task<string?> SettingTrainSet([FromRoute] Guid id, [FromQuery] string name)
     {
         return _modelService.SetDatasetOfModelAsync(new ModelFileDto
         {
@@ -76,14 +76,14 @@ public class BaseModelService
         return _modelService.GetUploadedTrainSetsForModel(id);
     }
 
-    [HttpPut("id")]
-    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto, Guid id)
+    [HttpPut("{id:guid}")]
+    public Task<bool> UpdateModelAsync(DataPredictionInputDto modelDto,[FromRoute] Guid id)
     {
         return _modelService.UpdateModelAsync(id, modelDto);
     }
 
-    [HttpDelete("id")]
-    public Task<bool> DeleteModelAsync(Guid id)
+    [HttpDelete("{id:guid}")]
+    public Task<bool> DeleteModelAsync([FromRoute] Guid id)
     {
         return _modelService.DeleteModelAsync(id);
     }
