@@ -48,4 +48,7 @@
     <data name="Deleted" xml:space="preserve">
         <value>Удалена</value>
     </data>
+    <data name="ErrorOfTrainingModel" xml:space="preserve">
+        <value>Произошла ошибка тренировки, проверьте параметры модели</value>
+    </data>
 </root>

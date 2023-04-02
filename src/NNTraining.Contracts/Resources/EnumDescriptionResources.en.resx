@@ -47,4 +47,7 @@
     <data name="Deleted" xml:space="preserve">
         <value>Deleted</value>
     </data>
+    <data name="ErrorOfTrainingModel" xml:space="preserve">
+        <value>Error of training the model</value>
+    </data>
 </root>

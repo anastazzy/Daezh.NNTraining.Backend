@@ -1,9 +1,11 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using NNTraining.Contracts;
+using NNTraining.Contracts.Resources;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Enums;
@@ -17,96 +19,110 @@ public class ModelInteractionService : IModelInteractionService
     private readonly IModelStorage _modelStorage;
     private readonly IFileStorage _fileStorage;
     private readonly INotifyService _notifyService;
+    private readonly IStringLocalizer<EnumDescriptionResources> _stringLocalizer;
     private readonly IServiceProvider _serviceProvider;
 
     public ModelInteractionService(
         IServiceProvider serviceProvider, 
         IModelStorage modelStorage, 
         IFileStorage fileStorage,
-        INotifyService notifyService)
+        INotifyService notifyService,
+        IStringLocalizer<EnumDescriptionResources> stringLocalizer)
     {
         _serviceProvider = serviceProvider;
         _modelStorage = modelStorage;
         _fileStorage = fileStorage;
         _notifyService = notifyService;
+        _stringLocalizer = stringLocalizer;
     }
 
     public async void Train(Guid id)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
-
-        var model = dbContext.Models.FirstOrDefault(x => x.Id == id);
-        if (model is null)
-        {
-            throw new ArgumentException("The model with current id not found");
-        }
-
-        if (model.ModelStatus != ModelStatus.ReadyToTraining)
-        {
-            throw new ArgumentException("The model not ready for training. You must specify the file - train set for training.");
-        }
-        
-        var parameters = model.Parameters;
-        if (parameters?.NameOfTrainSet is null) 
-        {
-            throw new ArgumentException("The model don`t has parameters.");
-        }
-        
-        await using var stream = await _fileStorage.GetStreamAsync(parameters?.NameOfTrainSet!, model.ModelType);
-        
-        //save the field type and name to params of model
-        switch (parameters)
-        {
-            case DataPredictionNnParameters dataPredictionNnParameters:
-            {
-                model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
-                    stream,
-                    dataPredictionNnParameters.Separators);
-                break;
-            }
-            default: throw new Exception();
-        }
-        
-        model = await _notifyService.UpdateStateAndNotify(model, ModelStatus.StillTraining);
-        await dbContext.SaveChangesAsync();
-
-        //creation of dataViewSchema for save model in storage
-        var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
-        var data = new DataViewSchema.Builder();
-        foreach (var item in columns)
-        {
-            data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
-        }
-
         var currentDirectory = Directory.GetCurrentDirectory();
         var oldFiles = Directory.GetFiles(currentDirectory);
         
-        var tempFileForTrainModel = $"{model.Name}.csv";
-        await _fileStorage.GetAsync(
-            model.Parameters?.NameOfTrainSet!, 
-            ModelType.DataPrediction,
-            tempFileForTrainModel);
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
+            
+        var model = dbContext.Models.FirstOrDefault(x => x.Id == id);
         
-        //creation the trainer and train the model
-        var factory = new ModelTrainerFactory
+        try
         {
-            NameOfTrainSet = tempFileForTrainModel
-        };
-        
-        var trainer = factory.CreateTrainer(model.Parameters);
-        _trainedModel = trainer.Train(model.PairFieldType);
-        await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
-        
-        await _notifyService.UpdateStateAndNotify(model, ModelStatus.Trained);
-        await dbContext.SaveChangesAsync();
+            if (model is null)
+            {
+                throw new ArgumentException("The model with current id not found");
+            }
 
-        var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
+            if (model.ModelStatus != ModelStatus.ReadyToTraining)
+            {
+                throw new ArgumentException("The model not ready for training. You must specify the file - train set for training.");
+            }
+            
+            var parameters = model.Parameters;
+            if (parameters?.NameOfTrainSet is null) 
+            {
+                throw new ArgumentException("The model don`t has parameters.");
+            }
+            
+            await using var stream = await _fileStorage.GetStreamAsync(parameters?.NameOfTrainSet!, model.ModelType);
+            
+            //save the field type and name to params of model
+            switch (parameters)
+            {
+                case DataPredictionNnParameters dataPredictionNnParameters:
+                {
+                    model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
+                        stream,
+                        dataPredictionNnParameters.Separators);
+                    break;
+                }
+                default: throw new Exception();
+            }
+            
+            model = await _notifyService.UpdateStateAndNotify(model, ModelStatus.StillTraining);
+            await dbContext.SaveChangesAsync();
 
-        var filesToDelete = fileNamesAfterSave.Except(oldFiles).ToArray();
-        foreach (var item in filesToDelete)
+            //creation of dataViewSchema for save model in storage
+            var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
+            var data = new DataViewSchema.Builder();
+            foreach (var item in columns)
+            {
+                data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
+            }
+
+            var tempFileForTrainModel = $"{model.Name}.csv";
+            await _fileStorage.GetAsync(
+                model.Parameters?.NameOfTrainSet!, 
+                ModelType.DataPrediction,
+                tempFileForTrainModel);
+            
+            //creation the trainer and train the model
+            var factory = new ModelTrainerFactory
+            {
+                NameOfTrainSet = tempFileForTrainModel
+            };
+            
+            var trainer = factory.CreateTrainer(model.Parameters);
+            _trainedModel = trainer.Train(model.PairFieldType);
+            await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());
+            
+            await _notifyService.UpdateStateAndNotify(model, ModelStatus.Trained);
+            await dbContext.SaveChangesAsync();
+        }
+        catch (Exception e)
         {
-            File.Delete(item);
+            Console.WriteLine($"The erorr was happend in training proccess: {e}");
+            await _notifyService.UpdateStateAndNotify(model, ModelStatus.ErrorOfTrainingModel);
+            await dbContext.SaveChangesAsync();
+        }
+        finally
+        {
+            var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
+            var filesToDelete = fileNamesAfterSave.Except(oldFiles).ToArray();
+            foreach (var item in filesToDelete)
+            {
+                File.Delete(item);
+            }
         }
     }
 
@@ -128,8 +144,7 @@ public class ModelInteractionService : IModelInteractionService
         var result = trainedModel.Predict(modelForPrediction);
         return result;
     }
-    
-    
+
     public Dictionary<string,string> GetSchemaOfModel(Guid id)
     {
         using var scope = _serviceProvider.CreateScope();
@@ -166,6 +181,5 @@ public class ModelInteractionService : IModelInteractionService
 
         return fieldTypeField;
     }
-    
 }
     
