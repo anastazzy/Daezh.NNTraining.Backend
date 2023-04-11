@@ -7,14 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NNTraining.Common\NNTraining.Common.csproj" />
       <ProjectReference Include="..\NNTraining.Contracts\NNTraining.Contracts.csproj" />
       <ProjectReference Include="..\NNTraining.DataAccess\NNTraining.DataAccess.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-      <PackageReference Include="Microsoft.ML" Version="1.7.1" />
       <PackageReference Include="Minio" Version="4.0.5" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
     </ItemGroup>
 
     <ItemGroup>

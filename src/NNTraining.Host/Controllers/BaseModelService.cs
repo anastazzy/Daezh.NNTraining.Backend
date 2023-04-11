@@ -1,20 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NNTraining.Common;
 using NNTraining.Contracts;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
 
 namespace NNTraining.Host.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class BaseModelService
 {
     private readonly IBaseModelService _modelService;
+    private readonly IRabbitMqService _rabbitMqService;
 
-    public BaseModelService(IBaseModelService modelService)
+    public BaseModelService(IBaseModelService modelService, IRabbitMqService rabbitMqService)
     {
         _modelService = modelService;
+        _rabbitMqService = rabbitMqService;
     }
 
     [HttpPost]
@@ -98,5 +100,17 @@ public class BaseModelService
     public IEnumerable<EnumOutputDto> GetModelStatuses()
     {
         return _modelService.GetModelStatuses();
+    }
+    
+    [HttpGet("schema/{id:guid}")]
+    public Dictionary<string,string> GetSchema([FromRoute] Guid id)
+    {
+        return _modelService.GetSchemaOfModel(id);
+    }
+    
+    [HttpPost("message")]
+    public void Send()
+    {
+        _rabbitMqService.SendMessage("123-гори");
     }
 }

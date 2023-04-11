@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Innofactor.EfCoreJsonValueConverter;
-using NNTraining.Domain.Enums;
+using NNTraining.Common.Enums;
 using NNTraining.Domain.Tools;
 
 namespace NNTraining.Domain.Models;

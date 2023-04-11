@@ -19,4 +19,8 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\NNTraining.Common\NNTraining.Common.csproj" />
+    </ItemGroup>
+
 </Project>

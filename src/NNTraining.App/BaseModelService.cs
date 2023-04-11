@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Localization;
+using NNTraining.Common;
+using NNTraining.Common.Enums;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Resources;
 using NNTraining.DataAccess;
 using NNTraining.Domain;
 using NNTraining.Domain.Dto;
-using NNTraining.Domain.Enums;
 using NNTraining.Domain.Models;
 
 namespace NNTraining.App;
@@ -105,7 +105,7 @@ public class BaseModelService : IBaseModelService
                 file => file.Id,
                 (modelFile, file) => new
                 {
-                    OriginalName = file.OriginalName,
+                    file.OriginalName,
                 })
             .ToHashSet();
 
@@ -253,5 +253,39 @@ public class BaseModelService : IBaseModelService
                 Id = (int) x,
                 Name = _localizer[x.ToString()],
             });
+    }
+    
+    public Dictionary<string,string> GetSchemaOfModel(Guid id)
+    {
+        var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
+        if (model?.PairFieldType is null)
+        {
+            throw new ArgumentException("Not found");
+        }
+
+        var fieldTypeField = new Dictionary<string, string>();
+        foreach (var (name, type) in model.PairFieldType)
+        {
+            fieldTypeField.Add(name, type.ToString());
+        }
+
+        string? targetFieldName;
+        
+        switch (model.Parameters)
+        {
+            case DataPredictionNnParameters dataPredictionNnParameters:
+            {
+                targetFieldName = dataPredictionNnParameters.NameOfTargetColumn;
+                break;
+            }
+            default: throw new Exception();
+        }
+
+        if (targetFieldName is not null)
+        {
+            fieldTypeField.Remove(targetFieldName);
+        }
+
+        return fieldTypeField;
     }
 }

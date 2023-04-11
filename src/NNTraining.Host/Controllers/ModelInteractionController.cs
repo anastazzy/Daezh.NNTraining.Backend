@@ -27,10 +27,4 @@ public class ModelInteractionController
     {
         return _modelService.Predict(id, objectToPredict);
     }
-    
-    [HttpGet("predict/{id}")]
-    public Dictionary<string,string> GetSchema([FromRoute] Guid id)
-    {
-        return _modelService.GetSchemaOfModel(id);
-    }
 }

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NNTraining.Common\NNTraining.Common.csproj" />
+    <ProjectReference Include="..\NNTraining.TrainerWorker.App\NNTraining.TrainerWorker.App.csproj" />
+    <ProjectReference Include="..\NNTraining.TrainerWorker.Contracts\NNTraining.TrainerWorker.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

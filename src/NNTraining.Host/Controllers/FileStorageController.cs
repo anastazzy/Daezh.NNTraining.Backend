@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NNTraining.Common;
+using NNTraining.Common.Enums;
 using NNTraining.Contracts;
-using NNTraining.Domain.Enums;
 
 namespace NNTraining.Host.Controllers;
 

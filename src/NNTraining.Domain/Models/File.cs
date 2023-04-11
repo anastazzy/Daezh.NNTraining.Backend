@@ -1,4 +1,4 @@
-﻿using NNTraining.Domain.Enums;
+﻿using NNTraining.Common.Enums;
 
 namespace NNTraining.Domain.Models;
 

@@ -29,4 +29,6 @@ public interface IBaseModelService
     IEnumerable<EnumOutputDto> GetModelStatuses();
 
     FileOutputDto[] GetUploadedTrainSetsForModel(Guid modelId);
+    
+    Dictionary<string, string> GetSchemaOfModel(Guid id);
 }

@@ -1,5 +1,6 @@
 ﻿using Minio.DataModel;
-using NNTraining.Domain.Enums;
+using NNTraining.Common;
+using NNTraining.Common.Enums;
 
 namespace NNTraining.Contracts;
 

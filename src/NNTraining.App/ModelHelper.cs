@@ -1,5 +1,5 @@
 ﻿using Microsoft.ML.Data;
-using NNTraining.Domain.Enums;
+using NNTraining.Common.Enums;
 
 namespace NNTraining.App;
 
