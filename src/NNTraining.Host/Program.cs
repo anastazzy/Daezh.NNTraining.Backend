@@ -24,7 +24,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IFileStorage, FileStorage>();
 builder.Services.AddSingleton<MLContext>();
 
-builder.Services.AddScoped<IRabbitMqService, RabbitMqPublisherService>();    
+builder.Services.AddScoped<IRabbitMqPublisherService, RabbitMqPublisherService>();    
 
 builder.Services.AddScoped<IBaseModelService, BaseModelService>();
 

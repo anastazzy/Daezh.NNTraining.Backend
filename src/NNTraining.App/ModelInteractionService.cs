@@ -7,6 +7,7 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 using NNTraining.Common;
 using NNTraining.Common.Enums;
+using NNTraining.Common.QueueContracts;
 using NNTraining.Common.ServiceContracts;
 using NNTraining.Contracts;
 using NNTraining.Contracts.Resources;
@@ -26,12 +27,12 @@ public class ModelInteractionService : IModelInteractionService
     public ModelInteractionService(
         IServiceProvider serviceProvider, 
         IFileStorage fileStorage,
-        IStringLocalizer<EnumDescriptionResources> stringLocalizer, IRabbitMqPublisherService _publisherService)
+        IStringLocalizer<EnumDescriptionResources> stringLocalizer, IRabbitMqPublisherService publisherService)
     {
         _serviceProvider = serviceProvider;
         _fileStorage = fileStorage;
         _stringLocalizer = stringLocalizer;
-        this._publisherService = _publisherService;
+        _publisherService = publisherService;
     }
 
     public async void Train(Guid id)
@@ -88,55 +89,9 @@ public class ModelInteractionService : IModelInteractionService
             Parameters = fullParam as NNParametersContract,
             PairFieldType = null
         }, Queues.ToTrain);
-        
-        //далее работу начинает воркер
-        // //creation of dataViewSchema for save model in storage
-        // var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
-        // var data = new DataViewSchema.Builder();
-        // foreach (var item in columns)
-        // {
-        //     data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
-        // }
-        //
-        // var tempFileForTrainModel = $"{model.Name}.csv";
-        // await _fileStorage.GetAsync(
-        //     model.Parameters?.NameOfTrainSet!, 
-        //     ModelType.DataPrediction,
-        //     tempFileForTrainModel);
-        //
-        // //creation the trainer and train the model
-        // var factory = new ModelTrainerFactory
-        // {
-        //     NameOfTrainSet = tempFileForTrainModel
-        // };
-        //
-        // var trainer = factory.CreateTrainer(model.Parameters);
-        // _trainedModel = trainer.Train(model.PairFieldType);
-        // await _modelStorage.SaveAsync(_trainedModel, model, data.ToSchema());// это вызывается тоже в воркере
-        //
-        // await _notifyService.UpdateStateAndNotify(model, ModelStatus.Trained);
-        
-        // как понять, что модель натренирована? надо получить событие от воркера
-        await dbContext.SaveChangesAsync();
-        // }
-        // catch (Exception e)
-        // {
-            // Console.WriteLine($"The erorr was happend in training proccess: {e}");
-            // await _notifyService.UpdateStateAndNotify(model, ModelStatus.ErrorOfTrainingModel);
-            await dbContext.SaveChangesAsync();
-        // }
-        // finally
-        // {
-            // var fileNamesAfterSave = Directory.GetFiles(currentDirectory);
-            // var filesToDelete = fileNamesAfterSave.Except(oldFiles).ToArray();
-            // foreach (var item in filesToDelete)
-            // {
-            //     File.Delete(item);
-            // }
-        // }
     }
 
-    public async Task<object> Predict(Guid id, Dictionary<string, JsonElement> modelForPrediction)
+    public async Task Predict(Guid id, Dictionary<string, JsonElement> modelForPrediction)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -146,17 +101,26 @@ public class ModelInteractionService : IModelInteractionService
         {
             throw new ArgumentException("The model with current id not found");
         }
+
+        var fileName = await GetAsync(model.Id);
         
-        //getting trained model from a model storage
-        var trainedModel = await _modelStorage.GetAsync(id, model.ModelType); // это вызывается тоже в воркере
-        
-        // после закидывания события в воркер то будет...
-        //there dataset or object need for prediction
-        var result = trainedModel.Predict(modelForPrediction);
-        return result;
+        _publisherService.SendMessage(new PredictionContract
+        {
+            Model = new ModelContract
+            {
+                Id = model.Id,
+                Name = model.Name,
+                ModelType = model.ModelType,
+                ModelStatus = model.ModelStatus,
+                Parameters = new (),
+                PairFieldType = model.PairFieldType
+            },
+            ModelForPrediction = modelForPrediction,
+            FileWithModelName = fileName
+        }, Queues.ToPredict);
     }
     
-    private async Task<GetAsyncContract> GetAsync(Guid id, ModelType bucketName)
+    private async Task<string?> GetAsync(Guid id)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
@@ -181,7 +145,9 @@ public class ModelInteractionService : IModelInteractionService
             throw new ArgumentException("The file with this model was not found");
         }
         // далее тоже вызывается все в воркере
-        
+
+        return fileWithModel.GuidName;
+
         // const string tempFileNameOfModel = "temp.zip";
         // await _storage.GetAsync(fileWithModel.GuidName, bucketName, tempFileNameOfModel);
         //

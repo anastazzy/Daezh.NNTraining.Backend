@@ -27,8 +27,9 @@ public class RabbitMqPublisherService : IRabbitMqPublisherService
         var queueName = queue switch
         {
             Queues.ChangeModelStatus => _options.Value.QueueChangeModelStatus,
-            Queues.FromTrainer => _options.Value.TrainingQueueFromTrainer,
-            Queues.ToTrain => _options.Value.TrainingQueueToTrain,
+            Queues.ToPredict => _options.Value.QueueToPredict,
+            Queues.PredictionResult => _options.Value.PredictionResult,
+            Queues.ToTrain => _options.Value.QueueToTrain,
             _ => _options.Value.Common
         };
         

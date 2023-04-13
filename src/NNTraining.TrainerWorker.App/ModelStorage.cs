@@ -47,24 +47,6 @@ public class ModelStorage: IModelStorage
 
     public async Task<ITrainedModel> GetAsync(ModelContract model, string fileWithModelName, ModelType bucketName)
     {
-        // var model = _dbContext.Models.FirstOrDefault(x => x.Id == id);
-        // if (model?.PairFieldType is null)
-        // {
-        //     throw new ArgumentException("The model or it`s field name type was not found");
-        // }
-        //
-        // var modelFile = await _dbContext.ModelFiles.FirstOrDefaultAsync(x =>
-        //     x.ModelId == id && x.FileType == FileType.Model);
-        // if (modelFile is null)
-        // {
-        //     throw new ArgumentException("The file with this model was not found");
-        // }
-        //
-        // var fileWithModel = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);// при сохранении модели сделать нормальным тип файла
-        // if (fileWithModel is null)
-        // {
-        //     throw new ArgumentException("The file with this model was not found");
-        // }
         
         const string tempFileNameOfModel = "temp.zip";
         await _storage.GetObjectAsync(fileWithModelName, bucketName.ToString(), tempFileNameOfModel);

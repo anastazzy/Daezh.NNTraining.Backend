@@ -11,12 +11,10 @@ namespace NNTraining.Host.Controllers;
 public class BaseModelService
 {
     private readonly IBaseModelService _modelService;
-    private readonly IRabbitMqService _rabbitMqService;
 
-    public BaseModelService(IBaseModelService modelService, IRabbitMqService rabbitMqService)
+    public BaseModelService(IBaseModelService modelService)
     {
         _modelService = modelService;
-        _rabbitMqService = rabbitMqService;
     }
 
     [HttpPost]
@@ -106,11 +104,5 @@ public class BaseModelService
     public Dictionary<string,string> GetSchema([FromRoute] Guid id)
     {
         return _modelService.GetSchemaOfModel(id);
-    }
-    
-    [HttpPost("message")]
-    public void Send()
-    {
-        _rabbitMqService.SendMessage("123-гори");
     }
 }

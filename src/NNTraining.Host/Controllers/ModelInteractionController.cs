@@ -23,7 +23,7 @@ public class ModelInteractionController
     }
     
     [HttpPost("predict/{id}")]
-    public Task<object> Predict([FromRoute] Guid id, [FromBody] Dictionary<string, JsonElement> objectToPredict)
+    public Task Predict([FromRoute] Guid id, [FromBody] Dictionary<string, JsonElement> objectToPredict)
     {
         return _modelService.Predict(id, objectToPredict);
     }

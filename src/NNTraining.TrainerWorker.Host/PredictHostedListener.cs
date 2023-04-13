@@ -6,6 +6,7 @@ using Minio.DataModel;
 using NNTraining.Common;
 using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
+using NNTraining.Common.QueueContracts;
 using NNTraining.Common.ServiceContracts;
 using NNTraining.TrainerWorker.App;
 using NNTraining.TrainerWorker.Contracts;
@@ -14,7 +15,7 @@ using RabbitMQ.Client.Events;
 
 namespace NNTraining.TrainerWorker.Host;
 
-public class TrainHostedListener : BackgroundService
+public class PredictHostedListener : BackgroundService
 {
     private readonly IOptions<RabbitMqOptions> _options;
     private readonly ICustomMinioClient _minioClient;
@@ -22,7 +23,7 @@ public class TrainHostedListener : BackgroundService
     private readonly INotifyService _notifyService;
     private readonly IRabbitMqPublisherService _publisherService;
 
-    public TrainHostedListener(IOptions<RabbitMqOptions> options, ICustomMinioClient minioClient, IModelStorage modelStorage, 
+    public PredictHostedListener(IOptions<RabbitMqOptions> options, ICustomMinioClient minioClient, IModelStorage modelStorage, 
         INotifyService notifyService, IRabbitMqPublisherService publisherService)
     {
         _options = options;
@@ -43,7 +44,7 @@ public class TrainHostedListener : BackgroundService
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
 
-        channel.QueueDeclare(queue: _options.Value.QueueToTrain,
+        channel.QueueDeclare(queue: _options.Value.QueueToPredict,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -60,7 +61,7 @@ public class TrainHostedListener : BackgroundService
                 //здесь надо прокидывать их в predict метод
                 Console.WriteLine($" [x] Received {message}");
             };
-            channel.BasicConsume(queue: _options.Value.QueueToTrain,
+            channel.BasicConsume(queue: _options.Value.QueueToPredict,
                 autoAck: true,
                 consumer: consumer);
         } while (!stoppingToken.IsCancellationRequested);
@@ -68,48 +69,35 @@ public class TrainHostedListener : BackgroundService
         return Task.CompletedTask;
     }
 
-    private async Task Train(ModelContract model)
+    private async Task Predict(PredictionContract contract)
     {
         var currentDirectory = Directory.GetCurrentDirectory();
         var oldFiles = Directory.GetFiles(currentDirectory);
+        object result;
 
         try
         {
-            //creation of dataViewSchema for save model in storage
-            var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
-            var data = new DataViewSchema.Builder();
-            foreach (var item in columns)
-            {
-                data.AddColumn(item.Name, new KeyDataViewType(typeof(UInt32),UInt32.MaxValue));
-            }
-
-            var tempFileForTrainModel = $"{model.Name}.csv";
-            await _minioClient.GetObjectAsync( model.Parameters?.NameOfTrainSet!, 
-                ModelType.DataPrediction.ToString(),
-                tempFileForTrainModel);
-
-            //creation the trainer and train the model
-            var factory = new ModelTrainerFactory
-            {
-                NameOfTrainSet = tempFileForTrainModel
-            };
+            await _notifyService.UpdateStateAndNotify(ModelStatus.StillPredict, contract.Model.Id);
+            //getting trained model from a model storage
+            var trainedModel = await _modelStorage.GetAsync(contract.Model, contract.FileWithModelName, contract.Model.ModelType); // это вызывается тоже в воркере
         
-            var trainer = factory.CreateTrainer(model.Parameters);
-            var trainedModel = trainer.Train(model.PairFieldType);
-            await _modelStorage.SaveAsync(trainedModel, model, data.ToSchema());
+            // после закидывания события в воркер то будет...
+            //there dataset or object need for prediction
+            result = trainedModel.Predict(contract.ModelForPrediction);
             
-            // в случае успеха закидывается на фронт смена статуса в хаб
-            _publisherService.SendMessage(new ModelStatusUpdateDto
+            _publisherService.SendMessage(new PredictionResultContract
             {
-                Id = model.Id,
-                Status = ModelStatus.Trained
-            }, Queues.ChangeModelStatus);
-            await _notifyService.UpdateStateAndNotify(ModelStatus.Trained, model.Id);
+                Id = contract.Model.Id,
+                Result = result
+            }, Queues.PredictionResult);
+            
+            await _notifyService.UpdateStateAndNotify(ModelStatus.Done, contract.Model.Id);
+            await _notifyService.UpdateStateAndNotify(ModelStatus.Trained, contract.Model.Id);
         }
         catch (Exception e)
         {
             Console.WriteLine($"The erorr was happend in training proccess: {e}");
-            await _notifyService.UpdateStateAndNotify(ModelStatus.ErrorOfTrainingModel, model.Id);
+            await _notifyService.UpdateStateAndNotify(ModelStatus.ErrorOfTrainingModel, contract.Model.Id);
         }
         finally
         {

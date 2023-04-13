@@ -6,7 +6,8 @@ public enum Queues
     
     ToTrain,
     
-    FromTrainer,
+    ToPredict,
     
     ChangeModelStatus,
+    PredictionResult,
 }
