@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.Host", "src\NNTraining.Host\NNTraining.Host.csproj", "{1F04CE68-3A8D-48EC-B103-656AE20E34AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.WebApi.Host", "src\NNTraining.WebApi.Host\NNTraining.WebApi.Host.csproj", "{1F04CE68-3A8D-48EC-B103-656AE20E34AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.Contracts", "src\NNTraining.Contracts\NNTraining.Contracts.csproj", "{E8697363-8687-4054-8F11-BBDE60916429}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.WebApi.Contracts", "src\NNTraining.WebApi.Contracts\NNTraining.WebApi.Contracts.csproj", "{E8697363-8687-4054-8F11-BBDE60916429}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.DataAccess", "src\NNTraining.DataAccess\NNTraining.DataAccess.csproj", "{F4A7186A-841B-4CAA-A933-8AA62212470A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.WebApi.DataAccess", "src\NNTraining.WebApi.DataAccess\NNTraining.WebApi.DataAccess.csproj", "{F4A7186A-841B-4CAA-A933-8AA62212470A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.Domain", "src\NNTraining.Domain\NNTraining.Domain.csproj", "{673111DD-ECF1-4325-8536-34FA6EAB4E29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.WebApi.Domain", "src\NNTraining.WebApi.Domain\NNTraining.WebApi.Domain.csproj", "{673111DD-ECF1-4325-8536-34FA6EAB4E29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.App", "src\NNTraining.App\NNTraining.App.csproj", "{2A272AF4-D973-4896-8836-FE58501A253F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNTraining.WebApi.App", "src\NNTraining.WebApi.App\NNTraining.WebApi.App.csproj", "{2A272AF4-D973-4896-8836-FE58501A253F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{688DB1C7-E7AE-49FF-8291-2600FB0FAF59}"
 EndProject

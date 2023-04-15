@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>NNTraining.WebApi.Host</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NNTraining.WebApi.App\NNTraining.WebApi.App.csproj" />
+      <ProjectReference Include="..\NNTraining.Common\NNTraining.Common.csproj" />
+      <ProjectReference Include="..\NNTraining.WebApi.Contracts\NNTraining.WebApi.Contracts.csproj" />
+      <ProjectReference Include="..\NNTraining.WebApi.DataAccess\NNTraining.WebApi.DataAccess.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="train-set.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

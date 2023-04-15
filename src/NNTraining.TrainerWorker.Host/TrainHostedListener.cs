@@ -122,20 +122,3 @@ public class TrainHostedListener : BackgroundService
         }
     }
 }
-
-// SSO API -> login / register. Has separated database. After register publish info anout registered user
-// after login return JWT token to the FE.
-
-// Model Trainer API subsribes to new users and replicate them to its own database.
-// Process requests from the specific users. Authentication works based on JWT. 
-// Enqueue models for the training
-// Also predictor API is here
-// Subsribe trained models (to update status in DB and send notificaton)
-
-// Model Trainer worker see waiting for training items in DB. Trains it. And notify users
-// about training finished.
-// 1. Get model where status = Enqueued Order By EnqueuedAt Limit 1
-// 2. Train it
-// 3. Update status = Trained
-// 4. Send notification
-// 5. Repeat 1 ot sleep 5 seconds

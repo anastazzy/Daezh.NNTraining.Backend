@@ -1,0 +1,11 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace NNTraining.WebApi.Domain.Dto;
+
+public class UploadingDatasetModelDto
+{
+    public Guid Id { get; set; }
+    
+    public FileInputDto? UploadTrainSet { get; set; }
+}
