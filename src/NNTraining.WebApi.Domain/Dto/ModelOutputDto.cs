@@ -1,6 +1,4 @@
-﻿using NNTraining.WebApi.Domain.Models;
-
-namespace NNTraining.WebApi.Domain.Dto;
+﻿namespace NNTraining.WebApi.Domain.Dto;
 
 public class ModelOutputDto
 {

@@ -1,10 +1,6 @@
-﻿using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Innofactor.EfCoreJsonValueConverter;
+﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Newtonsoft.Json;
 using NNTraining.WebApi.Domain;
 using NNTraining.WebApi.Domain.Models;
 using NNTraining.WebApi.Domain.Tools;

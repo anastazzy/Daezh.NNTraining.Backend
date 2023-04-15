@@ -1,5 +1,4 @@
 ﻿using NNTraining.Common.Enums;
-using NNTraining.Common.ServiceContracts;
 
 namespace NNTraining.TrainerWorker.Contracts;
 

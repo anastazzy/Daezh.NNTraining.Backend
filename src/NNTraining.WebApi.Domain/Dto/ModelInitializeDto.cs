@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using NNTraining.Common.Enums;
-using NNTraining.WebApi.Domain.Models;
+﻿using NNTraining.Common.Enums;
 
 namespace NNTraining.WebApi.Domain.Dto;
 

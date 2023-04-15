@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using NNTraining.Common;
 using NNTraining.Common.Options;
 using NNTraining.Common.QueueContracts;
 using NNTraining.WebApi.DataAccess;

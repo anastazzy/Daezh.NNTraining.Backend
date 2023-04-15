@@ -1,5 +1,4 @@
 ﻿using Minio.DataModel;
-using NNTraining.Common.Enums;
 
 namespace NNTraining.Common;
 

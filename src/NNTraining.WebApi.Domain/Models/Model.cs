@@ -1,8 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using Innofactor.EfCoreJsonValueConverter;
 using NNTraining.Common.Enums;
-using NNTraining.WebApi.Domain.Tools;
 
 namespace NNTraining.WebApi.Domain.Models;
 

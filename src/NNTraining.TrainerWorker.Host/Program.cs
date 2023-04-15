@@ -1,7 +1,8 @@
+using Microsoft.ML;
+using NNTraining.Common;
 using NNTraining.Common.Options;
 using NNTraining.TrainerWorker.App;
 using NNTraining.TrainerWorker.Contracts;
-using NNTraining.TrainerWorker.Host;
 using NNTraining.TrainerWorker.Host.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,11 +16,13 @@ builder.Services.AddHostedService<TrainHostedListener>();
 builder.Services.AddHostedService<PredictHostedListener>();
 
 builder.Services.AddSingleton<IModelTrainingHubContext, ModelTrainingHubContext>();
-builder.Services.AddScoped<INotifyService, NotifyService>();
-
 builder.Services.AddSingleton<IModelTrainerFactory, ModelTrainerFactory>();
+builder.Services.AddSingleton<ICustomMinioClient, CustomMinioClient>();
+builder.Services.AddSingleton<MLContext>();
+
 
 builder.Services.AddScoped<IModelStorage, ModelStorage>();
+builder.Services.AddScoped<INotifyService, NotifyService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

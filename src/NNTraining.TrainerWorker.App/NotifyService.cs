@@ -1,7 +1,6 @@
 ﻿using NNTraining.Common;
 using NNTraining.Common.Enums;
 using NNTraining.Common.QueueContracts;
-using NNTraining.Common.ServiceContracts;
 using NNTraining.TrainerWorker.Contracts;
 
 namespace NNTraining.TrainerWorker.App;

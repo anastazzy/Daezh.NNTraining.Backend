@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using Minio.DataModel.Replication;
-using NNTraining.WebApi.Domain;
-using NNTraining.WebApi.Domain.Dto;
-using NNTraining.WebApi.Domain.Models;
+﻿using NNTraining.WebApi.Domain.Dto;
 
 namespace NNTraining.WebApi.Contracts;
 

@@ -2,7 +2,6 @@
 using Minio;
 using Minio.DataModel;
 using Minio.Exceptions;
-using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
 
 namespace NNTraining.Common;

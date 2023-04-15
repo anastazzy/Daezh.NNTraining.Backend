@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using NNTraining.WebApi.Domain.Models;
 
 namespace NNTraining.WebApi.Domain.Tools;
 

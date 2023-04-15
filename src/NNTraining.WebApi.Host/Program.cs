@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.ML;
 using NNTraining.App;
 using NNTraining.Common;
 using NNTraining.Common.Options;
@@ -26,7 +25,6 @@ builder.Services.AddHostedService<ChangeStatusHostedListener>();
 
 builder.Services.AddSingleton<ICustomMinioClient, CustomMinioClient>();
 builder.Services.AddSingleton<IFileStorage, FileStorage>();
-builder.Services.AddSingleton<MLContext>();
 
 builder.Services.AddScoped<IRabbitMqPublisherService, RabbitMqPublisherService>();
 builder.Services.AddScoped<IBaseModelService, BaseModelService>();

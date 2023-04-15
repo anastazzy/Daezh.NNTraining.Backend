@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using NNTraining.Common.Enums;
+﻿using NNTraining.Common.Enums;
 
 namespace NNTraining.Common.ServiceContracts;
 
@@ -8,6 +7,8 @@ public class ModelContract
     public Guid Id { get; set; }
     
     public string? Name { get; set; }
+    
+    public Stream? Data { get; set; }
     
     public ModelType ModelType { get; set; }
     
