@@ -10,15 +10,13 @@ using RabbitMQ.Client.Events;
 
 namespace NNTraining.WebApi.Host.Workers;
 
-public class ChangeStatusHostedListener : BackgroundService
+public class PredictionResultHostedListener : BackgroundService
 {
     private readonly IOptions<RabbitMqOptions> _options;
-    private readonly IServiceProvider _serviceProvider;
 
-    public ChangeStatusHostedListener(IOptions<RabbitMqOptions> options, IServiceProvider serviceProvider)
+    public PredictionResultHostedListener(IOptions<RabbitMqOptions> options)
     {
         _options = options;
-        _serviceProvider = serviceProvider;
     }
     /// <summary>
     /// This method is called when the <see cref="T:Microsoft.Extensions.Hosting.IHostedService" /> starts. The implementation should return a task that represents
@@ -32,7 +30,7 @@ public class ChangeStatusHostedListener : BackgroundService
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
 
-        channel.QueueDeclare(queue: _options.Value.QueueChangeModelStatus,
+        channel.QueueDeclare(queue: _options.Value.PredictionResult,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -49,7 +47,7 @@ public class ChangeStatusHostedListener : BackgroundService
                 //здесь надо прокидывать их в predict метод
                 Console.WriteLine($" [x] Received {message}");
             };
-            channel.BasicConsume(queue: _options.Value.QueueChangeModelStatus,
+            channel.BasicConsume(queue: _options.Value.PredictionResult,
                 autoAck: true,
                 consumer: consumer);
         } while (!stoppingToken.IsCancellationRequested);
@@ -57,21 +55,8 @@ public class ChangeStatusHostedListener : BackgroundService
         return Task.CompletedTask;
     }
     
-    public async Task ChangeStateOfModel(ChangeModelStatusContract contract)
+    public async Task GetResult(PredictionResultContract contract)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
-
-        var model = await dbContext.Models.FirstOrDefaultAsync(x => x.Id == contract.Id);
-
-        if (model is null)
-        {
-            Console.WriteLine($" model with id={contract.Id} not found");
-            return;
-        }
-
-        model.ModelStatus = contract.Status;
-        
-        await dbContext.SaveChangesAsync();
+        // если будет какая-то история использования модели, то надо сохранять записи - вот зачем этот воркер
     }
 }

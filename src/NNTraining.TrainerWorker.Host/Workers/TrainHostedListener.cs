@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using Minio.DataModel;
 using NNTraining.Common;
 using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
@@ -12,7 +11,7 @@ using NNTraining.TrainerWorker.Contracts;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace NNTraining.TrainerWorker.Host;
+namespace NNTraining.TrainerWorker.Host.Workers;
 
 public class TrainHostedListener : BackgroundService
 {

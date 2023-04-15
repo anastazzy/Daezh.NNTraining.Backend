@@ -9,5 +9,6 @@ public enum Queues
     ToPredict,
     
     ChangeModelStatus,
+    
     PredictionResult,
 }

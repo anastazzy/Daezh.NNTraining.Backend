@@ -1,33 +1,26 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using Minio.DataModel;
 using NNTraining.Common;
 using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
 using NNTraining.Common.QueueContracts;
-using NNTraining.Common.ServiceContracts;
-using NNTraining.TrainerWorker.App;
 using NNTraining.TrainerWorker.Contracts;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace NNTraining.TrainerWorker.Host;
+namespace NNTraining.TrainerWorker.Host.Workers;
 
 public class PredictHostedListener : BackgroundService
 {
     private readonly IOptions<RabbitMqOptions> _options;
-    private readonly ICustomMinioClient _minioClient;
     private readonly IModelStorage _modelStorage;
     private readonly INotifyService _notifyService;
     private readonly IRabbitMqPublisherService _publisherService;
 
-    public PredictHostedListener(IOptions<RabbitMqOptions> options, ICustomMinioClient minioClient, IModelStorage modelStorage, 
+    public PredictHostedListener(IOptions<RabbitMqOptions> options, IModelStorage modelStorage, 
         INotifyService notifyService, IRabbitMqPublisherService publisherService)
     {
         _options = options;
-        _minioClient = minioClient;
         _modelStorage = modelStorage;
         _notifyService = notifyService;
         _publisherService = publisherService;
@@ -92,7 +85,6 @@ public class PredictHostedListener : BackgroundService
             }, Queues.PredictionResult);
             
             await _notifyService.UpdateStateAndNotify(ModelStatus.Done, contract.Model.Id);
-            await _notifyService.UpdateStateAndNotify(ModelStatus.Trained, contract.Model.Id);
         }
         catch (Exception e)
         {

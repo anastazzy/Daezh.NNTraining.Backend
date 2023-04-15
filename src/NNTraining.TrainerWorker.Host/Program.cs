@@ -2,6 +2,7 @@ using NNTraining.Common.Options;
 using NNTraining.TrainerWorker.App;
 using NNTraining.TrainerWorker.Contracts;
 using NNTraining.TrainerWorker.Host;
+using NNTraining.TrainerWorker.Host.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOptions<RabbitMqOptions>();
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
 
-builder.Services.AddScoped<TrainHostedListener>();
+builder.Services.AddHostedService<TrainHostedListener>();
+builder.Services.AddHostedService<PredictHostedListener>();
 
 builder.Services.AddSingleton<IModelTrainingHubContext, ModelTrainingHubContext>();
 builder.Services.AddScoped<INotifyService, NotifyService>();
