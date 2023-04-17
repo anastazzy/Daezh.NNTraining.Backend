@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -38,33 +39,39 @@ public class TrainHostedListener : BackgroundService
     /// <returns>A <see cref="T:System.Threading.Tasks.Task" /> that represents the long running operations.</returns>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _ = Task.Factory.StartNew(() => RunConsuming(stoppingToken), TaskCreationOptions.LongRunning);
+
+        return Task.CompletedTask;
+    }
+    
+    private void DeclareExchange(IModel channel, string exchange)
+    {
+        channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
+    }
+
+    public void RunConsuming(CancellationToken cancellationToken)
+    {
         var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
         using var connection = factory.CreateConnection();
-        using var channel = connection.CreateModel();
+        var model = connection.CreateModel();
 
-        channel.QueueDeclare(queue: _options.Value.QueueToTrain,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
+        DeclareExchange(model, _options.Value.QueueToTrain);
         
-        var consumer = new EventingBasicConsumer(channel);
+        model.QueueDeclare(_options.Value.QueueToTrain, true, false, false);
+        model.QueueBind(_options.Value.QueueToTrain, _options.Value.QueueToTrain, string.Empty);
         
-        do
+        JsonSerializerOptions options = new();
+        options.Converters.Add(new CustomModelParametersConverter());
+        
+        var consumer = new EventingBasicConsumer(model);
+        consumer.Received += async (_, ea) =>
         {
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                //здесь надо прокидывать их в predict метод
-                Console.WriteLine($" [x] Received {message}");
-            };
-            channel.BasicConsume(queue: _options.Value.QueueToTrain,
-                autoAck: true,
-                consumer: consumer);
-        } while (!stoppingToken.IsCancellationRequested);
+            var message = JsonSerializer.Deserialize<ModelContract>(ea.Body.Span, options)!;
+            await Train(message);
+        };
         
-        return Task.CompletedTask;
+        model.BasicConsume(_options.Value.QueueToTrain, true, consumer);
+
     }
 
     private async Task Train(ModelContract model)
@@ -74,6 +81,7 @@ public class TrainHostedListener : BackgroundService
 
         try
         {
+            await _notifyService.UpdateStateAndNotify(ModelStatus.WaitingTraining, model.Id);
             //creation of dataViewSchema for save model in storage
             var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
             var data = new DataViewSchema.Builder();
@@ -98,6 +106,7 @@ public class TrainHostedListener : BackgroundService
             await _modelStorage.SaveAsync(trainedModel, model, data.ToSchema());
             
             // в случае успеха закидывается на фронт смена статуса в хаб
+            
             _publisherService.SendMessage(new ModelStatusUpdateDto
             {
                 Id = model.Id,

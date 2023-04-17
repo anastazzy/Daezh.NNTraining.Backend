@@ -1,6 +1,6 @@
 ﻿namespace NNTraining.Common.ServiceContracts;
 
-public class NNParametersContract
+public class NNParameters
 {
     public string? NameOfTrainSet { get; set; }
 }

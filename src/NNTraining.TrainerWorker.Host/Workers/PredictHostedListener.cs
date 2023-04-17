@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NNTraining.Common;
 using NNTraining.Common.Enums;
@@ -33,33 +34,35 @@ public class PredictHostedListener : BackgroundService
     /// <returns>A <see cref="T:System.Threading.Tasks.Task" /> that represents the long running operations.</returns>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _ = Task.Factory.StartNew(() => RunConsuming(stoppingToken), TaskCreationOptions.LongRunning);
+
+        return Task.CompletedTask;
+    }
+    
+    private void DeclareExchange(IModel channel, string exchange)
+    {
+        channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
+    }
+
+    public void RunConsuming(CancellationToken cancellationToken)
+    {
         var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
         using var connection = factory.CreateConnection();
-        using var channel = connection.CreateModel();
+        var model = connection.CreateModel();
 
-        channel.QueueDeclare(queue: _options.Value.QueueToPredict,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
+        DeclareExchange(model, _options.Value.QueueToPredict);
         
-        var consumer = new EventingBasicConsumer(channel);
+        model.QueueDeclare(_options.Value.QueueToPredict, true, false, false);
+        model.QueueBind(_options.Value.QueueToPredict, _options.Value.QueueToPredict, string.Empty);
         
-        do
+        var consumer = new EventingBasicConsumer(model);
+        consumer.Received += async (_, ea) =>
         {
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                //здесь надо прокидывать их в predict метод
-                Console.WriteLine($" [x] Received {message}");
-            };
-            channel.BasicConsume(queue: _options.Value.QueueToPredict,
-                autoAck: true,
-                consumer: consumer);
-        } while (!stoppingToken.IsCancellationRequested);
+            var message = JsonSerializer.Deserialize<PredictionContract>(ea.Body.Span)!;
+            await Predict(message);
+        };
         
-        return Task.CompletedTask;
+        model.BasicConsume(_options.Value.QueueToPredict, true, consumer);
     }
 
     private async Task Predict(PredictionContract contract)

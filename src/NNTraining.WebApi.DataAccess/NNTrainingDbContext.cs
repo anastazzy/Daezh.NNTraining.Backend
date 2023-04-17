@@ -44,7 +44,7 @@ public class NNTrainingDbContext : DbContext
     
     private static class JsonHelper
     {
-        private static readonly JsonSerializerOptions options = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions options = new ()
         {
             Converters = { new CustomModelParametersConverter() }
         };

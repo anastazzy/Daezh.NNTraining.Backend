@@ -15,14 +15,8 @@ public class RabbitMqPublisherService : IRabbitMqPublisherService
     {
         _options = options;
     }
-    
-    public void SendMessage(object obj, Queues queue)
-    {
-        var message = JsonSerializer.Serialize(obj);
-        SendMessage(message, queue);
-    }
 
-    public void SendMessage(string message, Queues queue)
+    public void SendMessage(object obj, Queues queue)
     {
         var queueName = queue switch
         {
@@ -36,18 +30,15 @@ public class RabbitMqPublisherService : IRabbitMqPublisherService
         var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
-
-        channel.QueueDeclare(queue:  queueName,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
         
-        var body = Encoding.UTF8.GetBytes(message);
+        DeclareExchange(channel, queueName);
+        
+        channel.BasicPublish(queueName, string.Empty,
+            body: JsonSerializer.SerializeToUtf8Bytes(obj));
+    }
 
-        channel.BasicPublish(exchange: string.Empty,
-            routingKey: queueName,
-            basicProperties: null,
-            body: body);
+    private void DeclareExchange(IModel channel, string exchange)
+    {
+        channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
     }
 }

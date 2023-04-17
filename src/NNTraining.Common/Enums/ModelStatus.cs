@@ -18,6 +18,11 @@ public enum ModelStatus
     ReadyToTraining,
     
     /// <summary>
+    /// Ожидает тренировки
+    /// </summary>
+    WaitingTraining,
+    
+    /// <summary>
     /// В процессе тренировки
     /// </summary>
     StillTraining,

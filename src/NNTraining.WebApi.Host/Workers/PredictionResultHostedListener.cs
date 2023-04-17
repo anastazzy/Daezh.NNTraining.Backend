@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NNTraining.Common.Options;
 using NNTraining.Common.QueueContracts;
@@ -23,35 +24,38 @@ public class PredictionResultHostedListener : BackgroundService
     /// <returns>A <see cref="T:System.Threading.Tasks.Task" /> that represents the long running operations.</returns>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
-        using var connection = factory.CreateConnection();
-        using var channel = connection.CreateModel();
+        _ = Task.Factory.StartNew(() => RunConsuming(stoppingToken), TaskCreationOptions.LongRunning);
 
-        channel.QueueDeclare(queue: _options.Value.PredictionResult,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-        
-        var consumer = new EventingBasicConsumer(channel);
-        
-        do
-        {
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                //здесь надо прокидывать их в predict метод
-                Console.WriteLine($" [x] Received {message}");
-            };
-            channel.BasicConsume(queue: _options.Value.PredictionResult,
-                autoAck: true,
-                consumer: consumer);
-        } while (!stoppingToken.IsCancellationRequested);
-        
         return Task.CompletedTask;
     }
     
+    private void DeclareExchange(IModel channel, string exchange)
+    {
+        channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
+    }
+    
+    private void RunConsuming(CancellationToken cancellationToken)
+    {
+        var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
+        using var connection = factory.CreateConnection();
+        var model = connection.CreateModel();
+
+        DeclareExchange(model, _options.Value.PredictionResult);
+        
+        model.QueueDeclare(_options.Value.PredictionResult, true, false, false);
+        model.QueueBind(_options.Value.PredictionResult, _options.Value.PredictionResult, string.Empty);
+        
+        var consumer = new EventingBasicConsumer(model);
+        consumer.Received += async (_, ea) =>
+        {
+            var message = JsonSerializer.Deserialize<PredictionResultContract>(ea.Body.Span)!;
+            await GetResult(message);
+        };
+        
+        model.BasicConsume(_options.Value.PredictionResult, true, consumer);
+
+    }
+
     public async Task GetResult(PredictionResultContract contract)
     {
         // если будет какая-то история использования модели, то надо сохранять записи - вот зачем этот воркер

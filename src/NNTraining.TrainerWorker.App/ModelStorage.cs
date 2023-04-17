@@ -47,7 +47,6 @@ public class ModelStorage: IModelStorage
 
     public async Task<ITrainedModel> GetAsync(ModelContract model, string fileWithModelName, ModelType bucketName)
     {
-        
         const string tempFileNameOfModel = "temp.zip";
         await _storage.GetObjectAsync(fileWithModelName, bucketName.ToString(), tempFileNameOfModel);
         
@@ -59,7 +58,7 @@ public class ModelStorage: IModelStorage
         {
             case ModelType.DataPrediction:
             {
-                var parameters = model.Parameters as DataPredictionNnParametersContract;
+                var parameters = model.Parameters as DataPredictionNnParameters;
                 if (parameters?.NameOfTargetColumn is null)
                 {
                     throw new ArgumentException("Error of conversion parameters");

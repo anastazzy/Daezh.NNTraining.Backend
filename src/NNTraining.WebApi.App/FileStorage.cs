@@ -85,7 +85,7 @@ public class FileStorage: IFileStorage
         
         var bucket = bucketName.ToString().ToLower();
         
-        var result = await _customMinioClient.CopyStreamAsync(bucket, fileName, fileStream);
+        var result = await _customMinioClient.CopyStreamAsync(fileName, bucket, fileStream);
 
         if (result is null)
         {

@@ -7,11 +7,11 @@ public class ModelTrainerFactory : IModelTrainerFactory
 {
     public string NameOfTrainSet { get; set; }
     
-    public IModelTrainer CreateTrainer(NNParametersContract parameters)
+    public IModelTrainer CreateTrainer(NNParameters parameters)
     {
         switch (parameters)
         {
-            case DataPredictionNnParametersContract dataPredictionNnParameters:
+            case DataPredictionNnParameters dataPredictionNnParameters:
                 return new DataPredictionModelTrainer(
                     NameOfTrainSet, 
                     dataPredictionNnParameters.NameOfTargetColumn!,

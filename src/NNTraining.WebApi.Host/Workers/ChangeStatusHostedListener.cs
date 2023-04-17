@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NNTraining.Common.Options;
@@ -13,11 +14,13 @@ public class ChangeStatusHostedListener : BackgroundService
 {
     private readonly IOptions<RabbitMqOptions> _options;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger;
 
-    public ChangeStatusHostedListener(IOptions<RabbitMqOptions> options, IServiceProvider serviceProvider)
+    public ChangeStatusHostedListener(IOptions<RabbitMqOptions> options, IServiceProvider serviceProvider, ILogger<ChangeStatusHostedListener> logger)
     {
         _options = options;
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
     /// <summary>
     /// This method is called when the <see cref="T:Microsoft.Extensions.Hosting.IHostedService" /> starts. The implementation should return a task that represents
@@ -27,33 +30,55 @@ public class ChangeStatusHostedListener : BackgroundService
     /// <returns>A <see cref="T:System.Threading.Tasks.Task" /> that represents the long running operations.</returns>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
-        using var connection = factory.CreateConnection();
-        using var channel = connection.CreateModel();
-
-        channel.QueueDeclare(queue: _options.Value.QueueChangeModelStatus,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-        
-        var consumer = new EventingBasicConsumer(channel);
-        
-        do
-        {
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                //здесь надо прокидывать их в predict метод
-                Console.WriteLine($" [x] Received {message}");
-            };
-            channel.BasicConsume(queue: _options.Value.QueueChangeModelStatus,
-                autoAck: true,
-                consumer: consumer);
-        } while (!stoppingToken.IsCancellationRequested);
+        _ = Task.Factory.StartNew(() => RunConsuming(stoppingToken), TaskCreationOptions.LongRunning);
         
         return Task.CompletedTask;
+    }
+    
+    // public void Publish(ParsedPageMessage message)
+    // {
+    //     var factory = new ConnectionFactory { HostName = "localhost" };
+    //     using var connection = factory.CreateConnection();
+    //     using var channel = connection.CreateModel();
+    //
+    //     DeclareExchange(channel);
+    //     
+    //     channel.BasicPublish("crawler.parsed", string.Empty,
+    //         body: JsonSerializer.SerializeToUtf8Bytes(message));    
+    // }
+
+    private void DeclareExchange(IModel channel, string exchange)
+    {
+        channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
+    }
+
+    private void RunConsuming(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
+            using var connection = factory.CreateConnection();
+            var model = connection.CreateModel();
+        
+            DeclareExchange(model, _options.Value.QueueChangeModelStatus);
+        
+            model.QueueDeclare(_options.Value.QueueChangeModelStatus, true, false, false);
+            model.QueueBind(_options.Value.QueueChangeModelStatus, _options.Value.QueueChangeModelStatus, string.Empty);
+        
+            var consumer = new EventingBasicConsumer(model);
+            consumer.Received += async (_, ea) =>
+            {
+                var message = JsonSerializer.Deserialize<ChangeModelStatusContract>(ea.Body.Span)!;
+                await ChangeStateOfModel(message);
+            };
+        
+            model.BasicConsume(_options.Value.QueueChangeModelStatus, true, consumer);
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error, e.Message);
+            throw;
+        }
     }
     
     public async Task ChangeStateOfModel(ChangeModelStatusContract contract)

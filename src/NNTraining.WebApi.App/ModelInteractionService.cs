@@ -9,7 +9,7 @@ using NNTraining.Common.ServiceContracts;
 using NNTraining.WebApi.Contracts;
 using NNTraining.WebApi.Contracts.Resources;
 using NNTraining.WebApi.DataAccess;
-using NNTraining.WebApi.Domain;
+using NNParameters = NNTraining.Common.ServiceContracts.NNParameters;
 
 namespace NNTraining.App;
 
@@ -58,33 +58,39 @@ public class ModelInteractionService : IModelInteractionService
         await using var stream = await _fileStorage.GetStreamAsync(parameters?.NameOfTrainSet!, model.ModelType);
         
         //save the field type and name to params of model
-        object fullParam;
+        NNParameters fullParam;
+        var str = "";
         switch (parameters)
         {
-            case DataPredictionNnParameters dataPredictionNnParameters:
-            {
-                fullParam = dataPredictionNnParameters;
+            case WebApi.Domain.DataPredictionNnParameters dataPredictionNnParameters :
                 model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
                     stream,
                     dataPredictionNnParameters.Separators);
+                fullParam = new DataPredictionNnParameters
+                {
+                    NameOfTrainSet = dataPredictionNnParameters.NameOfTrainSet,
+                    NameOfTargetColumn = dataPredictionNnParameters.NameOfTargetColumn,
+                    HasHeader = dataPredictionNnParameters.HasHeader,
+                    Separators = dataPredictionNnParameters.Separators
+                };
+                str = typeof(DataPredictionNnParameters).ToString();
                 break;
-            }
-            default: throw new Exception();
-        }
-        //событие обновления статуса надо закинуть в рэбит
-        // model = await _notifyService.UpdateStateAndNotify(ModelStatus.StillTraining, model.Id);
-        model.ModelStatus = ModelStatus.StillTraining;
-        await dbContext.SaveChangesAsync();
-        
+            default:
+                throw new Exception();
+        };
+
         _publisherService.SendMessage(new ModelContract
         {
             Id = model.Id,
             Name = model.Name,
             ModelType = model.ModelType,
             ModelStatus = model.ModelStatus,
-            Parameters = fullParam as NNParametersContract,
-            PairFieldType = null
+            Parameters = fullParam,
+            TypeParameters = str,
+            PairFieldType = model.PairFieldType
         }, Queues.ToTrain);
+        
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task Predict(Guid id, Dictionary<string, JsonElement> modelForPrediction)

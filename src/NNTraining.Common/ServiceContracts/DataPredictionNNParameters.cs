@@ -1,6 +1,6 @@
 ﻿namespace NNTraining.Common.ServiceContracts;
 
-public class DataPredictionNnParametersContract : NNParametersContract
+public class DataPredictionNnParameters : NNParameters
 {
     public string? NameOfTargetColumn { get; set; }
     public bool HasHeader { get; set; }
