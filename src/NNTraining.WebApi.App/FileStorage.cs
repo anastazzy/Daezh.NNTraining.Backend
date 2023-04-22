@@ -50,13 +50,6 @@ public class FileStorage: IFileStorage
         var location = fileType.ToString();
 
         await _customMinioClient.UploadAsync(bucket, location, contentType, fileStream, size, newFileName);
-        // await CreateBucketAsync(modelType, FileType.PredictSet);      
-        // await _minio.PutObjectAsync(new PutObjectArgs()
-        //     .WithBucket(bucket)
-        //     .WithStreamData(fileStream)
-        //     .WithObjectSize(size)
-        //     .WithObject(newFileName)
-        //     .WithContentType(contentType));
         
         return newFileName;
     }
@@ -121,7 +114,7 @@ public class FileStorage: IFileStorage
         return file.GuidName;
     }
     
-    private async Task<string?> SaveModel(Guid modelId, string fileName, long size)
+    public async Task<string?> SaveModel(Guid modelId, string fileName, long size)
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;

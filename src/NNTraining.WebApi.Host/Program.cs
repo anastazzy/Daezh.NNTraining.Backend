@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using NNTraining.App;
+using NNTraining.App.Utils;
 using NNTraining.Common;
 using NNTraining.Common.Options;
 using NNTraining.WebApi.Contracts;
@@ -22,11 +23,14 @@ builder.Services.AddDbContext<NNTrainingDbContext>(x =>
 builder.Services.AddSignalR();
 
 builder.Services.AddHostedService<ChangeStatusHostedListener>();
+builder.Services.AddHostedService<ModelToTrainCrawler>();
+builder.Services.AddHostedService<SaveModelHostedListener>();
 
 builder.Services.AddSingleton<ICustomMinioClient, CustomMinioClient>();
 builder.Services.AddSingleton<IFileStorage, FileStorage>();
 
 builder.Services.AddScoped<IRabbitMqPublisherService, RabbitMqPublisherService>();
+builder.Services.AddScoped<IWebAppPublisherService, WebAppPublisherService>();
 builder.Services.AddScoped<IBaseModelService, BaseModelService>();
 builder.Services.AddScoped<IModelInteractionService, ModelInteractionService>();
 

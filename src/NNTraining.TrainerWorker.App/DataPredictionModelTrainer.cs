@@ -73,7 +73,7 @@ public class DataPredictionModelTrainer : IModelTrainer
             HasHeader = _hasHeader,
             Separators = _separators,
             Columns = columns
-        });
+        }); // почему-то не парсится (
 
         // creation the training pipelines
         var dataProcessPipeline = CreateTrainingPipeline(columns);

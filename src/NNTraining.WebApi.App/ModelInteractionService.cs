@@ -17,18 +17,24 @@ public class ModelInteractionService : IModelInteractionService
 {
     private readonly IFileStorage _fileStorage;
     private readonly IStringLocalizer<EnumDescriptionResources> _stringLocalizer;
-    private readonly IRabbitMqPublisherService _publisherService;
+
+    private readonly IWebAppPublisherService _publisherService;
+
+    // private readonly IRabbitMqPublisherService _publisherService;
     private readonly IServiceProvider _serviceProvider;
 
     public ModelInteractionService(
         IServiceProvider serviceProvider, 
         IFileStorage fileStorage,
-        IStringLocalizer<EnumDescriptionResources> stringLocalizer, IRabbitMqPublisherService publisherService)
+        IStringLocalizer<EnumDescriptionResources> stringLocalizer, 
+        // IRabbitMqPublisherService publisherService,
+        IWebAppPublisherService publisherService)
     {
         _serviceProvider = serviceProvider;
         _fileStorage = fileStorage;
         _stringLocalizer = stringLocalizer;
         _publisherService = publisherService;
+        // _publisherService = publisherService;
     }
 
     public async void Train(Guid id)
@@ -58,37 +64,28 @@ public class ModelInteractionService : IModelInteractionService
         await using var stream = await _fileStorage.GetStreamAsync(parameters?.NameOfTrainSet!, model.ModelType);
         
         //save the field type and name to params of model
-        NNParameters fullParam;
-        var str = "";
         switch (parameters)
         {
             case WebApi.Domain.DataPredictionNnParameters dataPredictionNnParameters :
                 model.PairFieldType = await ModelHelper.CompletionTheDictionaryAsync(
                     stream,
                     dataPredictionNnParameters.Separators);
-                fullParam = new DataPredictionNnParameters
-                {
-                    NameOfTrainSet = dataPredictionNnParameters.NameOfTrainSet,
-                    NameOfTargetColumn = dataPredictionNnParameters.NameOfTargetColumn,
-                    HasHeader = dataPredictionNnParameters.HasHeader,
-                    Separators = dataPredictionNnParameters.Separators
-                };
-                str = typeof(DataPredictionNnParameters).ToString();
                 break;
             default:
                 throw new Exception();
         };
+        
+        _publisherService.SendModelContract(model);
 
-        _publisherService.SendMessage(new ModelContract
-        {
-            Id = model.Id,
-            Name = model.Name,
-            ModelType = model.ModelType,
-            ModelStatus = model.ModelStatus,
-            Parameters = fullParam,
-            TypeParameters = str,
-            PairFieldType = model.PairFieldType
-        }, Queues.ToTrain);
+        // _publisherService.SendMessage(new ModelContract
+        // {
+        //     Id = model.Id,
+        //     Name = model.Name,
+        //     ModelType = model.ModelType,
+        //     ModelStatus = model.ModelStatus,
+        //     Parameters = fullParam,
+        //     PairFieldType = model.PairFieldType
+        // }, Queues.ToTrain);
         
         await dbContext.SaveChangesAsync();
     }
@@ -106,20 +103,22 @@ public class ModelInteractionService : IModelInteractionService
 
         var fileName = await GetAsync(model.Id);
         
-        _publisherService.SendMessage(new PredictionContract
-        {
-            Model = new ModelContract
-            {
-                Id = model.Id,
-                Name = model.Name,
-                ModelType = model.ModelType,
-                ModelStatus = model.ModelStatus,
-                Parameters = new (),
-                PairFieldType = model.PairFieldType
-            },
-            ModelForPrediction = modelForPrediction,
-            FileWithModelName = fileName
-        }, Queues.ToPredict);
+        _publisherService.SendPredictContract(model, modelForPrediction, fileName);
+        
+        // _publisherService.SendMessage(new PredictionContract
+        // {
+        //     Model = new ModelContract
+        //     {
+        //         Id = model.Id,
+        //         Name = model.Name,
+        //         ModelType = model.ModelType,
+        //         ModelStatus = model.ModelStatus,
+        //         Parameters = new (),
+        //         PairFieldType = model.PairFieldType
+        //     },
+        //     ModelForPrediction = modelForPrediction,
+        //     FileWithModelName = fileName
+        // }, Queues.ToPredict);
     }
     
     private async Task<string?> GetAsync(Guid id)
@@ -146,30 +145,7 @@ public class ModelInteractionService : IModelInteractionService
         {
             throw new ArgumentException("The file with this model was not found");
         }
-        // далее тоже вызывается все в воркере
-
-        return fileWithModel.GuidName;
-
-        // const string tempFileNameOfModel = "temp.zip";
-        // await _storage.GetAsync(fileWithModel.GuidName, bucketName, tempFileNameOfModel);
-        //
-        // var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);
-        //
-        // var type = ModelHelper.GetTypeOfCurrentFields(model.PairFieldType);
-        //
-        // switch (bucketName)
-        // {
-        //     case ModelType.DataPrediction:
-        //     {
-        //         var parameters = model.Parameters as DataPredictionNnParameters;
-        //         if (parameters?.NameOfTargetColumn is null)
-        //         {
-        //             throw new ArgumentException("Error of conversion parameters");
-        //         }
-        //         return new DataPredictionTrainedModel(trainedModel, _mlContext, type, parameters.NameOfTargetColumn);
-        //     }
-        //     default: throw new Exception();
-        // }
+        return fileWithModel.OriginalName;
     }
 }
     

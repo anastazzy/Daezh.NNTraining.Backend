@@ -2,24 +2,28 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
 using NNTraining.Common.QueueContracts;
+using NNTraining.Common.ServiceContracts;
+using NNTraining.WebApi.Contracts;
 using NNTraining.WebApi.DataAccess;
+using NNTraining.WebApi.Domain.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace NNTraining.WebApi.Host.Workers;
 
-public class ChangeStatusHostedListener : BackgroundService
+public class SaveModelHostedListener : BackgroundService
 {
     private readonly IOptions<RabbitMqOptions> _options;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IFileStorage _fileStorage;
     private readonly ILogger _logger;
 
-    public ChangeStatusHostedListener(IOptions<RabbitMqOptions> options, IServiceProvider serviceProvider, ILogger<ChangeStatusHostedListener> logger)
+    public SaveModelHostedListener(IOptions<RabbitMqOptions> options, IFileStorage fileStorage, ILogger<ChangeStatusHostedListener> logger)
     {
         _options = options;
-        _serviceProvider = serviceProvider;
+        _fileStorage = fileStorage;
         _logger = logger;
     }
     /// <summary>
@@ -35,18 +39,6 @@ public class ChangeStatusHostedListener : BackgroundService
         return Task.CompletedTask;
     }
     
-    // public void Publish(ParsedPageMessage message)
-    // {
-    //     var factory = new ConnectionFactory { HostName = "localhost" };
-    //     using var connection = factory.CreateConnection();
-    //     using var channel = connection.CreateModel();
-    //
-    //     DeclareExchange(channel);
-    //     
-    //     channel.BasicPublish("crawler.parsed", string.Empty,
-    //         body: JsonSerializer.SerializeToUtf8Bytes(message));    
-    // }
-
     private void DeclareExchange(IModel channel, string exchange)
     {
         channel.ExchangeDeclare(exchange, ExchangeType.Direct, true);
@@ -56,20 +48,20 @@ public class ChangeStatusHostedListener : BackgroundService
     {
         try
         {
-            var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
+            var factory = new ConnectionFactory { HostName = _options.Value.HostName};
             var connection = factory.CreateConnection();
             var model = connection.CreateModel();
         
-            DeclareExchange(model, _options.Value.QueueChangeModelStatus);
+            DeclareExchange(model, _options.Value.SaveFileWithModel);
         
-            model.QueueDeclare(_options.Value.QueueChangeModelStatus, true, false, false);
-            model.QueueBind(_options.Value.QueueChangeModelStatus, _options.Value.QueueChangeModelStatus, string.Empty);
+            model.QueueDeclare(_options.Value.SaveFileWithModel, true, false, false);
+            model.QueueBind(_options.Value.SaveFileWithModel, _options.Value.SaveFileWithModel, string.Empty);
         
             var consumer = new EventingBasicConsumer(model);
-            consumer.Received += async (_, ea) =>
+            consumer.Received += (_, ea) =>
             {
-                var message = JsonSerializer.Deserialize<ChangeModelStatusContract>(ea.Body.Span)!;
-                await ChangeStateOfModel(message);
+                var message = JsonSerializer.Deserialize<SaveFileWithModelContract>(ea.Body.Span)!;
+                SaveFileWithModel(message);
             };
         
             model.BasicConsume(_options.Value.QueueChangeModelStatus, true, consumer);
@@ -80,21 +72,8 @@ public class ChangeStatusHostedListener : BackgroundService
         }
     }
     
-    public async Task ChangeStateOfModel(ChangeModelStatusContract contract)
+    public void SaveFileWithModel(SaveFileWithModelContract contract)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
-
-        var model = await dbContext.Models.FirstOrDefaultAsync(x => x.Id == contract.Id);
-
-        if (model is null)
-        {
-            Console.WriteLine($" model with id={contract.Id} not found");
-            return;
-        }
-
-        model.ModelStatus = contract.Status;
-        
-        await dbContext.SaveChangesAsync();
+        _fileStorage.SaveModel(contract.ModelId, contract.FileIdInMinio, contract.Size);
     }
 }

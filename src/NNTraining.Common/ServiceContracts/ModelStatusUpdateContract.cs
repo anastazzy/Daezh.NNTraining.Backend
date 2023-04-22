@@ -2,7 +2,7 @@
 
 namespace NNTraining.Common.ServiceContracts;
 
-public class ModelStatusUpdateDto
+public class ModelStatusUpdateContract
 {
     public Guid Id { get; set; }
     public ModelStatus Status { get; set; }

@@ -18,13 +18,11 @@ public class NotifyService : INotifyService
 
     public async Task UpdateStateAndNotify(ModelStatus newStatus, Guid modelId)
     {
-        // model.ModelStatus = newStatus;
         await _hubContext.PullStatusOfTrainingAsync((int)newStatus, modelId);
         _publisherService.SendMessage(new ChangeModelStatusContract
         {
             Id = modelId,
             Status = newStatus
         }, Queues.ChangeModelStatus);
-        // return model;
     }
 }

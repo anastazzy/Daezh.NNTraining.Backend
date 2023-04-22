@@ -47,7 +47,7 @@ public class PredictHostedListener : BackgroundService
     public void RunConsuming(CancellationToken cancellationToken)
     {
         var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
-        using var connection = factory.CreateConnection();
+        var connection = factory.CreateConnection();
         var model = connection.CreateModel();
 
         DeclareExchange(model, _options.Value.QueueToPredict);
@@ -55,10 +55,13 @@ public class PredictHostedListener : BackgroundService
         model.QueueDeclare(_options.Value.QueueToPredict, true, false, false);
         model.QueueBind(_options.Value.QueueToPredict, _options.Value.QueueToPredict, string.Empty);
         
+        JsonSerializerOptions options = new();
+        options.Converters.Add(new CustomModelParametersConverter());
+        
         var consumer = new EventingBasicConsumer(model);
         consumer.Received += async (_, ea) =>
         {
-            var message = JsonSerializer.Deserialize<PredictionContract>(ea.Body.Span)!;
+            var message = JsonSerializer.Deserialize<PredictionContract>(ea.Body.Span, options)!;
             await Predict(message);
         };
         
@@ -75,9 +78,8 @@ public class PredictHostedListener : BackgroundService
         {
             await _notifyService.UpdateStateAndNotify(ModelStatus.StillPredict, contract.Model.Id);
             //getting trained model from a model storage
-            var trainedModel = await _modelStorage.GetAsync(contract.Model, contract.FileWithModelName, contract.Model.ModelType); // это вызывается тоже в воркере
+            var trainedModel = await _modelStorage.GetAsync(contract.Model, contract.FileWithModelName, contract.Model.ModelType);
         
-            // после закидывания события в воркер то будет...
             //there dataset or object need for prediction
             result = trainedModel.Predict(contract.ModelForPrediction);
             

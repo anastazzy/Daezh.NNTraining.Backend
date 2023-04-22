@@ -28,7 +28,7 @@ public class CustomMinioClient : ICustomMinioClient
     {
         await CreateBucketAsync(bucket.ToLower(), location);      
         await _minio.PutObjectAsync(new PutObjectArgs()
-            .WithBucket(bucket)
+            .WithBucket(bucket.ToLower())
             .WithStreamData(fileStream)
             .WithObjectSize(size)
             .WithObject(newFileName)
@@ -38,7 +38,7 @@ public class CustomMinioClient : ICustomMinioClient
     public async Task<ObjectStat> CopyStreamAsync(string fileName, string bucket, MemoryStream fileStream)
     {
         return await _minio.GetObjectAsync(new GetObjectArgs()
-            .WithBucket(bucket)
+            .WithBucket(bucket.ToLower())
             .WithObject(fileName)
             .WithCallbackStream(stream => stream.CopyToAsync(fileStream)));
     }

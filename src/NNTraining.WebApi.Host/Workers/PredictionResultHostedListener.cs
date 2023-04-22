@@ -37,7 +37,7 @@ public class PredictionResultHostedListener : BackgroundService
     private void RunConsuming(CancellationToken cancellationToken)
     {
         var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
-        using var connection = factory.CreateConnection();
+        var connection = factory.CreateConnection();
         var model = connection.CreateModel();
 
         DeclareExchange(model, _options.Value.PredictionResult);

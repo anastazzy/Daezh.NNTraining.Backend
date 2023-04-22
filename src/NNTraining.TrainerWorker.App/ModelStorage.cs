@@ -19,7 +19,7 @@ public class ModelStorage: IModelStorage
         _storage = storage;
     }
     
-    public async Task<string> SaveAsync(ITrainedModel trainedModel, ModelContract model, DataViewSchema dataViewSchema)
+    public async Task<(string fileName, long size)> SaveAsync(ITrainedModel trainedModel, ModelContract model, DataViewSchema dataViewSchema)
     {
         var contentType = "application/zip";
         var transformer = trainedModel.GetTransformer();
@@ -31,7 +31,7 @@ public class ModelStorage: IModelStorage
         var fileName = model.Id + ".zip";
         
         _mlContext.Model.Save(transformer, dataViewSchema, fileName);
-        await using var stream =  new FileStream(fileName, FileMode.OpenOrCreate);
+        await using var stream = new FileStream(fileName, FileMode.OpenOrCreate);
         var size = stream.Length;
         
         await _storage.UploadAsync(
@@ -42,7 +42,7 @@ public class ModelStorage: IModelStorage
             size,
             fileName);
         
-        return fileName;
+        return (fileName, size);
     }
 
     public async Task<ITrainedModel> GetAsync(ModelContract model, string fileWithModelName, ModelType bucketName)

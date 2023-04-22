@@ -11,4 +11,6 @@ public interface IFileStorage
     Task<ObjectStat> GetAsync(string fileName, ModelType bucketName, string outputFileName = "temp.csv");
 
     Task<Stream> GetStreamAsync(string fileName, ModelType bucketName);
+    
+    Task<string?> SaveModel(Guid modelId, string fileName, long size);
 }

@@ -51,8 +51,8 @@ public class TrainHostedListener : BackgroundService
 
     public void RunConsuming(CancellationToken cancellationToken)
     {
-        var factory = new ConnectionFactory { HostName =  _options.Value.HostName};
-        using var connection = factory.CreateConnection();
+        var factory = new ConnectionFactory { HostName = _options.Value.HostName};
+        var connection = factory.CreateConnection();
         var model = connection.CreateModel();
 
         DeclareExchange(model, _options.Value.QueueToTrain);
@@ -103,11 +103,17 @@ public class TrainHostedListener : BackgroundService
         
             var trainer = factory.CreateTrainer(model.Parameters);
             var trainedModel = trainer.Train(model.PairFieldType);
-            await _modelStorage.SaveAsync(trainedModel, model, data.ToSchema());
+            var (fileWithModel, size) = await _modelStorage.SaveAsync(trainedModel, model, data.ToSchema());
             
             // в случае успеха закидывается на фронт смена статуса в хаб
+            _publisherService.SendMessage(new SaveFileWithModelContract
+            {
+                ModelId = model.Id,
+                FileIdInMinio = fileWithModel,
+                Size = size
+            }, Queues.ChangeModelStatus);
             
-            _publisherService.SendMessage(new ModelStatusUpdateDto
+            _publisherService.SendMessage(new ModelStatusUpdateContract
             {
                 Id = model.Id,
                 Status = ModelStatus.Trained
