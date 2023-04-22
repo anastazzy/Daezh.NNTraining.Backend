@@ -26,7 +26,7 @@ public class CustomMinioClient : ICustomMinioClient
     public async Task UploadAsync(string bucket, string location, string contentType, Stream fileStream, 
         long size, string newFileName)
     {
-        await CreateBucketAsync(bucket, location);      
+        await CreateBucketAsync(bucket.ToLower(), location);      
         await _minio.PutObjectAsync(new PutObjectArgs()
             .WithBucket(bucket)
             .WithStreamData(fileStream)
@@ -46,7 +46,7 @@ public class CustomMinioClient : ICustomMinioClient
     public async Task<ObjectStat> GetObjectAsync(string fileName, string bucket, string outputFileName)
     {
         return await _minio.GetObjectAsync(new GetObjectArgs()
-                    .WithBucket(bucket)
+                    .WithBucket(bucket.ToLower())
                     .WithObject(fileName)
                     .WithFile(outputFileName));
     }

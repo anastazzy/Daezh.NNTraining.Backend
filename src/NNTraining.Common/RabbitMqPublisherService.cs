@@ -32,9 +32,12 @@ public class RabbitMqPublisherService : IRabbitMqPublisherService
         using var channel = connection.CreateModel();
         
         DeclareExchange(channel, queueName);
-        
+
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new CustomModelParametersConverter());
+
         channel.BasicPublish(queueName, string.Empty,
-            body: JsonSerializer.SerializeToUtf8Bytes(obj));
+            body: JsonSerializer.SerializeToUtf8Bytes(obj, options));
     }
 
     private void DeclareExchange(IModel channel, string exchange)

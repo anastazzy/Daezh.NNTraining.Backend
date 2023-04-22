@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using NNTraining.Common.ServiceContracts;
 
-namespace NNTraining.TrainerWorker.Host;
+namespace NNTraining.Common.Options;
 
 public class CustomModelParametersConverter : JsonConverter<NNParameters>
 {
@@ -15,7 +15,7 @@ public class CustomModelParametersConverter : JsonConverter<NNParameters>
 
         if (!reader.Read()
             || reader.TokenType != JsonTokenType.PropertyName
-            || reader.GetString() != "typeParameters")
+            || reader.GetString() != "$type")
         {
             throw new JsonException();
         }
@@ -27,7 +27,7 @@ public class CustomModelParametersConverter : JsonConverter<NNParameters>
         
         var type = Type.GetType(reader.GetString());
         
-        if (!reader.Read() || reader.GetString() != "parameters")
+        if (!reader.Read() || reader.GetString() != "$value")
         {
             throw new JsonException();
         }
