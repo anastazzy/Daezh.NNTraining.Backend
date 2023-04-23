@@ -89,8 +89,8 @@ public class PredictHostedListener : BackgroundService
                 Result = result
             }, Queues.PredictionResult);
             
-            await _notifyService.SendResultOfTraining(result, contract.Model.Id);
             await _notifyService.UpdateStateAndNotify(ModelStatus.Trained, contract.Model.Id);
+            await _notifyService.SendResultOfTraining(result, contract.Model.Id);
         }
         catch (Exception e)
         {
