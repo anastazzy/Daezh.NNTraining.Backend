@@ -28,6 +28,11 @@ public enum ModelStatus
     StillTraining,
     
     /// <summary>
+    /// Произошла ошибка тренировки
+    /// </summary>
+    ErrorOfTrainingModel,
+    
+    /// <summary>
     /// Готова к использованию
     /// </summary>
     Trained,
@@ -38,22 +43,12 @@ public enum ModelStatus
     StillPredict,
     
     /// <summary>
-    /// Предсказание выполнено
+    /// Ошибка предсказания
     /// </summary>
-    Done,
+    ErrorOfPredict,
     
     /// <summary>
     /// Удалена
     /// </summary>
-    Deleted, 
-    
-    /// <summary>
-    /// Произошла ошибка тренировки
-    /// </summary>
-    ErrorOfTrainingModel,
-    
-    /// <summary>
-    /// Произошла ошибка предсказания
-    /// </summary>
-    PredictionError
+    Deleted
 }

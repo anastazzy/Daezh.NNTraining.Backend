@@ -47,7 +47,7 @@ public class ModelStorage: IModelStorage
 
     public async Task<ITrainedModel> GetAsync(ModelContract model, string fileWithModelName, ModelType bucketName)
     {
-        const string tempFileNameOfModel = "temp.zip";
+        string tempFileNameOfModel = $"{fileWithModelName}.zip";
         await _storage.GetObjectAsync(fileWithModelName, bucketName.ToString(), tempFileNameOfModel);
         
         var trainedModel = _mlContext.Model.Load(tempFileNameOfModel, out var modelSchema);

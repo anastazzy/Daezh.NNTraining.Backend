@@ -76,12 +76,14 @@ public class TrainHostedListener : BackgroundService
 
     private async Task Train(ModelContract model)
     {
+        await _notifyService.UpdateStateAndNotify(ModelStatus.WaitingTraining, model.Id);
         var currentDirectory = Directory.GetCurrentDirectory();
         var oldFiles = Directory.GetFiles(currentDirectory);
 
         try
         {
-            await _notifyService.UpdateStateAndNotify(ModelStatus.WaitingTraining, model.Id);
+            
+            await _notifyService.UpdateStateAndNotify(ModelStatus.StillTraining, model.Id);
             //creation of dataViewSchema for save model in storage
             var columns = ModelHelper.CreateTheTextLoaderColumn(model.PairFieldType);
             var data = new DataViewSchema.Builder();

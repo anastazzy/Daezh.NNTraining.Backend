@@ -12,8 +12,13 @@ public class ModelTrainingHubContext : IModelTrainingHubContext
         _hub = hub;
     }
     
-    public Task PullStatusOfTrainingAsync(int status, Guid idModel)
+    public Task PullStatusOfTrainingAsync(int status, Guid modelId)
     {
-        return _hub.Clients.All.SendAsync("getLoadingElement", status, idModel);
+        return _hub.Clients.All.SendAsync("getLoadingElement", status, modelId);
+    }
+
+    public Task SendResultOfPrediction(object result, Guid modelId)
+    {
+        return _hub.Clients.All.SendAsync("getPredictionResult", result, modelId);
     }
 }

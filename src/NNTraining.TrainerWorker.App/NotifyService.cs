@@ -25,4 +25,9 @@ public class NotifyService : INotifyService
             Status = newStatus
         }, Queues.ChangeModelStatus);
     }
+
+    public async Task SendResultOfTraining(object result, Guid modelId)
+    {
+        await _hubContext.SendResultOfPrediction(result, modelId);
+    }
 }

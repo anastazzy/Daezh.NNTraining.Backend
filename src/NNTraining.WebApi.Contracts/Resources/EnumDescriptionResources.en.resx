@@ -32,22 +32,32 @@
     <data name="Initialized" xml:space="preserve">
         <value>Initialized</value>
     </data>
+    
     <data name="NeedAParameters" xml:space="preserve">
         <value>Need a parameters</value>
     </data>
     <data name="ReadyToTraining" xml:space="preserve">
         <value>Ready to training</value>
     </data>
+    <data name="WaitingTraining" xml:space="preserve">
+        <value>Waiting training</value>
+    </data>
     <data name="StillTraining" xml:space="preserve">
         <value>Still training</value>
+    </data>
+    <data name="ErrorOfTrainingModel" xml:space="preserve">
+        <value>Error of training model</value>
     </data>
     <data name="Trained" xml:space="preserve">
         <value>Trained</value>
     </data>
+    <data name="StillPredict" xml:space="preserve">
+        <value>Still predict</value>
+    </data>
     <data name="Deleted" xml:space="preserve">
         <value>Deleted</value>
     </data>
-    <data name="ErrorOfTrainingModel" xml:space="preserve">
-        <value>Error of training the model</value>
+    <data name="ErrorOfPredict" xml:space="preserve">
+        <value>Error of predict</value>
     </data>
 </root>

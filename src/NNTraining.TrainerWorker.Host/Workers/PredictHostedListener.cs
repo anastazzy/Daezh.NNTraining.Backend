@@ -89,12 +89,13 @@ public class PredictHostedListener : BackgroundService
                 Result = result
             }, Queues.PredictionResult);
             
-            await _notifyService.UpdateStateAndNotify(ModelStatus.Done, contract.Model.Id);
+            await _notifyService.SendResultOfTraining(result, contract.Model.Id);
+            await _notifyService.UpdateStateAndNotify(ModelStatus.Trained, contract.Model.Id);
         }
         catch (Exception e)
         {
             Console.WriteLine($"The erorr was happend in training proccess: {e}");
-            await _notifyService.UpdateStateAndNotify(ModelStatus.ErrorOfTrainingModel, contract.Model.Id);
+            await _notifyService.UpdateStateAndNotify(ModelStatus.ErrorOfPredict, contract.Model.Id);
         }
         finally
         {

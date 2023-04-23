@@ -34,18 +34,6 @@ public class ChangeStatusHostedListener : BackgroundService
         
         return Task.CompletedTask;
     }
-    
-    // public void Publish(ParsedPageMessage message)
-    // {
-    //     var factory = new ConnectionFactory { HostName = "localhost" };
-    //     using var connection = factory.CreateConnection();
-    //     using var channel = connection.CreateModel();
-    //
-    //     DeclareExchange(channel);
-    //     
-    //     channel.BasicPublish("crawler.parsed", string.Empty,
-    //         body: JsonSerializer.SerializeToUtf8Bytes(message));    
-    // }
 
     private void DeclareExchange(IModel channel, string exchange)
     {

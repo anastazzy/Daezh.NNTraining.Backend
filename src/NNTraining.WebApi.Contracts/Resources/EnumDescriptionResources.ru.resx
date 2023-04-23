@@ -30,6 +30,7 @@
     <data name="Paints" xml:space="preserve">
         <value>Рисование</value>
     </data>
+    
     <data name="Initialized" xml:space="preserve">
         <value>Инициализованна</value>
     </data>
@@ -39,8 +40,17 @@
     <data name="ReadyToTraining" xml:space="preserve">
         <value>Готова к тренировке</value>
     </data>
+    <data name="WaitingTraining" xml:space="preserve">
+        <value>Ожидает тренировки</value>
+    </data>
     <data name="StillTraining" xml:space="preserve">
         <value>В процессе тренировки</value>
+    </data>
+    <data name="ErrorOfTrainingModel" xml:space="preserve">
+        <value>Ошибка тренировки, проверьте заданные параметры</value>
+    </data>
+    <data name="StillPredict" xml:space="preserve">
+        <value>Используется</value>
     </data>
     <data name="Trained" xml:space="preserve">
         <value>Готова к использованию</value>
@@ -48,7 +58,7 @@
     <data name="Deleted" xml:space="preserve">
         <value>Удалена</value>
     </data>
-    <data name="ErrorOfTrainingModel" xml:space="preserve">
-        <value>Произошла ошибка тренировки, проверьте параметры модели</value>
+    <data name="ErrorOfPredict" xml:space="preserve">
+        <value>Ошибка предсказания</value>
     </data>
 </root>

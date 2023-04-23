@@ -96,7 +96,16 @@ namespace NNTraining.WebApi.Contracts.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Произошла ошибка тренировки, проверьте параметры модели.
+        ///   Looks up a localized string similar to Ошибка предсказания.
+        /// </summary>
+        internal static string ErrorOfPredict {
+            get {
+                return ResourceManager.GetString("ErrorOfPredict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ошибка тренировки, проверьте заданные параметры.
         /// </summary>
         internal static string ErrorOfTrainingModel {
             get {
@@ -141,6 +150,15 @@ namespace NNTraining.WebApi.Contracts.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Используется.
+        /// </summary>
+        internal static string StillPredict {
+            get {
+                return ResourceManager.GetString("StillPredict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to В процессе тренировки.
         /// </summary>
         internal static string StillTraining {
@@ -155,6 +173,15 @@ namespace NNTraining.WebApi.Contracts.Resources {
         internal static string Trained {
             get {
                 return ResourceManager.GetString("Trained", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ожидает тренировки.
+        /// </summary>
+        internal static string WaitingTraining {
+            get {
+                return ResourceManager.GetString("WaitingTraining", resourceCulture);
             }
         }
     }
