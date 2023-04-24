@@ -32,7 +32,10 @@ public class BaseModelService : IBaseModelService
         {
             Name = modelInitializeDto.Name,
             ModelType = modelInitializeDto.ModelType,
-            ModelStatus = ModelStatus.Initialized
+            ModelStatus = ModelStatus.Initialized,
+            CreationDate = DateTimeOffset.Now,
+            Priority = PriorityTraining.None,
+            UpdateDate = DateTimeOffset.Now
         };
 
         await _dbContext.Models.AddAsync(model);
@@ -80,8 +83,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        
-        _dbContext.Update(model);
+        model.UpdateDate = DateTimeOffset.Now;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -125,8 +127,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        
-        _dbContext.Update(model);
+        model.UpdateDate = DateTimeOffset.Now;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -169,7 +170,7 @@ public class BaseModelService : IBaseModelService
 
             model.Parameters = newParameters;
             model.ModelStatus = ModelStatus.ReadyToTraining;
-            _dbContext.Models.Update(model);
+            model.UpdateDate = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
         }
@@ -180,7 +181,8 @@ public class BaseModelService : IBaseModelService
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {
         var models = await _dbContext.Models.ToArrayAsync();
-        return models.Select(model => new ModelOutputDto()
+        return models.OrderBy(x => x.UpdateDate)
+            .Select(model => new ModelOutputDto()
         {
             Id = model.Id,
             Name = model.Name,

@@ -46,9 +46,4 @@ public enum ModelStatus
     /// Ошибка предсказания
     /// </summary>
     ErrorOfPredict,
-    
-    /// <summary>
-    /// Удалена
-    /// </summary>
-    Deleted
 }

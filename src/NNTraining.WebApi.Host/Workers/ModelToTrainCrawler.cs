@@ -33,7 +33,10 @@ public class ModelToTrainCrawler : BackgroundService
         var dbContext = scope.ServiceProvider.GetService<NNTrainingDbContext>()!;
         var publisher = scope.ServiceProvider.GetService<IWebAppPublisherService>()!;
 
-        var modelsToTrain = dbContext.Models.Where(x => x.ModelStatus == ModelStatus.WaitingTraining).ToList();
+        var modelsToTrain = dbContext.Models.Where(x => x.ModelStatus == ModelStatus.WaitingTraining)
+            .OrderBy(x => x.UpdateDate)
+            .ThenBy(x => x.Priority)
+            .ToList();
 
         foreach (var model in modelsToTrain)
         {
@@ -44,8 +47,6 @@ public class ModelToTrainCrawler : BackgroundService
             }
         }
         
-        Thread.Sleep(TimeSpan.FromSeconds(30));// раз в 30 секунд проверяет бд можно сделать, чтобы он
-                                               // сортировал по дате изменения статуса (добавить ее) и тут можно впихнуть будет приоритет
-                                               // (тогда убрать сразу в очередь пихание на тренировку и только отсуда делать)
+        Thread.Sleep(TimeSpan.FromSeconds(5));// раз в 5 секунд проверяет бд 
     }
 }

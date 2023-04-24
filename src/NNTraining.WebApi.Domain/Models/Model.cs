@@ -12,6 +12,12 @@ public class Model
     public ModelType ModelType { get; set; }
     
     public ModelStatus ModelStatus { get; set; }
+
+    public PriorityTraining Priority { get; set; } = PriorityTraining.None;
+
+    public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.Now;
+    
+    public DateTimeOffset UpdateDate { get; set; }
     
     [Column(TypeName = "jsonb")]
     public NNParameters? Parameters { get; set; }

@@ -14,9 +14,6 @@ public class FileStorage: IFileStorage
     private readonly ICustomMinioClient _customMinioClient;
     private readonly IServiceProvider _serviceProvider;
 
-    //location = fileType
-    //"dataprediction" - modelType - bucket
-
     public FileStorage(ICustomMinioClient customMinioClient, IServiceProvider serviceProvider)
     {
         _customMinioClient = customMinioClient;
@@ -97,7 +94,8 @@ public class FileStorage: IFileStorage
             OriginalName = fileName,
             Extension = ".csv",
             Size = size,
-            GuidName =   Guid.NewGuid() + ".csv",
+            GuidName = Guid.NewGuid() + ".csv",
+            FileType = FileType.TrainSet
         };
         
         dbContext.Files.Add(file);
