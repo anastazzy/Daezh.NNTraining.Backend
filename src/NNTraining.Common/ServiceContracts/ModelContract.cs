@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using NNTraining.Common.Enums;
+﻿using NNTraining.Common.Enums;
 
 namespace NNTraining.Common.ServiceContracts;
 

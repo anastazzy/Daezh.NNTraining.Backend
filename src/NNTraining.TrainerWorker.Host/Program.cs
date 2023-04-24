@@ -3,7 +3,6 @@ using NNTraining.Common;
 using NNTraining.Common.Options;
 using NNTraining.TrainerWorker.App;
 using NNTraining.TrainerWorker.Contracts;
-using NNTraining.TrainerWorker.Host;
 using NNTraining.TrainerWorker.Host.Workers;
 
 var builder = WebApplication.CreateBuilder(args);

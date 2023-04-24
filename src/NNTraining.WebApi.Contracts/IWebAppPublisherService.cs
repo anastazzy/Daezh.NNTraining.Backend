@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using NNTraining.Common.ServiceContracts;
 using NNTraining.WebApi.Domain.Models;
 
 namespace NNTraining.WebApi.Contracts;

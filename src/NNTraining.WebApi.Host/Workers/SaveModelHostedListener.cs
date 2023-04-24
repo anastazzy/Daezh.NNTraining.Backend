@@ -1,14 +1,8 @@
-﻿using System.Text;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
-using NNTraining.Common.Enums;
 using NNTraining.Common.Options;
-using NNTraining.Common.QueueContracts;
 using NNTraining.Common.ServiceContracts;
 using NNTraining.WebApi.Contracts;
-using NNTraining.WebApi.DataAccess;
-using NNTraining.WebApi.Domain.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

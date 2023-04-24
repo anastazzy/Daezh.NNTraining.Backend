@@ -2,14 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
-using NNTraining.Common;
 using NNTraining.Common.Enums;
-using NNTraining.Common.QueueContracts;
-using NNTraining.Common.ServiceContracts;
 using NNTraining.WebApi.Contracts;
 using NNTraining.WebApi.Contracts.Resources;
 using NNTraining.WebApi.DataAccess;
-using NNParameters = NNTraining.Common.ServiceContracts.NNParameters;
 
 namespace NNTraining.App;
 
