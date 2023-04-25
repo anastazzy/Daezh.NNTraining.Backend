@@ -81,7 +81,7 @@ public class ChangeStatusHostedListener : BackgroundService
         }
 
         model.ModelStatus = contract.Status;
-        model.UpdateDate = DateTimeOffset.Now;
+        model.UpdateDate = DateTimeOffset.UtcNow;
         
         await dbContext.SaveChangesAsync();
     }

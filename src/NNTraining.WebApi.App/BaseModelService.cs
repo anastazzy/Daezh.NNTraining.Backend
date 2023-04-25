@@ -33,9 +33,9 @@ public class BaseModelService : IBaseModelService
             Name = modelInitializeDto.Name,
             ModelType = modelInitializeDto.ModelType,
             ModelStatus = ModelStatus.Initialized,
-            CreationDate = DateTimeOffset.Now,
+            CreationDate = DateTimeOffset.UtcNow,
             Priority = PriorityTraining.None,
-            UpdateDate = DateTimeOffset.Now
+            UpdateDate = DateTimeOffset.UtcNow
         };
 
         await _dbContext.Models.AddAsync(model);
@@ -83,7 +83,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        model.UpdateDate = DateTimeOffset.Now;
+        model.UpdateDate = DateTimeOffset.UtcNow;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -127,7 +127,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        model.UpdateDate = DateTimeOffset.Now;
+        model.UpdateDate = DateTimeOffset.UtcNow;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -170,7 +170,7 @@ public class BaseModelService : IBaseModelService
 
             model.Parameters = newParameters;
             model.ModelStatus = ModelStatus.ReadyToTraining;
-            model.UpdateDate = DateTimeOffset.Now;
+            model.UpdateDate = DateTimeOffset.UtcNow;
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
         }

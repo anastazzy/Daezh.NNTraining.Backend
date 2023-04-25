@@ -15,7 +15,7 @@ public class Model
 
     public PriorityTraining Priority { get; set; } = PriorityTraining.None;
 
-    public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;
     
     public DateTimeOffset UpdateDate { get; set; }
     
