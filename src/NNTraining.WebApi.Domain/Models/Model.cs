@@ -24,4 +24,6 @@ public class Model
     
     [Column(TypeName = "jsonb")]
     public Dictionary<string, Types>? PairFieldType { get; set; }
+    
+    public List<File> Files { get; set; }
 }

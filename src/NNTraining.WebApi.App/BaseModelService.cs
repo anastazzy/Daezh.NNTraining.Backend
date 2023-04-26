@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using NNTraining.Common.Enums;
 using NNTraining.WebApi.Contracts;
@@ -99,21 +100,12 @@ public class BaseModelService : IBaseModelService
             throw new Exception("Model not found");
         }
 
-        var filesOfCurrentModel = _dbContext.ModelFiles
+        var filesOfCurrentModel = _dbContext.Files
             .Where(x => x.ModelId == modelDto.Id && x.FileType == FileType.TrainSet)
-            .Join(_dbContext.Files,
-                modelFile => modelFile.FileId,
-                file => file.Id,
-                (modelFile, file) => new
-                {
-                    file.OriginalName,
-                })
+            .Select(x => x.OriginalName)
             .ToHashSet();
 
-        if (!filesOfCurrentModel.Contains(new
-            {
-                OriginalName = modelDto.FileName
-            }))
+        if (!filesOfCurrentModel.Contains(modelDto.FileName))
         {
             throw new Exception("The same file does not contains in file list of current model");
         }
@@ -136,14 +128,13 @@ public class BaseModelService : IBaseModelService
 
     public FileOutputDto[] GetUploadedTrainSetsForModel(Guid modelId)
     { 
-        return _dbContext.ModelFiles
+        return _dbContext.Files
             .Where(x => x.ModelId == modelId && x.FileType == FileType.TrainSet)
-            .Join(_dbContext.Files, mf => mf.FileId, f => f.Id, (mf, f) => new FileOutputDto
+            .Select(x => new FileOutputDto
             {
-                ModelFileId = mf.Id,
-                FileId = f.Id,
-                FileName = f.OriginalName,
-                FileNameInStorage = f.GuidName
+                Id = x.Id,
+                FileName = x.OriginalName,
+                FileNameInStorage = x.GuidName
             }).ToArray();
     }
 

@@ -17,19 +17,17 @@ public class NNTrainingDbContext : DbContext
 
     public DbSet<Model> Models { get; set; }
     public DbSet<File> Files { get; set; }
-    public DbSet<ModelFile> ModelFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Model>()
             .Property(x => x.Parameters)
             .HasConversion(new JsonValueConverter<NNParameters>());
-        
-        modelBuilder.Entity<ModelFile>().HasIndex(x => new
-        {
-            x.ModelId,
-            x.FileId
-        }).IsUnique();
+
+        modelBuilder.Entity<File>()
+            .HasOne(f => f.Model)
+            .WithMany(m => m.Files)
+            .HasForeignKey(f => f.ModelId);
     }
 
     public class JsonValueConverter<T> : ValueConverter<T, string> where T : class

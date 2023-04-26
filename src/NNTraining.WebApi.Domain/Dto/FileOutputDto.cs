@@ -2,10 +2,8 @@
 
 public class FileOutputDto
 {
-    public Guid ModelFileId { get; set; }
-    
-    public Guid FileId { get; set; }
-    
+    public Guid Id { get; set; }
+
     public string? FileName { get; set; }
     
     public string? FileNameInStorage { get; set; }

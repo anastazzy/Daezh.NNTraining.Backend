@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NNTraining.Common.Enums;
 using NNTraining.WebApi.DataAccess;
@@ -13,9 +14,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NNTraining.WebApi.DataAccess.Migrations
 {
     [DbContext(typeof(NNTrainingDbContext))]
-    partial class NNTrainingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230426191815_DbContexFix")]
+    partial class DbContexFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

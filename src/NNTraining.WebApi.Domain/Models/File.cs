@@ -5,6 +5,7 @@ namespace NNTraining.WebApi.Domain.Models;
 public class File
 {
     public Guid Id { get; set; }
+    public Guid ModelId { get; set; }
     
     public string? OriginalName { get; set; }
     
@@ -14,5 +15,7 @@ public class File
     
     public long Size { get; set; }
     
-    public FileType FileType { get; set; }//add migrations
+    public FileType FileType { get; set; }
+    
+    public Model Model { get; set; }
 }

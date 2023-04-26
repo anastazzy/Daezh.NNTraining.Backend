@@ -95,20 +95,14 @@ public class ModelInteractionService : IModelInteractionService
             throw new ArgumentException("The model or it`s field name type was not found");
         }
 
-        var modelFile = await dbContext.ModelFiles.FirstOrDefaultAsync(x =>
+        var file = await dbContext.Files.FirstOrDefaultAsync(x =>
             x.ModelId == id && x.FileType == FileType.Model);
-        if (modelFile is null)
+        if (file is null)
         {
             throw new ArgumentException("The file with this model was not found");
         }
 
-        var fileWithModel = await dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);
-        // при сохранении модели сделать нормальным тип файла
-        if (fileWithModel is null)
-        {
-            throw new ArgumentException("The file with this model was not found");
-        }
-        return fileWithModel.OriginalName;
+        return file.OriginalName;
     }
 }
     

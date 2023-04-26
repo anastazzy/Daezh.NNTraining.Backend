@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NNTraining.Common.Enums;
 using NNTraining.WebApi.DataAccess;
@@ -13,9 +14,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NNTraining.WebApi.DataAccess.Migrations
 {
     [DbContext(typeof(NNTrainingDbContext))]
-    partial class NNTrainingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230426190138_DeleteManyToManyTable")]
+    partial class DeleteManyToManyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,8 +51,6 @@ namespace NNTraining.WebApi.DataAccess.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ModelId");
 
                     b.ToTable("Files");
                 });
@@ -88,22 +88,6 @@ namespace NNTraining.WebApi.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Models");
-                });
-
-            modelBuilder.Entity("NNTraining.WebApi.Domain.Models.File", b =>
-                {
-                    b.HasOne("NNTraining.WebApi.Domain.Models.Model", "Model")
-                        .WithMany("Files")
-                        .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Model");
-                });
-
-            modelBuilder.Entity("NNTraining.WebApi.Domain.Models.Model", b =>
-                {
-                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }
