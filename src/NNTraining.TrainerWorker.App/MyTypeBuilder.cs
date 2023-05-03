@@ -10,7 +10,6 @@ public static class MyTypeBuilder
         var tb = GetTypeBuilder();
         var constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
-        // NOTE: assuming your list contains Field objects with fields FieldName(string) and FieldType(Type)
         foreach (var field in fields)
             CreateProperty(tb, field.Item1, field.Item2);
 
@@ -20,7 +19,7 @@ public static class MyTypeBuilder
 
     private static TypeBuilder GetTypeBuilder()
     {
-        var typeSignature = "MyDynamicType";
+        var typeSignature = Guid.NewGuid().ToString().Replace('-', 'A');
         var an = new AssemblyName(typeSignature);
         var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
         var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");

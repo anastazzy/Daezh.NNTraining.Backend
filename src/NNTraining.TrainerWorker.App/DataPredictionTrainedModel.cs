@@ -12,11 +12,7 @@ public class DataPredictionTrainedModel: ITrainedModel
     private readonly Type _type;
     private readonly string _nameOfTargetColumn;
     
-    public DataPredictionTrainedModel(
-        ITransformer trainedModel,
-        MLContext mlContext,
-        Type type,
-        string nameOfTargetColumn)
+    public DataPredictionTrainedModel(ITransformer trainedModel, MLContext mlContext, Type type, string nameOfTargetColumn)
     {
         _trainedModel = trainedModel;
         _mlContext = mlContext;
@@ -24,8 +20,9 @@ public class DataPredictionTrainedModel: ITrainedModel
         _nameOfTargetColumn = nameOfTargetColumn;
     }
     
-    public object Predict(Dictionary<string, JsonElement> data)
+    public object Predict(object data)
     {
+        var dictionary = (Dictionary<string, JsonElement>) data;
         if (_type is null)
         {
             throw new ArgumentException("The type of model is null");
@@ -44,7 +41,7 @@ public class DataPredictionTrainedModel: ITrainedModel
         
         foreach (var currentPropertyInfo in prop)
         {
-            var inputFieldValue = data
+            var inputFieldValue = dictionary
                 .Where(x => x.Key == currentPropertyInfo.Name)
                 .Select(x => x.Value)
                 .FirstOrDefault();
@@ -87,17 +84,17 @@ public class DataPredictionTrainedModel: ITrainedModel
             throw new ArgumentException("Error with invoke the generis function");
         }
         
-        var a = (object) predictor;
-        var engine = a.GetType().GetMethods()
+        var tempPredictorEngine = (object) predictor;
+        var predictMethod = tempPredictorEngine.GetType().GetMethods()
             .Where(x => x.GetParameters().Length < 2)
             .FirstOrDefault(x => x.Name == "Predict");
         
-        if (engine is null)
+        if (predictMethod is null)
         {
             throw new ArgumentException("Engine is null");
         }
         
-        var res = engine.Invoke((object) predictor, new []{instance});
+        var res = predictMethod.Invoke((object) predictor, new []{instance});
         if (res is null)
         {
             throw new ArgumentException("Error with invoke the generis function");

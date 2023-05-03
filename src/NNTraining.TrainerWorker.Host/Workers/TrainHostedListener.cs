@@ -98,10 +98,7 @@ public class TrainHostedListener : BackgroundService
                 tempFileForTrainModel);
 
             //creation the trainer and train the model
-            var factory = new ModelTrainerFactory
-            {
-                NameOfTrainSet = tempFileForTrainModel
-            };
+            var factory = new ModelTrainerFactory();
         
             var trainer = factory.CreateTrainer(model.Parameters);
             var trainedModel = trainer.Train(model.PairFieldType);

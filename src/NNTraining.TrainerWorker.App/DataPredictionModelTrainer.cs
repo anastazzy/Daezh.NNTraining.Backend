@@ -14,7 +14,7 @@ public class DataPredictionModelTrainer : IModelTrainer
     private readonly char[] _separators;
 
     public DataPredictionModelTrainer(string nameOfTrainSet, string nameOfTargetColumn,
-        bool hasHeader, char[] separators) //"train-set.csv", "price", true, ';'
+        bool hasHeader, char[] separators)
     {
         _nameOfTargetColumn = nameOfTargetColumn;
         _nameOfTrainSet = nameOfTrainSet;
@@ -59,13 +59,15 @@ public class DataPredictionModelTrainer : IModelTrainer
         {
             throw new ArgumentException("EstimatorChain was not created");
         }
+        
         var result = estimatorChain
             .Append(_mlContext.Transforms.Concatenate(outputConcat, nameOfColumns.ToArray()));
         return result;
     }
 
-    public ITrainedModel Train(Dictionary<string, Types> mapColumnNameColumnType)
+    public ITrainedModel Train(object data)
     {
+        var mapColumnNameColumnType = (Dictionary<string, Types>) data;
         var columns = ModelHelper.CreateTheTextLoaderColumn(mapColumnNameColumnType).ToArray();
 
         var trainingView = _mlContext.Data.LoadFromTextFile(_nameOfTrainSet, new TextLoader.Options
@@ -73,7 +75,7 @@ public class DataPredictionModelTrainer : IModelTrainer
             HasHeader = _hasHeader,
             Separators = _separators,
             Columns = columns
-        }); // почему-то не парсится (
+        });
 
         // creation the training pipelines
         var dataProcessPipeline = CreateTrainingPipeline(columns);

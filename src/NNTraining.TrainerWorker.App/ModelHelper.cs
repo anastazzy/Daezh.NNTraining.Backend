@@ -24,7 +24,7 @@ public static class ModelHelper
                 return (key, value);
             }).ToArray();
         
-            return MyTypeBuilder.CompileResultType(nameTypePair);
+        return MyTypeBuilder.CompileResultType(nameTypePair);
     }
     
     public static IEnumerable<TextLoader.Column> CreateTheTextLoaderColumn(Dictionary<string, Types> dictionary)

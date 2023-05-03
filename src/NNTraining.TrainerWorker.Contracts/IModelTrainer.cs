@@ -4,5 +4,5 @@ namespace NNTraining.TrainerWorker.Contracts;
 
 public interface IModelTrainer
 {
-    ITrainedModel Train(Dictionary<string, Types> mapColumnNameColumnType);
+    ITrainedModel Train(object data);
 }
