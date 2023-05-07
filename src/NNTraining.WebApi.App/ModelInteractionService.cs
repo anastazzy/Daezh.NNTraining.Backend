@@ -20,21 +20,18 @@ public class ModelInteractionService : IModelInteractionService
 
     private readonly IWebAppPublisherService _publisherService;
 
-    // private readonly IRabbitMqPublisherService _publisherService;
     private readonly IServiceProvider _serviceProvider;
 
     public ModelInteractionService(
         IServiceProvider serviceProvider, 
         IFileStorage fileStorage,
         IStringLocalizer<EnumDescriptionResources> stringLocalizer, 
-        // IRabbitMqPublisherService publisherService,
         IWebAppPublisherService publisherService)
     {
         _serviceProvider = serviceProvider;
         _fileStorage = fileStorage;
         _stringLocalizer = stringLocalizer;
         _publisherService = publisherService;
-        // _publisherService = publisherService;
     }
 
     public async void Train(Guid id)
@@ -77,16 +74,7 @@ public class ModelInteractionService : IModelInteractionService
         
         _publisherService.SendModelContract(model);
 
-        // _publisherService.SendMessage(new ModelContract
-        // {
-        //     Id = model.Id,
-        //     Name = model.Name,
-        //     ModelType = model.ModelType,
-        //     ModelStatus = model.ModelStatus,
-        //     Parameters = fullParam,
-        //     PairFieldType = model.PairFieldType
-        // }, Queues.ToTrain);
-        
+        model.UpdateDate = DateTime.Now;
         await dbContext.SaveChangesAsync();
     }
 
@@ -104,21 +92,6 @@ public class ModelInteractionService : IModelInteractionService
         var fileName = await GetAsync(model.Id);
         
         _publisherService.SendPredictContract(model, modelForPrediction, fileName);
-        
-        // _publisherService.SendMessage(new PredictionContract
-        // {
-        //     Model = new ModelContract
-        //     {
-        //         Id = model.Id,
-        //         Name = model.Name,
-        //         ModelType = model.ModelType,
-        //         ModelStatus = model.ModelStatus,
-        //         Parameters = new (),
-        //         PairFieldType = model.PairFieldType
-        //     },
-        //     ModelForPrediction = modelForPrediction,
-        //     FileWithModelName = fileName
-        // }, Queues.ToPredict);
     }
     
     private async Task<string?> GetAsync(Guid id)
@@ -132,20 +105,14 @@ public class ModelInteractionService : IModelInteractionService
             throw new ArgumentException("The model or it`s field name type was not found");
         }
 
-        var modelFile = await dbContext.ModelFiles.FirstOrDefaultAsync(x =>
+        var file = await dbContext.Files.FirstOrDefaultAsync(x =>
             x.ModelId == id && x.FileType == FileType.Model);
-        if (modelFile is null)
+        if (file is null)
         {
             throw new ArgumentException("The file with this model was not found");
         }
-
-        var fileWithModel = await dbContext.Files.FirstOrDefaultAsync(x => x.Id == modelFile.FileId);
-        // при сохранении модели сделать нормальным тип файла
-        if (fileWithModel is null)
-        {
-            throw new ArgumentException("The file with this model was not found");
-        }
-        return fileWithModel.OriginalName;
+        
+        return file.OriginalName;
     }
 }
     

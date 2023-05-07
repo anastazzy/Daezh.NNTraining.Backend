@@ -9,6 +9,10 @@ public class Model
     
     public string? Name { get; set; }
     
+    public DateTime CreationDate { get; set; }
+    
+    public DateTime UpdateDate { get; set; }
+    
     public ModelType ModelType { get; set; }
     
     public ModelStatus ModelStatus { get; set; }
@@ -18,4 +22,7 @@ public class Model
     
     [Column(TypeName = "jsonb")]
     public Dictionary<string, Types>? PairFieldType { get; set; }
+
+    // navigation
+    public List<File> Files { get; set; } = new();
 }

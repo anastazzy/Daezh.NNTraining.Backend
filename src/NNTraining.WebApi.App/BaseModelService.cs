@@ -32,7 +32,9 @@ public class BaseModelService : IBaseModelService
         {
             Name = modelInitializeDto.Name,
             ModelType = modelInitializeDto.ModelType,
-            ModelStatus = ModelStatus.Initialized
+            ModelStatus = ModelStatus.Initialized,
+            CreationDate = DateTime.Now,
+            UpdateDate = DateTime.Now,
         };
 
         await _dbContext.Models.AddAsync(model);
@@ -80,8 +82,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        
-        _dbContext.Update(model);
+        model.UpdateDate = DateTime.Now;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -97,21 +98,12 @@ public class BaseModelService : IBaseModelService
             throw new Exception("Model not found");
         }
 
-        var filesOfCurrentModel = _dbContext.ModelFiles
+        var filesOfCurrentModel = _dbContext.Files
             .Where(x => x.ModelId == modelDto.Id && x.FileType == FileType.TrainSet)
-            .Join(_dbContext.Files,
-                modelFile => modelFile.FileId,
-                file => file.Id,
-                (modelFile, file) => new
-                {
-                    file.OriginalName,
-                })
+            .Select(f => f.OriginalName)
             .ToHashSet();
 
-        if (!filesOfCurrentModel.Contains(new
-            {
-                OriginalName = modelDto.FileName
-            }))
+        if (!filesOfCurrentModel.Contains(modelDto.FileName))
         {
             throw new Exception("The same file does not contains in file list of current model");
         }
@@ -125,8 +117,7 @@ public class BaseModelService : IBaseModelService
             _ => throw new Exception()
         };
         model.ModelStatus = ModelStatus.NeedAParameters;
-        
-        _dbContext.Update(model);
+        model.UpdateDate = DateTime.Now;
         
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -135,11 +126,10 @@ public class BaseModelService : IBaseModelService
 
     public FileOutputDto[] GetUploadedTrainSetsForModel(Guid modelId)
     { 
-        return _dbContext.ModelFiles
+        return _dbContext.Files
             .Where(x => x.ModelId == modelId && x.FileType == FileType.TrainSet)
-            .Join(_dbContext.Files, mf => mf.FileId, f => f.Id, (mf, f) => new FileOutputDto
+            .Select(f => new FileOutputDto
             {
-                ModelFileId = mf.Id,
                 FileId = f.Id,
                 FileName = f.OriginalName,
                 FileNameInStorage = f.GuidName
@@ -169,7 +159,8 @@ public class BaseModelService : IBaseModelService
 
             model.Parameters = newParameters;
             model.ModelStatus = ModelStatus.ReadyToTraining;
-            _dbContext.Models.Update(model);
+            model.UpdateDate = DateTime.Now;
+            
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
         }
@@ -180,7 +171,7 @@ public class BaseModelService : IBaseModelService
     public async Task<ModelOutputDto[]> GetListOfModelsAsync()
     {
         var models = await _dbContext.Models.ToArrayAsync();
-        return models.Select(model => new ModelOutputDto()
+        return models.OrderBy(x => x.UpdateDate).Select(model => new ModelOutputDto()
         {
             Id = model.Id,
             Name = model.Name,
@@ -218,6 +209,8 @@ public class BaseModelService : IBaseModelService
             throw new Exception("Model update ERROR");
         }
         model.Parameters = modelDto.Parameters;
+        model.UpdateDate = DateTime.Now;
+        
         await _dbContext.SaveChangesAsync();
         return true;
     }
@@ -230,6 +223,7 @@ public class BaseModelService : IBaseModelService
             throw new Exception("Delete model ERROR");
         }
         _dbContext.Models.Remove(model);
+        
         await _dbContext.SaveChangesAsync();
         return true;
     }

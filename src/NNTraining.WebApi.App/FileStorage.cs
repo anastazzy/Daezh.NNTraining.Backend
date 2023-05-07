@@ -98,18 +98,13 @@ public class FileStorage: IFileStorage
             Extension = ".csv",
             Size = size,
             GuidName =   Guid.NewGuid() + ".csv",
+            FileType = FileType.TrainSet, 
+            ModelId = modelId,
+            CreationDate = DateTime.Now
         };
         
         dbContext.Files.Add(file);
-        var idFile = file.Id;
-        
-        dbContext.ModelFiles.Add(new ModelFile()
-        {
-            FileId = idFile,
-            ModelId = modelId,
-            FileType = FileType.TrainSet
-        });
-        
+
         await dbContext.SaveChangesAsync();
         return file.GuidName;
     }
@@ -124,26 +119,12 @@ public class FileStorage: IFileStorage
             Extension = ".zip", 
             Size = size,
             GuidName =  Guid.NewGuid() + ".zip",
-            FileType = FileType.Model
+            FileType = FileType.Model,
+            ModelId = modelId,
+            CreationDate = DateTime.Now
         };
         
         dbContext.Files.Add(file);
-        var fileId = file.Id;
-
-        var currentModelFile = dbContext.ModelFiles.FirstOrDefault(x => x.ModelId == modelId && x.FileType == FileType.Model);
-        if (currentModelFile is null)
-        {
-            dbContext.ModelFiles.Add(new ModelFile()
-            {
-                FileId = fileId,
-                ModelId = modelId,
-                FileType = FileType.Model
-            });
-        }
-        else
-        {
-            currentModelFile.FileId = fileId;
-        }
 
         await dbContext.SaveChangesAsync();
         return file.GuidName;
