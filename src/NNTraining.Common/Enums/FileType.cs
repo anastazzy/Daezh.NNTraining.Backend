@@ -3,6 +3,5 @@
 public enum FileType
 {
     TrainSet,
-    PredictSet,
     Model
 }
